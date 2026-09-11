@@ -376,15 +376,15 @@ build/
 
 # エンジン実行時の一時ファイル(HotReloadの世代別DLL、フォントアトラス等の動的テクスチャキャッシュ)
 DirectXGame/Temp/
+KujataEngine/Temp/
 
 # HotReload用ゲームDLLのビルド出力(GameModule.vcxprojのOutDir)
-Game/GameModule/bin/
+DirectXGame/GameModule/bin/
 
 # エンジン実行時ログ
-DirectXGame/logs/
+KujataEngine/logs/
 # Claude Code の個人用権限設定(共有しない)
 .claude/settings.local.json
 
-# プロジェクト側のホットリロード一時ファイルと、git 管理しない試作プロジェクト
-Game/Temp/
+# git 管理しない試作プロジェクト
 Sandbox/

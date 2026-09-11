@@ -23,7 +23,7 @@ KUJATA_API std::filesystem::path GetEngineDataRoot();
 
 /// <summary>
 /// 開いているプロジェクトのフォルダを返す。起動引数 `--project <フォルダ>` で指定する。
-/// 未指定なら、エンジンのフォルダの隣の `Game/`、それも無ければ(配布先など)エンジンのフォルダ。
+/// 未指定なら、エンジンのフォルダの隣の `DirectXGame/`、それも無ければ(配布先など)エンジンのフォルダ。
 /// GameModule / Data / Temp はすべてここが基準。
 /// </summary>
 KUJATA_API std::filesystem::path GetActiveProjectRoot();

@@ -39,7 +39,7 @@ KujataEngine は、DirectX 12 の描画基盤に、ImGui Docking を使った簡
 - DirectX 12
 - x64 / Debug または x64 / Release
 
-外部ライブラリは `DirectXGame/externals` 配下に置かれています。
+外部ライブラリは `externals` 配下に置かれています。
 
 - Dear ImGui docking
 - ImGuizmo
@@ -56,7 +56,7 @@ Assimp を使うモデル読み込みでは、プロジェクト側と Assimp �
 3. スタートアッププロジェクトを `DirectXGame` にします。
 4. 実行します。
 
-エントリーポイントは `DirectXGame/main.cpp` です。
+エントリーポイントは `KujataEngine/main.cpp` です。
 
 ```cpp
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -110,7 +110,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 ```mermaid
 graph TD
-	main["DirectXGame/main.cpp"] --> engine["KujataEngine::Initialize / Update / Finalize"]
+	main["KujataEngine/main.cpp"] --> engine["KujataEngine::Initialize / Update / Finalize"]
 	main --> editorApp["EditorApplication"]
 
 	editorApp --> imgui["ImGuiManager"]
@@ -342,7 +342,7 @@ Component は次の目的を持ちます。
 
 ## 標準 Component
 
-現在登録されている標準 Component は `Game/GameModule/GameModule.cpp` の `RegisterGameComponents()` で登録されています。実装ファイルは `DirectXGame/KujataEngine/components` にありますが、ビルド対象は `GameModule.vcxproj` 側です。そのため、標準 Component の実装変更も `GameModule.dll` をビルドして `Reload DLL` すれば反映されます。
+現在登録されている標準 Component は `DirectXGame/GameModule/GameModule.cpp` の `RegisterGameComponents()` で登録されています。実装ファイルは `KujataEngine/components` にありますが、ビルド対象は `GameModule.vcxproj` 側です。そのため、標準 Component の実装変更も `GameModule.dll` をビルドして `Reload DLL` すれば反映されます。
 
 | Component | 役割 |
 | --- | --- |
@@ -930,7 +930,7 @@ GameObject に追加し、Inspector で以下を設定します。Canvas も Rec
 
 `ProjectWindow` は Unity の Project Window に近いファイル閲覧 UI です。
 
-Project root は `GetActiveProjectRoot()`(`base/ProjectPath.h`)で決まります。起動引数 `--project <フォルダ>` で指定し、未指定ならエンジンのフォルダ(`DirectXGame`)が root になります。
+Project root は `GetActiveProjectRoot()`(`base/ProjectPath.h`)で決まります。起動引数 `--project <フォルダ>` で指定し、未指定ならエンジンの隣の `DirectXGame/`(無ければエンジンのフォルダ)が root になります。
 
 表示対象は ProjectDir 配下に制限されます。ProjectDir 外へ移動しないようにガードしています。
 
@@ -1050,7 +1050,7 @@ extern "C" __declspec(dllexport) void DestroyGameScene(Scene* scene);
 
 ### GameModule のサンプル
 
-`Game/GameModule/GameModule.cpp` には標準 Component の登録と、DLL 側 Component のサンプルを入れています。
+`DirectXGame/GameModule/GameModule.cpp` には標準 Component の登録と、DLL 側 Component のサンプルを入れています。
 
 Scene は `GameModuleScene : SampleScene` という薄い DLL 側派生クラスで作っています。Engine 側の `SampleScene` を DLL 側で直接 `new` すると、Debug CRT のヒープ境界で delete 時にアサートする可能性があるためです。
 
@@ -1084,7 +1084,7 @@ Scene は `GameModuleScene : SampleScene` という薄い DLL 側派生クラス
 
 ### 1. ヘッダを作る
 
-`Game/GameModule/MoveForwardComponent.h`
+`DirectXGame/GameModule/MoveForwardComponent.h`
 
 ```cpp
 #pragma once
@@ -1111,7 +1111,7 @@ private:
 
 ### 2. cpp を作る
 
-`Game/GameModule/MoveForwardComponent.cpp`
+`DirectXGame/GameModule/MoveForwardComponent.cpp`
 
 ```cpp
 #include "MoveForwardComponent.h"
@@ -1157,7 +1157,7 @@ void MoveForwardComponent::ReadJson(const nlohmann::json& json) {
 
 ### 3. Factory に登録する
 
-`Game/GameModule/GameModule.cpp` に include と登録を追加します。
+`DirectXGame/GameModule/GameModule.cpp` に include と登録を追加します。
 
 ```cpp
 #include "MoveForwardComponent.h"
@@ -1227,7 +1227,7 @@ Camera* MyScene::GetEditorCamera() {
 
 実際の `SampleScene` では、Edit 用の DebugCamera、Play 用の Main Camera、Light の適用、ModelRenderer への Camera 再設定なども行っています。新しい Scene を作る場合は、まず `SampleScene` を参考にするのが一番早いです。
 
-作成した Scene を使うには、`Game/GameModule/GameModule.cpp` の `CreateGameScene()` で返す Scene を変更します。
+作成した Scene を使うには、`DirectXGame/GameModule/GameModule.cpp` の `CreateGameScene()` で返す Scene を変更します。
 
 ```cpp
 extern "C" __declspec(dllexport) KujataEngine::Scene* CreateGameScene() {
@@ -1241,9 +1241,9 @@ extern "C" __declspec(dllexport) KujataEngine::Scene* CreateGameScene() {
 
 | ファイル | 役割 |
 | --- | --- |
-| `DirectXGame/main.cpp` | Windows アプリの入口。KujataEngine 初期化、EditorApplication 呼び出し、終了処理を行います。Scene 作成は GameModule 経由です。 |
-| `DirectXGame/KujataEngine/KujataEngine.h` | エンジン利用側が include する総合ヘッダです。主要クラスをまとめて include しています。 |
-| `DirectXGame/KujataEngine/KujataEngine.cpp` | WinApp、DirectXCommon、ImGui、GraphicsPipeline、Light、Texture、Input、Time などの初期化と毎フレーム更新をまとめます。 |
+| `KujataEngine/main.cpp` | Windows アプリの入口。KujataEngine 初期化、EditorApplication 呼び出し、終了処理を行います。Scene 作成は GameModule 経由です。 |
+| `KujataEngine/KujataEngine.h` | エンジン利用側が include する総合ヘッダです。主要クラスをまとめて include しています。 |
+| `KujataEngine/KujataEngine.cpp` | WinApp、DirectXCommon、ImGui、GraphicsPipeline、Light、Texture、Input、Time などの初期化と毎フレーム更新をまとめます。 |
 
 ### Editor
 
@@ -1277,8 +1277,8 @@ extern "C" __declspec(dllexport) KujataEngine::Scene* CreateGameScene() {
 | `runtime/AnimationRecordingState.h/.cpp` | アニメーション録画モードの状態(録画フラグ、Component 文脈、変更キュー)を Engine / GameModule 双方から参照できるよう保持します。 |
 | `runtime/GameModule.h` | Game DLL が export する関数ポインタと Load 結果を定義します。 |
 | `runtime/GameModuleLoader.h/.cpp` | DLL のコピー、`LoadLibrary`、`GetProcAddress`、`FreeLibrary` を担当します。 |
-| `Game/GameModule/GameModule.cpp` | Hot Reload 用 Game DLL の入口です。標準 Component 登録、追加 Component 登録、Scene 作成 export を持ちます。 |
-| `Game/GameModule/GameModule.vcxproj` | `GameModule.dll` を `Game/GameModule/bin/<構成>` へ出力するプロジェクトです。標準 Component と `SampleScene.cpp` もここでビルドします。 |
+| `DirectXGame/GameModule/GameModule.cpp` | Hot Reload 用 Game DLL の入口です。標準 Component 登録、追加 Component 登録、Scene 作成 export を持ちます。 |
+| `DirectXGame/GameModule/GameModule.vcxproj` | `GameModule.dll` を `DirectXGame/GameModule/bin/<構成>` へ出力するプロジェクトです。標準 Component と `SampleScene.cpp` もここでビルドします。 |
 
 ### Scene
 
@@ -1359,9 +1359,9 @@ extern "C" __declspec(dllexport) KujataEngine::Scene* CreateGameScene() {
 
 | パス | 内容 |
 | --- | --- |
-| `DirectXGame/KujataEngine/resources/images` | Editor アイコン、Gizmo アイコン、Project Window アイコンです。 |
+| `KujataEngine/resources/images` | Editor アイコン、Gizmo アイコン、Project Window アイコンです。 |
 | `DirectXGame/resources` | モデルやテクスチャなど、ゲーム側で使うリソースを置く想定の場所です。 |
-| `DirectXGame/externals` | ImGui、ImGuizmo、DirectXTex、Assimp、nlohmann/json などの外部ライブラリです。 |
+| `externals` | ImGui、ImGuizmo、DirectXTex、Assimp、nlohmann/json などの外部ライブラリです。 |
 
 ## 実装時の注意
 
@@ -1444,7 +1444,7 @@ KujataEngine のコメントは UTF-8 として扱います。新しくコメン
 
 ### Project Window にファイルが出ない
 
-Project root の検出に失敗している可能性があります。`--project` を指定していなければ、`GetEngineRoot()` が起動時カレントから `KujataEngine.vcxproj`、`DirectXGame/KujataEngine.vcxproj`、`KujataEngine.sln` を手がかりにエンジンのフォルダを探し、それが root になります。
+Project root の検出に失敗している可能性があります。`--project` を指定していなければ、`GetEngineRoot()` が起動時カレントから `KujataEngine.vcxproj`、`KujataEngine/KujataEngine.vcxproj`、`KujataEngine.sln` を手がかりにエンジンのフォルダを探し、それが root になります。
 
 ### Game Window のクリック選択が効かない
 
@@ -1452,13 +1452,13 @@ Project root の検出に失敗している可能性があります。`--project
 
 ### Reload DLL が失敗する
 
-`Game/GameModule/bin/<構成>/GameModule.dll` が存在するか確認してください。存在しない場合は `GameModule` プロジェクトを exe と同じ構成(`Debug|x64` または `Release|x64`)でビルドします。Play 中の Reload は拒否されるため、Stop して Edit に戻ってから実行してください。
+`DirectXGame/GameModule/bin/<構成>/GameModule.dll` が存在するか確認してください。存在しない場合は `GameModule` プロジェクトを exe と同じ構成(`Debug|x64` または `Release|x64`)でビルドします。Play 中の Reload は拒否されるため、Stop して Edit に戻ってから実行してください。
 
 Export 関数名が変わっている場合も読み込みに失敗します。`RegisterGameComponents`、`UnregisterGameComponents`、`CreateGameScene`、`DestroyGameScene` の 4 つが `extern "C"` で export されているか確認してください。
 
 ### Add Component に GameModule 側 Component が出ない
 
-起動時の Console に `[GameModule] Loaded` と `[GameModule] Register game components.` が出ているか確認してください。出ていない場合は `Game/GameModule/bin/<構成>/GameModule.dll` が存在しない、または export 関数の取得に失敗している可能性があります。
+起動時の Console に `[GameModule] Loaded` と `[GameModule] Register game components.` が出ているか確認してください。出ていない場合は `DirectXGame/GameModule/bin/<構成>/GameModule.dll` が存在しない、または export 関数の取得に失敗している可能性があります。
 
 ## 今後の拡張予定の入口
 

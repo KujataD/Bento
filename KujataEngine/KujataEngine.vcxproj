@@ -1,0 +1,468 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{a180aa57-47d1-4c0a-b744-751e038ada71}</ProjectGuid>
+    <RootNamespace>CG2_04</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>KujataEngine</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <!-- exe名などゲーム固有の設定は DirectXGame/Game.props が持つ。無ければ既定の名前でビルドする。 -->
+  <Import Project="$(MSBuildThisFileDirectory)..\DirectXGame\Game.props" Condition="exists('$(MSBuildThisFileDirectory)..\DirectXGame\Game.props')" />
+  <PropertyGroup>
+    <KujataExeName Condition="'$(KujataExeName)'==''">KujataEngine</KujataExeName>
+  </PropertyGroup>
+  <!-- 生成物はすべてリポジトリ直下の build/ に集約する(bin=実行ファイル, obj=中間ファイル)。 -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(ProjectDir)..\build\bin\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\build\obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>$(KujataExeName)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)..\build\bin\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\build\obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>$(KujataExeName)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;USE_IMGUI;KUJATA_ENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)externals\DirectXTex;$(ProjectDir);$(ProjectDir)..\externals\assimp\include;$(ProjectDir)..\externals\imgui;$(ProjectDir)..\externals\ImGuizmo-1.9\src</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+      <!-- LNK4232: exe名に非ASCIIが含まれる警告。提出名(日本語)を使うため個別に見送る。
+           **CP932以外のANSIコードページのWindowsではGameModule.dllが読めない**点は承知の上。 -->
+      <AdditionalOptions>/ignore:4049 /ignore:4098 /ignore:4232 /ignore:4233 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\externals\assimp\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc143-mdd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
+
+copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;KUJATA_ENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <!-- C4251: DLLエクスポートクラスのSTLメンバ警告。engine/GameModuleは同一ツールチェーン共有のため無害。 -->
+      <!-- C4275: 非エクスポートの純粋仮想インターフェース(IRaycastTarget等)を基底に持つ警告。データを持たないため無害。 -->
+      <DisableSpecificWarnings>4251;4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\externals\assimp\include;$(ProjectDir)..\externals\imgui;$(ProjectDir)..\externals\ImGuizmo-1.9\src</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\externals\assimp\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc143-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
+
+copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\externals\imgui\imgui.cpp" />
+    <ClCompile Include="..\externals\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\externals\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\externals\imgui\imgui_impl_dx12.cpp" />
+    <ClCompile Include="..\externals\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="..\externals\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\externals\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\externals\ImGuizmo-1.9\src\ImGuizmo.cpp" />
+    <ClCompile Include="..\externals\imsearch\imsearch.cpp" />
+    <ClCompile Include="Editor\ImGuiManager.cpp" />
+    <ClCompile Include="2d\Sprite2DRenderer.cpp" />
+    <ClCompile Include="2d\SpriteQuad.cpp" />
+    <ClCompile Include="2d\UIRenderer.cpp" />
+    <ClCompile Include="2d\UIQuad.cpp" />
+    <ClCompile Include="assets\AnimationClipAsset.cpp" />
+    <ClCompile Include="assets\MaterialAsset.cpp" />
+    <ClCompile Include="assets\NoiseTexture.cpp" />
+    <ClCompile Include="components\AnimatorComponent.cpp" />
+    <ClCompile Include="components\AudioSourceComponent.cpp" />
+    <ClCompile Include="components\BuiltinComponents.cpp" />
+    <ClCompile Include="components\CameraComponent.cpp" />
+    <ClCompile Include="components\ColliderComponent.cpp" />
+    <ClCompile Include="components\DebugCameraComponent.cpp" />
+    <ClCompile Include="components\DirectionalLightComponent.cpp" />
+    <ClCompile Include="components\ModelRendererComponent.cpp" />
+    <ClCompile Include="components\NoiseTextureComponent.cpp" />
+    <ClCompile Include="components\ParticleSystemComponent.cpp" />
+    <ClCompile Include="components\TrailRendererComponent.cpp" />
+    <ClCompile Include="components\OrbitCameraComponent.cpp" />
+    <ClCompile Include="scene\MovementUtil.cpp" />
+    <ClCompile Include="components\CanvasComponent.cpp" />
+    <ClCompile Include="components\RectTransformComponent.cpp" />
+    <ClCompile Include="components\ImageComponent.cpp" />
+    <ClCompile Include="components\TextComponent.cpp" />
+    <ClCompile Include="components\ButtonComponent.cpp" />
+    <ClCompile Include="2d\UICanvasRenderer.cpp" />
+    <ClCompile Include="2d\UIEventSystem.cpp" />
+    <ClCompile Include="2d\UINavigationSystem.cpp" />
+    <ClCompile Include="2d\FontAtlas.cpp" />
+    <ClCompile Include="runtime\UIInput.cpp" />
+    <ClCompile Include="runtime\AppControl.cpp" />
+    <ClCompile Include="runtime\UIEventBus.cpp" />
+    <ClCompile Include="Editor\UIObjectFactory.cpp" />
+    <ClCompile Include="components\PointLightComponent.cpp" />
+    <ClCompile Include="components\RotatorComponent.cpp" />
+    <ClCompile Include="components\SpriteRendererComponent.cpp" />
+    <ClCompile Include="components\TransformComponent.cpp" />
+    <ClCompile Include="Editor\AnimationWindow.cpp" />
+    <ClCompile Include="Editor\AssetDatabase.cpp" />
+    <ClCompile Include="Editor\EditorApplication.cpp" />
+    <ClCompile Include="Editor\EditorConsole.cpp" />
+    <ClCompile Include="Editor\EditorDockSpace.cpp" />
+    <ClCompile Include="Editor\EditorImGuiUtil.cpp" />
+    <ClCompile Include="base\ProjectPath.cpp" />
+    <ClCompile Include="Editor\EditorSelection.cpp" />
+    <ClCompile Include="Editor\EditorStyle.cpp" />
+    <ClCompile Include="Editor\EditorUndoManager.cpp" />
+    <ClCompile Include="Editor\HierarchyWindow.cpp" />
+    <ClCompile Include="Editor\InspectorUI.cpp" />
+    <ClCompile Include="Editor\InspectorWindow.cpp" />
+    <ClCompile Include="Editor\MaterialInspector.cpp" />
+    <ClCompile Include="Editor\PrefabAsset.cpp" />
+    <ClCompile Include="Editor\ProjectAssetClassifier.cpp" />
+    <ClCompile Include="Editor\ProjectWindow.cpp" />
+    <ClCompile Include="Editor\SceneJsonExporter.cpp" />
+    <ClCompile Include="Editor\GameViewWindow.cpp" />
+    <ClCompile Include="Editor\PerformanceWindow.cpp" />
+    <ClCompile Include="Editor\RenderingWindow.cpp" />
+    <ClCompile Include="Editor\SceneViewWindow.cpp" />
+    <ClCompile Include="Editor\SceneJsonImporter.cpp" />
+    <ClCompile Include="3d\AxisIndicator.cpp" />
+    <ClCompile Include="3d\Camera.cpp" />
+    <ClCompile Include="3d\DebugCamera.cpp" />
+    <ClCompile Include="3d\DirectionalLight.cpp" />
+    <ClCompile Include="3d\FollowCamera.cpp" />
+    <ClCompile Include="3d\GraphicsPipeline.cpp" />
+    <ClCompile Include="3d\LineRenderer.cpp" />
+    <ClCompile Include="3d\Model.cpp" />
+    <ClCompile Include="3d\ModelUtil.cpp" />
+    <ClCompile Include="3d\PointLight.cpp" />
+    <ClCompile Include="3d\RailCameraController.cpp" />
+    <ClCompile Include="3d\SpotLight.cpp" />
+    <ClCompile Include="3d\WorldTransform.cpp" />
+    <ClCompile Include="base\AudioManager.cpp" />
+    <ClCompile Include="base\DirectXCommon.cpp" />
+    <ClCompile Include="base\FrameProfiler.cpp" />
+    <ClCompile Include="base\GlobalVariables.cpp" />
+    <ClCompile Include="base\Logger.cpp" />
+    <ClCompile Include="base\StringUtil.cpp" />
+    <ClCompile Include="base\TextureManager.cpp" />
+    <ClCompile Include="base\Time.cpp" />
+    <ClCompile Include="base\WinApp.cpp" />
+    <ClCompile Include="postprocess\PostEffectPipeline.cpp" />
+    <ClCompile Include="postprocess\PostProcess.cpp" />
+    <ClCompile Include="Editor\PrimitiveObjectFactory.cpp" />
+    <ClCompile Include="Editor\LightObjectFactory.cpp" />
+    <ClCompile Include="components\SpotLightComponent.cpp" />
+    <ClCompile Include="shadow\ShadowMap.cpp" />
+    <ClCompile Include="shadow\ShadowPipeline.cpp" />
+    <ClCompile Include="postprocess\VolumeProfile.cpp" />
+    <ClCompile Include="postprocess\VolumeStack.cpp" />
+    <ClCompile Include="components\VolumeComponent.cpp" />
+    <ClCompile Include="input\Input.cpp" />
+    <ClCompile Include="KujataEngine.cpp" />
+    <ClCompile Include="math\Easing.cpp" />
+    <ClCompile Include="math\MathUtil.cpp" />
+    <ClCompile Include="math\Noise.cpp" />
+    <ClCompile Include="math\Matrix3x3.cpp" />
+    <ClCompile Include="math\Matrix4x4.cpp" />
+    <ClCompile Include="math\Random.cpp" />
+    <ClCompile Include="math\Vector2.cpp" />
+    <ClCompile Include="math\Vector3.cpp" />
+    <ClCompile Include="runtime\GameModuleLoader.cpp" />
+    <ClCompile Include="runtime\AnimationRecordingState.cpp" />
+    <ClCompile Include="runtime\PlayState.cpp" />
+    <ClCompile Include="runtime\SceneManager.cpp" />
+    <ClCompile Include="runtime\AssetResolver.cpp" />
+    <ClCompile Include="runtime\EngineContext.cpp" />
+    <ClCompile Include="runtime\SelectionProvider.cpp" />
+    <ClCompile Include="runtime\TagRegistry.cpp" />
+    <ClCompile Include="scene\Component.cpp" />
+    <ClCompile Include="scene\ComponentFactory.cpp" />
+    <ClCompile Include="scene\GameObject.cpp" />
+    <ClCompile Include="scene\ObjectRef.cpp" />
+    <ClCompile Include="scene\UnityAction.cpp" />
+    <ClCompile Include="scene\UnityActionUI.cpp" />
+    <ClCompile Include="scene\RayCast.cpp" />
+    <ClCompile Include="scene\SampleScene.cpp" />
+    <ClCompile Include="scene\Scene.cpp" />
+    <ClCompile Include="shapes\AABB.cpp" />
+    <ClCompile Include="shapes\Collider.cpp" />
+    <ClCompile Include="shapes\CollisionManager.cpp" />
+    <ClCompile Include="shapes\Rect.cpp" />
+    <ClCompile Include="shapes\ShapeDraw.cpp" />
+    <ClCompile Include="shapes\ShapeUtil.cpp" />
+    <ClCompile Include="vfx\InstancingModel.cpp" />
+    <ClCompile Include="vfx\ParticleField.cpp" />
+    <ClCompile Include="vfx\ParticleEmitter.cpp" />
+    <ClCompile Include="vfx\ParticleModel.cpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\externals\imgui\imconfig.h" />
+    <ClInclude Include="..\externals\imgui\imgui.h" />
+    <ClInclude Include="..\externals\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="..\externals\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="..\externals\imgui\imgui_internal.h" />
+    <ClInclude Include="..\externals\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\externals\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\externals\imgui\imstb_truetype.h" />
+    <ClInclude Include="..\externals\imsearch\imsearch.h" />
+    <ClInclude Include="..\externals\imsearch\imsearch_internal.h" />
+    <ClInclude Include="Editor\ImGuiManager.h" />
+    <ClInclude Include="2d\Sprite2DRenderer.h" />
+    <ClInclude Include="2d\SpriteQuad.h" />
+    <ClInclude Include="2d\UIRenderer.h" />
+    <ClInclude Include="2d\UIQuad.h" />
+    <ClInclude Include="assets\AnimationClipAsset.h" />
+    <ClInclude Include="assets\MaterialAsset.h" />
+    <ClInclude Include="assets\NoiseTexture.h" />
+    <ClInclude Include="components\AnimatorComponent.h" />
+    <ClInclude Include="components\AudioSourceComponent.h" />
+    <ClInclude Include="components\BuiltinComponents.h" />
+    <ClInclude Include="components\CameraComponent.h" />
+    <ClInclude Include="components\ColliderComponent.h" />
+    <ClInclude Include="components\DebugCameraComponent.h" />
+    <ClInclude Include="components\DirectionalLightComponent.h" />
+    <ClInclude Include="components\ModelRendererComponent.h" />
+    <ClInclude Include="components\NoiseTextureComponent.h" />
+    <ClInclude Include="components\ParticleSystemComponent.h" />
+    <ClInclude Include="components\TrailRendererComponent.h" />
+    <ClInclude Include="components\OrbitCameraComponent.h" />
+    <ClInclude Include="scene\MovementUtil.h" />
+    <ClInclude Include="math\Quaternion.h" />
+    <ClInclude Include="components\CanvasComponent.h" />
+    <ClInclude Include="components\RectTransformComponent.h" />
+    <ClInclude Include="components\ImageComponent.h" />
+    <ClInclude Include="2d\UICanvasRenderer.h" />
+    <ClInclude Include="2d\UIRect.h" />
+    <ClInclude Include="2d\FontAtlas.h" />
+    <ClInclude Include="2d\UIEventSystem.h" />
+    <ClInclude Include="2d\UINavigationSystem.h" />
+    <ClInclude Include="components\TextComponent.h" />
+    <ClInclude Include="components\ButtonComponent.h" />
+    <ClInclude Include="runtime\UIInput.h" />
+    <ClInclude Include="runtime\AppControl.h" />
+    <ClInclude Include="runtime\UIEventBus.h" />
+    <ClInclude Include="Editor\UIObjectFactory.h" />
+    <ClInclude Include="..\externals\stb\stb_truetype.h" />
+    <ClInclude Include="components\PointLightComponent.h" />
+    <ClInclude Include="components\RigidbodyComponent.h" />
+    <ClInclude Include="components\RotatorComponent.h" />
+    <ClInclude Include="components\SpriteRendererComponent.h" />
+    <ClInclude Include="components\TransformComponent.h" />
+    <ClInclude Include="Editor\AnimationWindow.h" />
+    <ClInclude Include="Editor\AssetDatabase.h" />
+    <ClInclude Include="Editor\EditorApplication.h" />
+    <ClInclude Include="Editor\EditorConsole.h" />
+    <ClInclude Include="Editor\EditorDockSpace.h" />
+    <ClInclude Include="Editor\EditorImGuiUtil.h" />
+    <ClInclude Include="base\ProjectPath.h" />
+    <ClInclude Include="Editor\EditorSelection.h" />
+    <ClInclude Include="Editor\EditorStyle.h" />
+    <ClInclude Include="Editor\EditorUndoManager.h" />
+    <ClInclude Include="Editor\HierarchyWindow.h" />
+    <ClInclude Include="runtime\InspectorUI.h" />
+    <ClInclude Include="Editor\InspectorWindow.h" />
+    <ClInclude Include="Editor\MaterialInspector.h" />
+    <ClInclude Include="Editor\PrefabAsset.h" />
+    <ClInclude Include="Editor\ProjectAssetClassifier.h" />
+    <ClInclude Include="Editor\ProjectWindow.h" />
+    <ClInclude Include="Editor\SceneJsonExporter.h" />
+    <ClInclude Include="Editor\GameViewWindow.h" />
+    <ClInclude Include="Editor\PerformanceWindow.h" />
+    <ClInclude Include="Editor\RenderingWindow.h" />
+    <ClInclude Include="Editor\SceneViewWindow.h" />
+    <ClInclude Include="Editor\SceneJsonImporter.h" />
+    <ClInclude Include="..\externals\ImGuizmo-1.9\src\ImGuizmo.h" />
+    <ClInclude Include="3d\AxisIndicator.h" />
+    <ClInclude Include="3d\Camera.h" />
+    <ClInclude Include="3d\DebugCamera.h" />
+    <ClInclude Include="3d\DirectionalLight.h" />
+    <ClInclude Include="3d\FollowCamera.h" />
+    <ClInclude Include="3d\GraphicsPipeline.h" />
+    <ClInclude Include="3d\LineRenderer.h" />
+    <ClInclude Include="3d\Model.h" />
+    <ClInclude Include="3d\ModelUtil.h" />
+    <ClInclude Include="3d\PointLight.h" />
+    <ClInclude Include="3d\RailCameraController.h" />
+    <ClInclude Include="3d\SpotLight.h" />
+    <ClInclude Include="3d\WorldTransform.h" />
+    <ClInclude Include="base\AudioManager.h" />
+    <ClInclude Include="base\DirectXCommon.h" />
+    <ClInclude Include="base\GlobalVariables.h" />
+    <ClInclude Include="base\FrameProfiler.h" />
+    <ClInclude Include="base\Logger.h" />
+    <ClInclude Include="base\StringUtil.h" />
+    <ClInclude Include="base\TextureManager.h" />
+    <ClInclude Include="base\Time.h" />
+    <ClInclude Include="base\WinApp.h" />
+    <ClInclude Include="postprocess\PostEffectPipeline.h" />
+    <ClInclude Include="postprocess\PostProcess.h" />
+    <ClInclude Include="Editor\PrimitiveObjectFactory.h" />
+    <ClInclude Include="Editor\LightObjectFactory.h" />
+    <ClInclude Include="components\SpotLightComponent.h" />
+    <ClInclude Include="shadow\ShadowMap.h" />
+    <ClInclude Include="shadow\ShadowPipeline.h" />
+    <ClInclude Include="postprocess\VolumeProfile.h" />
+    <ClInclude Include="postprocess\VolumeStack.h" />
+    <ClInclude Include="components\VolumeComponent.h" />
+    <ClInclude Include="input\Input.h" />
+    <ClInclude Include="KujataEngine.h" />
+    <ClInclude Include="KujataEngineEditor.h" />
+    <ClInclude Include="math\Easing.h" />
+    <ClInclude Include="math\MathUtil.h" />
+    <ClInclude Include="math\Noise.h" />
+    <ClInclude Include="math\Matrix3x3.h" />
+    <ClInclude Include="math\Matrix4x4.h" />
+    <ClInclude Include="math\Random.h" />
+    <ClInclude Include="math\Vector2.h" />
+    <ClInclude Include="math\Vector3.h" />
+    <ClInclude Include="math\Vector4.h" />
+    <ClInclude Include="runtime\GameModule.h" />
+    <ClInclude Include="runtime\GameModuleLoader.h" />
+    <ClInclude Include="runtime\KujataApi.h" />
+    <ClInclude Include="runtime\AnimationRecordingState.h" />
+    <ClInclude Include="runtime\PlayState.h" />
+    <ClInclude Include="runtime\SceneManager.h" />
+    <ClInclude Include="runtime\AssetResolver.h" />
+    <ClInclude Include="runtime\EngineContext.h" />
+    <ClInclude Include="runtime\IAssetResolver.h" />
+    <ClInclude Include="runtime\TagRegistry.h" />
+    <ClInclude Include="runtime\ISelectionProvider.h" />
+    <ClInclude Include="runtime\SelectionProvider.h" />
+    <ClInclude Include="scene\Component.h" />
+    <ClInclude Include="scene\IEditorBillboard.h" />
+    <ClInclude Include="scene\IMaterialTarget.h" />
+    <ClInclude Include="scene\IRaycastTarget.h" />
+    <ClInclude Include="scene\ISceneCamera.h" />
+    <ClInclude Include="scene\ComponentFactory.h" />
+    <ClInclude Include="scene\GameObject.h" />
+    <ClInclude Include="scene\InvokableMethod.h" />
+    <ClInclude Include="scene\ObjectRef.h" />
+    <ClInclude Include="scene\RayCast.h" />
+    <ClInclude Include="scene\UnityAction.h" />
+    <ClInclude Include="scene\UnityActionUI.h" />
+    <ClInclude Include="scene\SampleScene.h" />
+    <ClInclude Include="scene\Scene.h" />
+    <ClInclude Include="shapes\AABB.h" />
+    <ClInclude Include="shapes\Collider.h" />
+    <ClInclude Include="shapes\CollisionManager.h" />
+    <ClInclude Include="shapes\Rect.h" />
+    <ClInclude Include="shapes\ShapeDraw.h" />
+    <ClInclude Include="shapes\ShapeUtil.h" />
+    <ClInclude Include="vfx\InstancingModel.h" />
+    <ClInclude Include="vfx\Particle.h" />
+    <ClInclude Include="vfx\ParticleEmitter.h" />
+    <ClInclude Include="vfx\ParticleField.h" />
+    <ClInclude Include="vfx\ParticleModel.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\externals\imgui\LICENSE.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="EngineData\shader\Line.PS.hlsl" />
+    <None Include="EngineData\shader\Line.VS.hlsl" />
+    <None Include="EngineData\shader\PostEffect.hlsli" />
+    <None Include="EngineData\shader\Fullscreen.VS.hlsl" />
+    <None Include="EngineData\shader\BloomDownsample.PS.hlsl" />
+    <None Include="EngineData\shader\BloomUpsample.PS.hlsl" />
+    <None Include="EngineData\shader\Tonemap.PS.hlsl" />
+    <None Include="EngineData\shader\Fog.PS.hlsl" />
+    <None Include="shader\Object3d.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="shader\Particle.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="shader\Object3d.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="shader\Object3d.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="shader\Particle.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="shader\Particle.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
+      <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

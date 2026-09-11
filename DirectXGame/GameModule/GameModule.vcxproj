@@ -44,10 +44,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <!-- exe名などゲーム固有の設定。エンジンは Game/ の隣の DirectXGame/ にある前提。 -->
+  <!-- exe名などゲーム固有の設定。ゲームは DirectXGame/、エンジンはその隣の KujataEngine/、外部ライブラリは externals/ にある前提。 -->
   <Import Project="$(MSBuildThisFileDirectory)..\Game.props" />
   <PropertyGroup>
-    <KujataEngineDir>$(MSBuildThisFileDirectory)..\..\DirectXGame\</KujataEngineDir>
+    <KujataEngineDir>$(MSBuildThisFileDirectory)..\..\KujataEngine\</KujataEngineDir>
   </PropertyGroup>
   <!-- 出力先はこのプロジェクト直下の bin/。EditorApplication::GetGameModuleDllPath がここから DLL を読むため、変更時は必ず両方を揃えること。 -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -68,14 +68,14 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(KujataEngineDir)KujataEngine;$(KujataEngineDir)externals\assimp\include;$(KujataEngineDir)externals\imgui;$(KujataEngineDir)externals\ImGuizmo-1.9\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(KujataEngineDir);$(KujataEngineDir)..\externals\assimp\include;$(KujataEngineDir)..\externals\imgui;$(KujataEngineDir)..\externals\ImGuizmo-1.9\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <ProgramDataBaseFile>$(IntDir)$(TargetName).pdb</ProgramDataBaseFile>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\build\bin\$(Configuration);$(KujataEngineDir)externals\assimp\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\build\bin\$(Configuration);$(KujataEngineDir)..\externals\assimp\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(KujataExeName).lib;assimp-vc143-mdd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <!-- LNK4232: インポート元のexe名に非ASCIIが含まれる場合の警告。日本語のexe名を使うゲームのために見送る。 -->
       <AdditionalOptions>/ignore:4049 /ignore:4098 /ignore:4232 /ignore:4233 %(AdditionalOptions)</AdditionalOptions>
@@ -93,13 +93,13 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(KujataEngineDir)KujataEngine;$(KujataEngineDir)externals\assimp\include;$(KujataEngineDir)externals\imgui;$(KujataEngineDir)externals\ImGuizmo-1.9\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(KujataEngineDir);$(KujataEngineDir)..\externals\assimp\include;$(KujataEngineDir)..\externals\imgui;$(KujataEngineDir)..\externals\ImGuizmo-1.9\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDataBaseFile>$(IntDir)$(TargetName).pdb</ProgramDataBaseFile>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\build\bin\$(Configuration);$(KujataEngineDir)externals\assimp\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\build\bin\$(Configuration);$(KujataEngineDir)..\externals\assimp\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(KujataExeName).lib;assimp-vc143-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4049 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
     </Link>

@@ -23,15 +23,15 @@ std::filesystem::path DetectEngineRoot() {
 			return NormalizeEditorPath(cursor);
 		}
 
-		std::filesystem::path directXGameProject = cursor / "DirectXGame" / "KujataEngine.vcxproj";
-		if (std::filesystem::exists(directXGameProject)) {
-			return NormalizeEditorPath(cursor / "DirectXGame");
+		std::filesystem::path engineProject = cursor / "KujataEngine" / "KujataEngine.vcxproj";
+		if (std::filesystem::exists(engineProject)) {
+			return NormalizeEditorPath(cursor / "KujataEngine");
 		}
 
 		if (std::filesystem::exists(cursor / "KujataEngine.sln")) {
-			std::filesystem::path directXGameDirectory = cursor / "DirectXGame";
-			if (std::filesystem::exists(directXGameDirectory)) {
-				return NormalizeEditorPath(directXGameDirectory);
+			std::filesystem::path engineDirectory = cursor / "KujataEngine";
+			if (std::filesystem::exists(engineDirectory)) {
+				return NormalizeEditorPath(engineDirectory);
 			}
 			return NormalizeEditorPath(cursor);
 		}
@@ -69,7 +69,7 @@ std::filesystem::path DetectActiveProjectRoot() {
 	std::filesystem::path requested = FindProjectArgument();
 	if (requested.empty()) {
 		std::error_code error;
-		std::filesystem::path gameDirectory = GetEngineRoot().parent_path() / "Game";
+		std::filesystem::path gameDirectory = GetEngineRoot().parent_path() / "DirectXGame";
 		if (std::filesystem::is_directory(gameDirectory, error)) {
 			return NormalizeEditorPath(gameDirectory);
 		}
@@ -114,7 +114,7 @@ std::filesystem::path GetActiveProjectRoot() {
 }
 
 std::filesystem::path GetEditorIconDirectory() {
-	return GetEngineRoot() / "KujataEngine" / "resources" / "images";
+	return GetEngineRoot() / "resources" / "images";
 }
 
 std::filesystem::path GetExecutableDirectory() {

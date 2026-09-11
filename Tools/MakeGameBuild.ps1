@@ -6,8 +6,8 @@
 # 要点:
 #   - Release構成を配る。DebugのCRT(MSVCP140D.dll等)は**再頒布不可**で、
 #     VSの入っていないPCでは起動しない。
-#   - Data(Game/Data)と EngineData(DirectXGame/EngineData)は **exeの隣**へ置く。
-#     配布先には KujataEngine.sln も Game/ も無いので、エンジンとプロジェクトの起点は
+#   - Data(DirectXGame/Data)と EngineData(KujataEngine/EngineData)は **exeの隣**へ置く。
+#     配布先には KujataEngine.sln も DirectXGame/ も無いので、エンジンとプロジェクトの起点は
 #     どちらもカレント(exeの隣)になる。
 #   - StartupScene は TitleScene にする(配布物はタイトルから始まる)。
 #
@@ -25,11 +25,11 @@ $ErrorActionPreference = "Stop"
 
 $repo = Split-Path -Parent $PSScriptRoot
 $binDir = Join-Path $repo "build\bin\$Configuration"
-$moduleDll = Join-Path $repo "Game\GameModule\bin\$Configuration\GameModule.dll"
-$dataSrc = Join-Path $repo "Game\Data"
-$engineDataSrc = Join-Path $repo "DirectXGame\EngineData"
+$moduleDll = Join-Path $repo "DirectXGame\GameModule\bin\$Configuration\GameModule.dll"
+$dataSrc = Join-Path $repo "DirectXGame\Data"
+$engineDataSrc = Join-Path $repo "KujataEngine\EngineData"
 
-# exe名は Game/Game.props の KujataExeName で決まるので、決め打ちせず bin から探す。
+# exe名は DirectXGame/Game.props の KujataExeName で決まるので、決め打ちせず bin から探す。
 $exe = Get-ChildItem $binDir -Filter *.exe -ErrorAction SilentlyContinue | Select-Object -First 1
 if (-not $exe) {
     throw "exe が無い: $binDir  先に $Configuration をビルドすること"

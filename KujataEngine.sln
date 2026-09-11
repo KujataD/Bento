@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.3.11527.330
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KujataEngine", "DirectXGame\KujataEngine.vcxproj", "{A180AA57-47D1-4C0A-B744-751E038ADA71}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KujataEngine", "KujataEngine\KujataEngine.vcxproj", "{A180AA57-47D1-4C0A-B744-751E038ADA71}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameModule", "Game\GameModule\GameModule.vcxproj", "{9DAB0B5A-5070-4A27-9E45-9B45FBEB1E32}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameModule", "DirectXGame\GameModule\GameModule.vcxproj", "{9DAB0B5A-5070-4A27-9E45-9B45FBEB1E32}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A180AA57-47D1-4C0A-B744-751E038ADA71} = {A180AA57-47D1-4C0A-B744-751E038ADA71}
 	EndProjectSection
@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTex", "DirectXGame\externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj", "{371B9FA9-4C90-4AC6-A123-ACED756D6C77}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTex", "externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj", "{371B9FA9-4C90-4AC6-A123-ACED756D6C77}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

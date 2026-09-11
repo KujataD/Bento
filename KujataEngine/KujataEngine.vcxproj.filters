@@ -22,49 +22,49 @@
     <Filter Include="KujataEngine">
       <UniqueIdentifier>{adc5439f-48ee-4f7e-a2e9-720c59671c23}</UniqueIdentifier>
     </Filter>
-    <Filter Include="KujataEngine\math">
+    <Filter Include="math">
       <UniqueIdentifier>{c8544584-8cd7-4840-a924-a5a135a7deb5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="KujataEngine\3d">
+    <Filter Include="3d">
       <UniqueIdentifier>{f7c9f7a4-c510-49d6-92fa-7c0b88f81981}</UniqueIdentifier>
     </Filter>
-    <Filter Include="KujataEngine\2d">
+    <Filter Include="2d">
       <UniqueIdentifier>{2537381b-99e7-4b90-a00f-9d66824cc414}</UniqueIdentifier>
     </Filter>
-    <Filter Include="KujataEngine\base">
+    <Filter Include="base">
       <UniqueIdentifier>{8d857e10-8c82-40ca-a86f-1c24f096b20e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="KujataEngine\shader">
+    <Filter Include="shader">
       <UniqueIdentifier>{76e52043-7741-4d1d-9347-3e978724e376}</UniqueIdentifier>
     </Filter>
-    <Filter Include="KujataEngine\audio">
+    <Filter Include="audio">
       <UniqueIdentifier>{c9b53e20-ad3e-4fdd-b3bf-074a577782c5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="KujataEngine\input">
+    <Filter Include="input">
       <UniqueIdentifier>{bba9aba5-b068-4ac9-9b46-d796a5ec1803}</UniqueIdentifier>
     </Filter>
     <Filter Include="ソース ファイル\GameObject">
       <UniqueIdentifier>{ebbac2a2-863a-40d1-bc25-cfbf51048c52}</UniqueIdentifier>
     </Filter>
-    <Filter Include="KujataEngine\shapes">
+    <Filter Include="shapes">
       <UniqueIdentifier>{4ce3014d-950b-41ee-9a0a-c94ca6731cb0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="KujataEngine\vfx">
+    <Filter Include="vfx">
       <UniqueIdentifier>{ae19aad8-f3e4-4adc-83d4-4c5a704702bd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="KujataEngine\Editor">
+    <Filter Include="Editor">
       <UniqueIdentifier>{e7b43ca6-a8f5-4d84-a27f-a67608eb0f49}</UniqueIdentifier>
     </Filter>
-    <Filter Include="KujataEngine\components">
+    <Filter Include="components">
       <UniqueIdentifier>{a2868ec1-0c72-4d5d-8b0f-e5503cc1603f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="KujataEngine\runtime">
+    <Filter Include="runtime">
       <UniqueIdentifier>{034d85de-0d5f-4a2e-b90b-76fd6ee7e5f4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="KujataEngine\assets">
+    <Filter Include="assets">
       <UniqueIdentifier>{b1819ac8-7f61-43e1-a565-df0cb53a59d2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="KujataEngine\postprocess">
+    <Filter Include="postprocess">
       <UniqueIdentifier>{3f6d9a15-52c4-4de1-9a7b-6b1f28a4c901}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -72,895 +72,895 @@
     <ClCompile Include="main.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\postprocess\PostEffectPipeline.cpp">
+    <ClCompile Include="postprocess\PostEffectPipeline.cpp">
       <Filter>KujataEngine\postprocess</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\postprocess\PostProcess.cpp">
+    <ClCompile Include="postprocess\PostProcess.cpp">
       <Filter>KujataEngine\postprocess</Filter>
     </ClCompile>
-    <ClCompile Include="externals\imgui\imgui.cpp">
+    <ClCompile Include="..\externals\imgui\imgui.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_demo.cpp">
+    <ClCompile Include="..\externals\imgui\imgui_demo.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_draw.cpp">
+    <ClCompile Include="..\externals\imgui\imgui_draw.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_impl_dx12.cpp">
+    <ClCompile Include="..\externals\imgui\imgui_impl_dx12.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_tables.cpp">
+    <ClCompile Include="..\externals\imgui\imgui_tables.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_widgets.cpp">
+    <ClCompile Include="..\externals\imgui\imgui_widgets.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
+    <ClCompile Include="..\externals\imgui\imgui_impl_win32.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="externals\ImGuizmo-1.9\src\ImGuizmo.cpp">
+    <ClCompile Include="..\externals\ImGuizmo-1.9\src\ImGuizmo.cpp">
       <Filter>ImGuizmo</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\math\Matrix3x3.cpp">
+    <ClCompile Include="math\Matrix3x3.cpp">
       <Filter>KujataEngine\math</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\math\Matrix4x4.cpp">
+    <ClCompile Include="math\Matrix4x4.cpp">
       <Filter>KujataEngine\math</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\math\Vector2.cpp">
+    <ClCompile Include="math\Vector2.cpp">
       <Filter>KujataEngine\math</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\math\Vector3.cpp">
+    <ClCompile Include="math\Vector3.cpp">
       <Filter>KujataEngine\math</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\3d\Camera.cpp">
+    <ClCompile Include="3d\Camera.cpp">
       <Filter>KujataEngine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\3d\GraphicsPipeline.cpp">
+    <ClCompile Include="3d\GraphicsPipeline.cpp">
       <Filter>KujataEngine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\3d\LineRenderer.cpp">
+    <ClCompile Include="3d\LineRenderer.cpp">
       <Filter>KujataEngine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\3d\Model.cpp">
+    <ClCompile Include="3d\Model.cpp">
       <Filter>KujataEngine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\3d\ModelUtil.cpp">
+    <ClCompile Include="3d\ModelUtil.cpp">
       <Filter>KujataEngine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\3d\WorldTransform.cpp">
+    <ClCompile Include="3d\WorldTransform.cpp">
       <Filter>KujataEngine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\ImGuiManager.cpp">
+    <ClCompile Include="Editor\ImGuiManager.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\base\AudioManager.cpp">
+    <ClCompile Include="base\AudioManager.cpp">
       <Filter>KujataEngine\base</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\base\DirectXCommon.cpp">
+    <ClCompile Include="base\DirectXCommon.cpp">
       <Filter>KujataEngine\base</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\base\WinApp.cpp">
+    <ClCompile Include="base\WinApp.cpp">
       <Filter>KujataEngine\base</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\KujataEngine.cpp">
+    <ClCompile Include="KujataEngine.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\2d\Sprite2DRenderer.cpp">
+    <ClCompile Include="2d\Sprite2DRenderer.cpp">
       <Filter>KujataEngine\2d</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\2d\SpriteQuad.cpp">
+    <ClCompile Include="2d\SpriteQuad.cpp">
       <Filter>KujataEngine\2d</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\assets\AnimationClipAsset.cpp">
+    <ClCompile Include="assets\AnimationClipAsset.cpp">
       <Filter>KujataEngine\assets</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\assets\MaterialAsset.cpp">
+    <ClCompile Include="assets\MaterialAsset.cpp">
       <Filter>KujataEngine\assets</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\assets\NoiseTexture.cpp">
+    <ClCompile Include="assets\NoiseTexture.cpp">
       <Filter>KujataEngine\assets</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\AnimatorComponent.cpp">
+    <ClCompile Include="components\AnimatorComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\AnimationWindow.cpp">
+    <ClCompile Include="Editor\AnimationWindow.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\AssetDatabase.cpp">
+    <ClCompile Include="Editor\AssetDatabase.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\EditorApplication.cpp">
+    <ClCompile Include="Editor\EditorApplication.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\base\ProjectPath.cpp">
+    <ClCompile Include="base\ProjectPath.cpp">
       <Filter>KujataEngine\base</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\EditorConsole.cpp">
+    <ClCompile Include="Editor\EditorConsole.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\EditorDockSpace.cpp">
+    <ClCompile Include="Editor\EditorDockSpace.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\EditorImGuiUtil.cpp">
+    <ClCompile Include="Editor\EditorImGuiUtil.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\EditorSelection.cpp">
+    <ClCompile Include="Editor\EditorSelection.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\EditorStyle.cpp">
+    <ClCompile Include="Editor\EditorStyle.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\EditorUndoManager.cpp">
+    <ClCompile Include="Editor\EditorUndoManager.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\InspectorUI.cpp">
+    <ClCompile Include="Editor\InspectorUI.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\PrefabAsset.cpp">
+    <ClCompile Include="Editor\PrefabAsset.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\ProjectAssetClassifier.cpp">
+    <ClCompile Include="Editor\ProjectAssetClassifier.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\ProjectWindow.cpp">
+    <ClCompile Include="Editor\ProjectWindow.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\HierarchyWindow.cpp">
+    <ClCompile Include="Editor\HierarchyWindow.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\InspectorWindow.cpp">
+    <ClCompile Include="Editor\InspectorWindow.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\MaterialInspector.cpp">
+    <ClCompile Include="Editor\MaterialInspector.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\GameViewWindow.cpp">
+    <ClCompile Include="Editor\GameViewWindow.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\RenderingWindow.cpp">
+    <ClCompile Include="Editor\RenderingWindow.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\PerformanceWindow.cpp">
+    <ClCompile Include="Editor\PerformanceWindow.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\SceneViewWindow.cpp">
+    <ClCompile Include="Editor\SceneViewWindow.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\SceneJsonExporter.cpp">
+    <ClCompile Include="Editor\SceneJsonExporter.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\SceneJsonImporter.cpp">
+    <ClCompile Include="Editor\SceneJsonImporter.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\base\FrameProfiler.cpp">
+    <ClCompile Include="base\FrameProfiler.cpp">
       <Filter>KujataEngine\base</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\base\Logger.cpp">
+    <ClCompile Include="base\Logger.cpp">
       <Filter>KujataEngine\base</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\base\StringUtil.cpp">
+    <ClCompile Include="base\StringUtil.cpp">
       <Filter>KujataEngine\base</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\3d\DirectionalLight.cpp">
+    <ClCompile Include="3d\DirectionalLight.cpp">
       <Filter>KujataEngine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\3d\DebugCamera.cpp">
+    <ClCompile Include="3d\DebugCamera.cpp">
       <Filter>KujataEngine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\input\Input.cpp">
+    <ClCompile Include="input\Input.cpp">
       <Filter>KujataEngine\input</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\shapes\Rect.cpp">
+    <ClCompile Include="shapes\Rect.cpp">
       <Filter>KujataEngine\shapes</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\math\Random.cpp">
+    <ClCompile Include="math\Random.cpp">
       <Filter>KujataEngine\math</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\math\Easing.cpp">
+    <ClCompile Include="math\Easing.cpp">
       <Filter>KujataEngine\math</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\shapes\AABB.cpp">
+    <ClCompile Include="shapes\AABB.cpp">
       <Filter>KujataEngine\shapes</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\shapes\ShapeDraw.cpp">
+    <ClCompile Include="shapes\ShapeDraw.cpp">
       <Filter>KujataEngine\shapes</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\shapes\ShapeUtil.cpp">
+    <ClCompile Include="shapes\ShapeUtil.cpp">
       <Filter>KujataEngine\shapes</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\base\TextureManager.cpp">
+    <ClCompile Include="base\TextureManager.cpp">
       <Filter>KujataEngine\base</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\vfx\ParticleEmitter.cpp">
+    <ClCompile Include="vfx\ParticleEmitter.cpp">
       <Filter>KujataEngine\vfx</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\vfx\ParticleModel.cpp">
+    <ClCompile Include="vfx\ParticleModel.cpp">
       <Filter>KujataEngine\vfx</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\vfx\ParticleField.cpp">
+    <ClCompile Include="vfx\ParticleField.cpp">
       <Filter>KujataEngine\vfx</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\3d\PointLight.cpp">
+    <ClCompile Include="3d\PointLight.cpp">
       <Filter>KujataEngine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\3d\SpotLight.cpp">
+    <ClCompile Include="3d\SpotLight.cpp">
       <Filter>KujataEngine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\scene\Component.cpp">
+    <ClCompile Include="scene\Component.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\runtime\GameModuleLoader.cpp">
+    <ClCompile Include="runtime\GameModuleLoader.cpp">
       <Filter>KujataEngine\runtime</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\runtime\AnimationRecordingState.cpp">
+    <ClCompile Include="runtime\AnimationRecordingState.cpp">
       <Filter>KujataEngine\runtime</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\runtime\PlayState.cpp">
+    <ClCompile Include="runtime\PlayState.cpp">
       <Filter>KujataEngine\runtime</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\runtime\SceneManager.cpp">
+    <ClCompile Include="runtime\SceneManager.cpp">
       <Filter>KujataEngine\runtime</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\runtime\TagRegistry.cpp">
+    <ClCompile Include="runtime\TagRegistry.cpp">
       <Filter>KujataEngine\runtime</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\runtime\AssetResolver.cpp">
+    <ClCompile Include="runtime\AssetResolver.cpp">
       <Filter>KujataEngine\runtime</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\runtime\EngineContext.cpp">
+    <ClCompile Include="runtime\EngineContext.cpp">
       <Filter>KujataEngine\runtime</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\runtime\SelectionProvider.cpp">
+    <ClCompile Include="runtime\SelectionProvider.cpp">
       <Filter>KujataEngine\runtime</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\scene\ComponentFactory.cpp">
+    <ClCompile Include="scene\ComponentFactory.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\scene\GameObject.cpp">
+    <ClCompile Include="scene\GameObject.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\scene\RayCast.cpp">
+    <ClCompile Include="scene\RayCast.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\scene\Scene.cpp">
+    <ClCompile Include="scene\Scene.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\BuiltinComponents.cpp">
+    <ClCompile Include="components\BuiltinComponents.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\CameraComponent.cpp">
+    <ClCompile Include="components\CameraComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\ColliderComponent.cpp">
+    <ClCompile Include="components\ColliderComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\DebugCameraComponent.cpp">
+    <ClCompile Include="components\DebugCameraComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\DirectionalLightComponent.cpp">
+    <ClCompile Include="components\DirectionalLightComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\OrbitCameraComponent.cpp">
+    <ClCompile Include="components\OrbitCameraComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\ModelRendererComponent.cpp">
+    <ClCompile Include="components\ModelRendererComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\NoiseTextureComponent.cpp">
+    <ClCompile Include="components\NoiseTextureComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\ParticleSystemComponent.cpp">
+    <ClCompile Include="components\ParticleSystemComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\TrailRendererComponent.cpp">
+    <ClCompile Include="components\TrailRendererComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\PointLightComponent.cpp">
+    <ClCompile Include="components\PointLightComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\AudioSourceComponent.cpp">
+    <ClCompile Include="components\AudioSourceComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\RotatorComponent.cpp">
+    <ClCompile Include="components\RotatorComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\SpriteRendererComponent.cpp">
+    <ClCompile Include="components\SpriteRendererComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\TransformComponent.cpp">
+    <ClCompile Include="components\TransformComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\scene\SampleScene.cpp">
+    <ClCompile Include="scene\SampleScene.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\math\MathUtil.cpp">
+    <ClCompile Include="math\MathUtil.cpp">
       <Filter>KujataEngine\math</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\math\Noise.cpp">
+    <ClCompile Include="math\Noise.cpp">
       <Filter>KujataEngine\math</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\3d\AxisIndicator.cpp">
+    <ClCompile Include="3d\AxisIndicator.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\shapes\Collider.cpp">
+    <ClCompile Include="shapes\Collider.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\shapes\CollisionManager.cpp">
+    <ClCompile Include="shapes\CollisionManager.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\3d\FollowCamera.cpp">
+    <ClCompile Include="3d\FollowCamera.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\base\GlobalVariables.cpp">
+    <ClCompile Include="base\GlobalVariables.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\vfx\InstancingModel.cpp">
+    <ClCompile Include="vfx\InstancingModel.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\3d\RailCameraController.cpp">
+    <ClCompile Include="3d\RailCameraController.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\base\Time.cpp">
+    <ClCompile Include="base\Time.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
-    <ClCompile Include="externals\imsearch\imsearch.cpp">
+    <ClCompile Include="..\externals\imsearch\imsearch.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\2d\UIRenderer.cpp">
+    <ClCompile Include="2d\UIRenderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\2d\UIQuad.cpp">
+    <ClCompile Include="2d\UIQuad.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\scene\MovementUtil.cpp">
+    <ClCompile Include="scene\MovementUtil.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\CanvasComponent.cpp">
+    <ClCompile Include="components\CanvasComponent.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\RectTransformComponent.cpp">
+    <ClCompile Include="components\RectTransformComponent.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\ImageComponent.cpp">
+    <ClCompile Include="components\ImageComponent.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\TextComponent.cpp">
+    <ClCompile Include="components\TextComponent.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\components\ButtonComponent.cpp">
+    <ClCompile Include="components\ButtonComponent.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\2d\UICanvasRenderer.cpp">
+    <ClCompile Include="2d\UICanvasRenderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\2d\UIEventSystem.cpp">
+    <ClCompile Include="2d\UIEventSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\2d\UINavigationSystem.cpp">
+    <ClCompile Include="2d\UINavigationSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\2d\FontAtlas.cpp">
+    <ClCompile Include="2d\FontAtlas.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\runtime\UIInput.cpp">
+    <ClCompile Include="runtime\UIInput.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\runtime\AppControl.cpp">
+    <ClCompile Include="runtime\AppControl.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\runtime\UIEventBus.cpp">
+    <ClCompile Include="runtime\UIEventBus.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\Editor\UIObjectFactory.cpp">
+    <ClCompile Include="Editor\UIObjectFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\scene\ObjectRef.cpp">
+    <ClCompile Include="scene\ObjectRef.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\scene\UnityAction.cpp">
+    <ClCompile Include="scene\UnityAction.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="KujataEngine\scene\UnityActionUI.cpp">
+    <ClCompile Include="scene\UnityActionUI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="KujataEngine\postprocess\PostEffectPipeline.h">
+    <ClInclude Include="postprocess\PostEffectPipeline.h">
       <Filter>KujataEngine\postprocess</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\postprocess\PostProcess.h">
+    <ClInclude Include="postprocess\PostProcess.h">
       <Filter>KujataEngine\postprocess</Filter>
     </ClInclude>
-    <ClInclude Include="externals\imgui\imconfig.h">
+    <ClInclude Include="..\externals\imgui\imconfig.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="externals\imgui\imgui.h">
+    <ClInclude Include="..\externals\imgui\imgui.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="externals\imgui\imgui_impl_dx12.h">
+    <ClInclude Include="..\externals\imgui\imgui_impl_dx12.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="externals\imgui\imgui_internal.h">
+    <ClInclude Include="..\externals\imgui\imgui_internal.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="externals\imgui\imstb_rectpack.h">
+    <ClInclude Include="..\externals\imgui\imstb_rectpack.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="externals\imgui\imstb_textedit.h">
+    <ClInclude Include="..\externals\imgui\imstb_textedit.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="externals\imgui\imstb_truetype.h">
+    <ClInclude Include="..\externals\imgui\imstb_truetype.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="externals\imgui\imgui_impl_win32.h">
+    <ClInclude Include="..\externals\imgui\imgui_impl_win32.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\math\Matrix3x3.h">
+    <ClInclude Include="math\Matrix3x3.h">
       <Filter>KujataEngine\math</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\math\Matrix4x4.h">
+    <ClInclude Include="math\Matrix4x4.h">
       <Filter>KujataEngine\math</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\math\Vector2.h">
+    <ClInclude Include="math\Vector2.h">
       <Filter>KujataEngine\math</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\math\Vector3.h">
+    <ClInclude Include="math\Vector3.h">
       <Filter>KujataEngine\math</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\math\Vector4.h">
+    <ClInclude Include="math\Vector4.h">
       <Filter>KujataEngine\math</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\3d\Camera.h">
+    <ClInclude Include="3d\Camera.h">
       <Filter>KujataEngine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\3d\DirectionalLight.h">
+    <ClInclude Include="3d\DirectionalLight.h">
       <Filter>KujataEngine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\3d\GraphicsPipeline.h">
+    <ClInclude Include="3d\GraphicsPipeline.h">
       <Filter>KujataEngine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\3d\LineRenderer.h">
+    <ClInclude Include="3d\LineRenderer.h">
       <Filter>KujataEngine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\3d\Model.h">
+    <ClInclude Include="3d\Model.h">
       <Filter>KujataEngine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\3d\ModelUtil.h">
+    <ClInclude Include="3d\ModelUtil.h">
       <Filter>KujataEngine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\3d\WorldTransform.h">
+    <ClInclude Include="3d\WorldTransform.h">
       <Filter>KujataEngine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\ImGuiManager.h">
+    <ClInclude Include="Editor\ImGuiManager.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\base\AudioManager.h">
+    <ClInclude Include="base\AudioManager.h">
       <Filter>KujataEngine\base</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\base\DirectXCommon.h">
+    <ClInclude Include="base\DirectXCommon.h">
       <Filter>KujataEngine\base</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\base\WinApp.h">
+    <ClInclude Include="base\WinApp.h">
       <Filter>KujataEngine\base</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\KujataEngine.h">
+    <ClInclude Include="KujataEngine.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\KujataEngineEditor.h">
+    <ClInclude Include="KujataEngineEditor.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\2d\Sprite2DRenderer.h">
+    <ClInclude Include="2d\Sprite2DRenderer.h">
       <Filter>KujataEngine\2d</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\2d\SpriteQuad.h">
+    <ClInclude Include="2d\SpriteQuad.h">
       <Filter>KujataEngine\2d</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\assets\AnimationClipAsset.h">
+    <ClInclude Include="assets\AnimationClipAsset.h">
       <Filter>KujataEngine\assets</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\assets\MaterialAsset.h">
+    <ClInclude Include="assets\MaterialAsset.h">
       <Filter>KujataEngine\assets</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\assets\NoiseTexture.h">
+    <ClInclude Include="assets\NoiseTexture.h">
       <Filter>KujataEngine\assets</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\AnimatorComponent.h">
+    <ClInclude Include="components\AnimatorComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\BuiltinComponents.h">
+    <ClInclude Include="components\BuiltinComponents.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\CameraComponent.h">
+    <ClInclude Include="components\CameraComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\ColliderComponent.h">
+    <ClInclude Include="components\ColliderComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\DebugCameraComponent.h">
+    <ClInclude Include="components\DebugCameraComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\DirectionalLightComponent.h">
+    <ClInclude Include="components\DirectionalLightComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\OrbitCameraComponent.h">
+    <ClInclude Include="components\OrbitCameraComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\math\Quaternion.h">
+    <ClInclude Include="math\Quaternion.h">
       <Filter>KujataEngine\math</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\ModelRendererComponent.h">
+    <ClInclude Include="components\ModelRendererComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\NoiseTextureComponent.h">
+    <ClInclude Include="components\NoiseTextureComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\ParticleSystemComponent.h">
+    <ClInclude Include="components\ParticleSystemComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\TrailRendererComponent.h">
+    <ClInclude Include="components\TrailRendererComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\PointLightComponent.h">
+    <ClInclude Include="components\PointLightComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\RigidbodyComponent.h">
+    <ClInclude Include="components\RigidbodyComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\AudioSourceComponent.h">
+    <ClInclude Include="components\AudioSourceComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\RotatorComponent.h">
+    <ClInclude Include="components\RotatorComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\SpriteRendererComponent.h">
+    <ClInclude Include="components\SpriteRendererComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\TransformComponent.h">
+    <ClInclude Include="components\TransformComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\AnimationWindow.h">
+    <ClInclude Include="Editor\AnimationWindow.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\AssetDatabase.h">
+    <ClInclude Include="Editor\AssetDatabase.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\EditorApplication.h">
+    <ClInclude Include="Editor\EditorApplication.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\base\ProjectPath.h">
+    <ClInclude Include="base\ProjectPath.h">
       <Filter>KujataEngine\base</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\EditorConsole.h">
+    <ClInclude Include="Editor\EditorConsole.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\EditorDockSpace.h">
+    <ClInclude Include="Editor\EditorDockSpace.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\EditorImGuiUtil.h">
+    <ClInclude Include="Editor\EditorImGuiUtil.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\EditorSelection.h">
+    <ClInclude Include="Editor\EditorSelection.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\EditorStyle.h">
+    <ClInclude Include="Editor\EditorStyle.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\EditorUndoManager.h">
+    <ClInclude Include="Editor\EditorUndoManager.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\InspectorUI.h">
+    <ClInclude Include="runtime\InspectorUI.h">
       <Filter>KujataEngine\runtime</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\AnimationRecordingState.h">
+    <ClInclude Include="runtime\AnimationRecordingState.h">
       <Filter>KujataEngine\runtime</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\PlayState.h">
+    <ClInclude Include="runtime\PlayState.h">
       <Filter>KujataEngine\runtime</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\SceneManager.h">
+    <ClInclude Include="runtime\SceneManager.h">
       <Filter>KujataEngine\runtime</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\TagRegistry.h">
+    <ClInclude Include="runtime\TagRegistry.h">
       <Filter>KujataEngine\runtime</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\AssetResolver.h">
+    <ClInclude Include="runtime\AssetResolver.h">
       <Filter>KujataEngine\runtime</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\EngineContext.h">
+    <ClInclude Include="runtime\EngineContext.h">
       <Filter>KujataEngine\runtime</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\IAssetResolver.h">
+    <ClInclude Include="runtime\IAssetResolver.h">
       <Filter>KujataEngine\runtime</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\ISelectionProvider.h">
+    <ClInclude Include="runtime\ISelectionProvider.h">
       <Filter>KujataEngine\runtime</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\SelectionProvider.h">
+    <ClInclude Include="runtime\SelectionProvider.h">
       <Filter>KujataEngine\runtime</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\PrefabAsset.h">
+    <ClInclude Include="Editor\PrefabAsset.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\ProjectAssetClassifier.h">
+    <ClInclude Include="Editor\ProjectAssetClassifier.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\ProjectWindow.h">
+    <ClInclude Include="Editor\ProjectWindow.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\HierarchyWindow.h">
+    <ClInclude Include="Editor\HierarchyWindow.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\InspectorWindow.h">
+    <ClInclude Include="Editor\InspectorWindow.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\MaterialInspector.h">
+    <ClInclude Include="Editor\MaterialInspector.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\GameViewWindow.h">
+    <ClInclude Include="Editor\GameViewWindow.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\RenderingWindow.h">
+    <ClInclude Include="Editor\RenderingWindow.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\PerformanceWindow.h">
+    <ClInclude Include="Editor\PerformanceWindow.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\SceneViewWindow.h">
+    <ClInclude Include="Editor\SceneViewWindow.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\SceneJsonExporter.h">
+    <ClInclude Include="Editor\SceneJsonExporter.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\SceneJsonImporter.h">
+    <ClInclude Include="Editor\SceneJsonImporter.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\base\FrameProfiler.h">
+    <ClInclude Include="base\FrameProfiler.h">
       <Filter>KujataEngine\base</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\base\Logger.h">
+    <ClInclude Include="base\Logger.h">
       <Filter>KujataEngine\base</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\base\StringUtil.h">
+    <ClInclude Include="base\StringUtil.h">
       <Filter>KujataEngine\base</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\3d\DebugCamera.h">
+    <ClInclude Include="3d\DebugCamera.h">
       <Filter>KujataEngine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\input\Input.h">
+    <ClInclude Include="input\Input.h">
       <Filter>KujataEngine\input</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\shapes\Rect.h">
+    <ClInclude Include="shapes\Rect.h">
       <Filter>KujataEngine\shapes</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\math\Random.h">
+    <ClInclude Include="math\Random.h">
       <Filter>KujataEngine\math</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\math\Easing.h">
+    <ClInclude Include="math\Easing.h">
       <Filter>KujataEngine\math</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\shapes\AABB.h">
+    <ClInclude Include="shapes\AABB.h">
       <Filter>KujataEngine\shapes</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\shapes\ShapeDraw.h">
+    <ClInclude Include="shapes\ShapeDraw.h">
       <Filter>KujataEngine\shapes</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\shapes\ShapeUtil.h">
+    <ClInclude Include="shapes\ShapeUtil.h">
       <Filter>KujataEngine\shapes</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\base\TextureManager.h">
+    <ClInclude Include="base\TextureManager.h">
       <Filter>KujataEngine\base</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\vfx\Particle.h">
+    <ClInclude Include="vfx\Particle.h">
       <Filter>KujataEngine\vfx</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\vfx\ParticleEmitter.h">
+    <ClInclude Include="vfx\ParticleEmitter.h">
       <Filter>KujataEngine\vfx</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\vfx\ParticleModel.h">
+    <ClInclude Include="vfx\ParticleModel.h">
       <Filter>KujataEngine\vfx</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\vfx\ParticleField.h">
+    <ClInclude Include="vfx\ParticleField.h">
       <Filter>KujataEngine\vfx</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\3d\PointLight.h">
+    <ClInclude Include="3d\PointLight.h">
       <Filter>KujataEngine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\3d\SpotLight.h">
+    <ClInclude Include="3d\SpotLight.h">
       <Filter>KujataEngine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\scene\Component.h">
+    <ClInclude Include="scene\Component.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\scene\IEditorBillboard.h">
+    <ClInclude Include="scene\IEditorBillboard.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\scene\IMaterialTarget.h">
+    <ClInclude Include="scene\IMaterialTarget.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\scene\IRaycastTarget.h">
+    <ClInclude Include="scene\IRaycastTarget.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\scene\ISceneCamera.h">
+    <ClInclude Include="scene\ISceneCamera.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\GameModule.h">
+    <ClInclude Include="runtime\GameModule.h">
       <Filter>KujataEngine\runtime</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\GameModuleLoader.h">
+    <ClInclude Include="runtime\GameModuleLoader.h">
       <Filter>KujataEngine\runtime</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\KujataApi.h">
+    <ClInclude Include="runtime\KujataApi.h">
       <Filter>KujataEngine\runtime</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\scene\ComponentFactory.h">
+    <ClInclude Include="scene\ComponentFactory.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\scene\GameObject.h">
+    <ClInclude Include="scene\GameObject.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\scene\RayCast.h">
+    <ClInclude Include="scene\RayCast.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\scene\SampleScene.h">
+    <ClInclude Include="scene\SampleScene.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\scene\Scene.h">
+    <ClInclude Include="scene\Scene.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="externals\ImGuizmo-1.9\src\ImGuizmo.h">
+    <ClInclude Include="..\externals\ImGuizmo-1.9\src\ImGuizmo.h">
       <Filter>ImGuizmo</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\math\MathUtil.h">
+    <ClInclude Include="math\MathUtil.h">
       <Filter>KujataEngine\math</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\math\Noise.h">
+    <ClInclude Include="math\Noise.h">
       <Filter>KujataEngine\math</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\base\Time.h">
+    <ClInclude Include="base\Time.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\3d\AxisIndicator.h">
+    <ClInclude Include="3d\AxisIndicator.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\shapes\Collider.h">
+    <ClInclude Include="shapes\Collider.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\shapes\CollisionManager.h">
+    <ClInclude Include="shapes\CollisionManager.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\3d\FollowCamera.h">
+    <ClInclude Include="3d\FollowCamera.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\base\GlobalVariables.h">
+    <ClInclude Include="base\GlobalVariables.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\vfx\InstancingModel.h">
+    <ClInclude Include="vfx\InstancingModel.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\3d\RailCameraController.h">
+    <ClInclude Include="3d\RailCameraController.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
-    <ClInclude Include="externals\imsearch\imsearch.h">
+    <ClInclude Include="..\externals\imsearch\imsearch.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="externals\imsearch\imsearch_internal.h">
+    <ClInclude Include="..\externals\imsearch\imsearch_internal.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\2d\UIRenderer.h">
+    <ClInclude Include="2d\UIRenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\2d\UIQuad.h">
+    <ClInclude Include="2d\UIQuad.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\scene\MovementUtil.h">
+    <ClInclude Include="scene\MovementUtil.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\CanvasComponent.h">
+    <ClInclude Include="components\CanvasComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\RectTransformComponent.h">
+    <ClInclude Include="components\RectTransformComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\ImageComponent.h">
+    <ClInclude Include="components\ImageComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\2d\UICanvasRenderer.h">
+    <ClInclude Include="2d\UICanvasRenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\2d\UIRect.h">
+    <ClInclude Include="2d\UIRect.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\2d\FontAtlas.h">
+    <ClInclude Include="2d\FontAtlas.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\2d\UIEventSystem.h">
+    <ClInclude Include="2d\UIEventSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\2d\UINavigationSystem.h">
+    <ClInclude Include="2d\UINavigationSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\TextComponent.h">
+    <ClInclude Include="components\TextComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\components\ButtonComponent.h">
+    <ClInclude Include="components\ButtonComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\UIInput.h">
+    <ClInclude Include="runtime\UIInput.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\AppControl.h">
+    <ClInclude Include="runtime\AppControl.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\runtime\UIEventBus.h">
+    <ClInclude Include="runtime\UIEventBus.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\Editor\UIObjectFactory.h">
+    <ClInclude Include="Editor\UIObjectFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="externals\stb\stb_truetype.h">
+    <ClInclude Include="..\externals\stb\stb_truetype.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\scene\InvokableMethod.h">
+    <ClInclude Include="scene\InvokableMethod.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\scene\ObjectRef.h">
+    <ClInclude Include="scene\ObjectRef.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\scene\UnityAction.h">
+    <ClInclude Include="scene\UnityAction.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="KujataEngine\scene\UnityActionUI.h">
+    <ClInclude Include="scene\UnityActionUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="externals\imgui\LICENSE.txt">
+    <Text Include="..\externals\imgui\LICENSE.txt">
       <Filter>imgui</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="KujataEngine\shader\Object3d.hlsli">
+    <None Include="shader\Object3d.hlsli">
       <Filter>KujataEngine\shader</Filter>
     </None>
-    <None Include="KujataEngine\shader\Particle.hlsli">
+    <None Include="shader\Particle.hlsli">
       <Filter>KujataEngine\shader</Filter>
     </None>
-    <None Include="Data\shader\PostEffect.hlsli" />
-    <None Include="Data\shader\Fog.PS.hlsl">
+    <None Include="EngineData\shader\PostEffect.hlsli" />
+    <None Include="EngineData\shader\Fog.PS.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </None>
-    <None Include="Data\shader\Fullscreen.VS.hlsl">
+    <None Include="EngineData\shader\Fullscreen.VS.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </None>
-    <None Include="Data\shader\Line.PS.hlsl">
+    <None Include="EngineData\shader\Line.PS.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </None>
-    <None Include="Data\shader\Line.VS.hlsl">
+    <None Include="EngineData\shader\Line.VS.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </None>
-    <None Include="Data\shader\Tonemap.PS.hlsl">
+    <None Include="EngineData\shader\Tonemap.PS.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </None>
-    <None Include="Data\shader\BloomUpsample.PS.hlsl">
+    <None Include="EngineData\shader\BloomUpsample.PS.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </None>
-    <None Include="Data\shader\BloomDownsample.PS.hlsl">
+    <None Include="EngineData\shader\BloomDownsample.PS.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="KujataEngine\shader\Object3d.PS.hlsl">
+    <FxCompile Include="shader\Object3d.PS.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </FxCompile>
-    <FxCompile Include="KujataEngine\shader\Object3d.VS.hlsl">
+    <FxCompile Include="shader\Object3d.VS.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </FxCompile>
-    <FxCompile Include="KujataEngine\shader\Particle.PS.hlsl">
+    <FxCompile Include="shader\Particle.PS.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </FxCompile>
-    <FxCompile Include="KujataEngine\shader\Particle.VS.hlsl">
+    <FxCompile Include="shader\Particle.VS.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </FxCompile>
   </ItemGroup>

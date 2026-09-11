@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  このゲーム固有のビルド設定。エンジン(DirectXGame/KujataEngine.vcxproj)と Game/GameModule/GameModule.vcxproj の両方が読み込む。
-  ゲームを別のエンジンのコピーへ持っていくときは、Game/ フォルダごと移せばこの設定も一緒に移る。
+  このゲーム固有のビルド設定。エンジン(KujataEngine/KujataEngine.vcxproj)と DirectXGame/GameModule/GameModule.vcxproj の両方が読み込む。
+  ゲームを別のエンジンのコピーへ持っていくときは、DirectXGame/ フォルダごと移せばこの設定も一緒に移る。
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>

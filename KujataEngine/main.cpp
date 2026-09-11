@@ -2,7 +2,7 @@
 #include <base/ProjectPath.h>
 #include <base/StringUtil.h>
 
-#include "externals/nlohmann/json.hpp"
+#include "../externals/nlohmann/json.hpp"
 
 #include <algorithm>
 #include <cassert>

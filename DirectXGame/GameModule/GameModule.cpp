@@ -96,7 +96,7 @@ private:
 extern "C" __declspec(dllexport) void RegisterGameComponents(KujataEngine::ComponentFactory& factory) {
 	// GameModuleはゲーム固有Componentだけを登録する。
 	// TransformやModelRendererなどの標準ComponentはEngine初期化時に登録される。
-	// Game/GameComponents/ に書いたComponentもここで登録する。
+	// DirectXGame/GameComponents/ に書いたComponentもここで登録する。
 	factory.RegisterComponent<MoveForwardComponent>(kGameModuleName);
 	factory.RegisterComponent<BlinkComponent>(kGameModuleName);
 }
