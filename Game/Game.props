@@ -9,6 +9,6 @@
       exe名。GameModule.dll はこのexeから関数をインポートするので、インポート表に「ビルド時のexe名」が焼き込まれる。
       **ビルド後にexeをリネームしてはいけない**(ウィンドウは出るが何も描画されない壊れ方をする)。変えるときはここを変えて両方をビルドし直す。
     -->
-    <KujataExeName>LE2B_04_オオツカ_ダイチ_BoardBorder</KujataExeName>
+    <KujataExeName>KujataEngine</KujataExeName>
   </PropertyGroup>
 </Project>

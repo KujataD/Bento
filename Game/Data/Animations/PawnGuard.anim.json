@@ -1,9 +1,0 @@
-{
-  "name": "PawnGuard",
-  "tracks": [
-    { "keys": [{"inTangent":0.0,"outTangent":0.0,"time":0.0,"value":0.0},{"inTangent":0.0,"outTangent":0.0,"time":0.1,"value":-0.6},{"inTangent":0.0,"outTangent":0.0,"time":10.0,"value":-0.6}], "path": "Shield:Transform/rotation.x" },
-    { "keys": [{"inTangent":0.0,"outTangent":0.0,"time":0.0,"value":0.0},{"inTangent":0.0,"outTangent":0.0,"time":0.1,"value":0.9},{"inTangent":0.0,"outTangent":0.0,"time":10.0,"value":0.9}], "path": "Shield:Transform/rotation.y" },
-    { "keys": [{"inTangent":0.0,"outTangent":0.0,"time":0.0,"value":0.0},{"inTangent":0.0,"outTangent":0.0,"time":0.1,"value":-0.35},{"inTangent":0.0,"outTangent":0.0,"time":10.0,"value":-0.35}], "path": "HandRight:Transform/rotation.x" }
-  ],
-  "wrapMode": "Once"
-}

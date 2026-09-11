@@ -1,9 +1,0 @@
-{
-  "name": "BishopCastCharge",
-  "tracks": [
-    { "keys": [{"inTangent":0.0,"outTangent":0.0,"time":0.0,"value":0.0},{"inTangent":0.0,"outTangent":0.0,"time":0.25,"value":-1.6},{"inTangent":0.0,"outTangent":0.0,"time":0.6,"value":-1.7},{"inTangent":0.0,"outTangent":0.0,"time":0.72,"value":1.1},{"inTangent":0.0,"outTangent":0.0,"time":0.9,"value":0.8},{"inTangent":0.0,"outTangent":0.0,"time":1.2,"value":0.0}], "path": "Weapon:Transform/rotation.x" },
-    { "keys": [{"inTangent":0.0,"outTangent":0.0,"time":0.0,"value":0.0},{"inTangent":0.0,"outTangent":0.0,"time":0.25,"value":0.9},{"inTangent":0.0,"outTangent":0.0,"time":0.6,"value":1.1},{"inTangent":0.0,"outTangent":0.0,"time":0.72,"value":-1.1},{"inTangent":0.0,"outTangent":0.0,"time":1.2,"value":0.0}], "path": "Weapon:Transform/rotation.y" },
-    { "keys": [{"inTangent":0.0,"outTangent":0.0,"time":0.0,"value":0.0},{"inTangent":0.0,"outTangent":0.0,"time":0.25,"value":0.4},{"inTangent":0.0,"outTangent":0.0,"time":0.6,"value":0.45},{"inTangent":0.0,"outTangent":0.0,"time":0.72,"value":-0.45},{"inTangent":0.0,"outTangent":0.0,"time":1.2,"value":0.0}], "path": "Transform/localRotation.y" }
-  ],
-  "wrapMode": "Once"
-}

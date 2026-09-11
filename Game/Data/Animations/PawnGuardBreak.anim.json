@@ -1,9 +1,0 @@
-{
-  "name": "PawnGuardBreak",
-  "tracks": [
-    { "keys": [{"inTangent":0.0,"outTangent":0.0,"time":0.0,"value":-0.6},{"inTangent":0.0,"outTangent":0.0,"time":0.12,"value":0.6},{"inTangent":0.0,"outTangent":0.0,"time":0.9,"value":0.4},{"inTangent":0.0,"outTangent":0.0,"time":1.4,"value":0.0}], "path": "Shield:Transform/rotation.x" },
-    { "keys": [{"inTangent":0.0,"outTangent":0.0,"time":0.0,"value":0.9},{"inTangent":0.0,"outTangent":0.0,"time":0.12,"value":2.0},{"inTangent":0.0,"outTangent":0.0,"time":0.9,"value":1.6},{"inTangent":0.0,"outTangent":0.0,"time":1.4,"value":0.0}], "path": "Shield:Transform/rotation.y" },
-    { "keys": [{"inTangent":0.0,"outTangent":0.0,"time":0.0,"value":0.0},{"inTangent":0.0,"outTangent":0.0,"time":0.12,"value":-0.35},{"inTangent":0.0,"outTangent":0.0,"time":0.9,"value":-0.25},{"inTangent":0.0,"outTangent":0.0,"time":1.4,"value":0.0}], "path": "Transform/localRotation.x" }
-  ],
-  "wrapMode": "Once"
-}

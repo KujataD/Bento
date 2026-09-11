@@ -68,16 +68,16 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(KujataEngineDir)KujataEngine;$(KujataEngineDir)externals\assimp\include;$(KujataEngineDir)externals\imgui;$(KujataEngineDir)externals\ImGuizmo-1.9\src;$(SolutionDir)..\BahamutAIMiddleware\BahamutAICore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(KujataEngineDir)KujataEngine;$(KujataEngineDir)externals\assimp\include;$(KujataEngineDir)externals\imgui;$(KujataEngineDir)externals\ImGuizmo-1.9\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <ProgramDataBaseFile>$(IntDir)$(TargetName).pdb</ProgramDataBaseFile>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\build\bin\$(Configuration);$(KujataEngineDir)externals\assimp\lib\Debug;$(SolutionDir)build\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(KujataExeName).lib;assimp-vc143-mdd.lib;BahamutAICore.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <!-- LNK4232: インポート元のexe名に非ASCIIが含まれる警告。提出名(日本語)を使うため個別に見送る。 -->
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\build\bin\$(Configuration);$(KujataEngineDir)externals\assimp\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(KujataExeName).lib;assimp-vc143-mdd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <!-- LNK4232: インポート元のexe名に非ASCIIが含まれる場合の警告。日本語のexe名を使うゲームのために見送る。 -->
       <AdditionalOptions>/ignore:4049 /ignore:4098 /ignore:4232 /ignore:4233 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -93,14 +93,14 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(KujataEngineDir)KujataEngine;$(KujataEngineDir)externals\assimp\include;$(KujataEngineDir)externals\imgui;$(KujataEngineDir)externals\ImGuizmo-1.9\src;$(SolutionDir)..\BahamutAIMiddleware\BahamutAICore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(KujataEngineDir)KujataEngine;$(KujataEngineDir)externals\assimp\include;$(KujataEngineDir)externals\imgui;$(KujataEngineDir)externals\ImGuizmo-1.9\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDataBaseFile>$(IntDir)$(TargetName).pdb</ProgramDataBaseFile>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\build\bin\$(Configuration);$(KujataEngineDir)externals\assimp\lib\Release;$(SolutionDir)build\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(KujataExeName).lib;assimp-vc143-md.lib;BahamutAICore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\build\bin\$(Configuration);$(KujataEngineDir)externals\assimp\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(KujataExeName).lib;assimp-vc143-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4049 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>

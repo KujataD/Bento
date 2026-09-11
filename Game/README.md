@@ -1,21 +1,22 @@
-# BOARD:BORDER(ボス戦アクション)
+# (ゲーム名)
 
-このリポジトリ(CG3)のゲーム。パーティで巨大なガーディアンに挑むボス戦アクション。
-課題の夏提出版はコミット `e7ce911`(エンジンとゲームの分離より前)。
+KujataEngine のテンプレートプロジェクト。新しいゲームを作ったら、このファイルをそのゲームの説明に書き換える
+(作り方はリポジトリの `.claude/ReadMe.md` の「新しいゲームを作る」)。
 
 ## 必要なもの
 
-- このリポジトリの隣に [BahamutAIMiddleware](https://github.com/KujataD/BahamutAIMiddleware) を置く(敵・味方AIのビヘイビアツリーに使う)
-  - そのため、このリポジトリの `KujataEngine.sln` には BahamutAICore プロジェクトが入っている(エンジン用リポジトリには入っていない)
+- エンジン以外に追加で必要なもの(隣に置くライブラリ等)があればここに書く
 
 ## このゲーム固有の設定の置き場所
 
 | 設定 | 場所 |
 |---|---|
-| exe 名(課題の提出名) | `Game/Game.props` の `KujataExeName` |
+| exe 名 | `Game/Game.props` の `KujataExeName` |
 | ウィンドウのタイトル・背景色 | `Game/Data/ProjectSettings/Project.json` |
-| 起動シーン | `Game/Data/ProjectSettings/StartupScene.txt`(配布物は `Tools/MakeGameBuild.ps1` が TitleScene にする) |
+| 起動シーン | `Game/Data/ProjectSettings/StartupScene.txt` |
 | タグ一覧 | `Game/Data/ProjectSettings/Tags.json` |
-| AI のビヘイビアツリー | `Game/Data/Resources/bt_set/` |
 
-背景色がほぼ黒なのは、画面奥を洞窟の闇に見せるため(空色のままだと、天井の無い通路から明るい「空」が覗いてしまう)。
+## テンプレートに最初から入っているもの
+
+- `Game/Data/Resources/white1x1.png` と `Game/Data/Resources/plane/`: エンジンの `SampleScene` が名前で読むので消さない
+- `Game/GameModule/GameModule.cpp` のサンプル Component(MoveForwardComponent / BlinkComponent): 不要になったら消してよい
