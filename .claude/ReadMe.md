@@ -16,7 +16,10 @@ DirectX 12 製の自作ゲームエンジン(Unity 風エディタ内蔵)。
 1. `KujataEngine.sln` を Visual Studio 18 で開き、**Debug | x64** でビルド(exe と GameModule は必ず同じ .sln から同時にビルドすること)
 2. 実行するとエディタが起動し、`DirectXGame/` のゲームが開く。Hierarchy でオブジェクト選択、▶ で Play / ■ で停止
    - 別のフォルダを開くときは、起動引数に `--project <フォルダ>` を付ける(例: 試作用の `Sandbox/`)
+   - エディタの `Reload DLL` を押すと、GameModule を `DirectXGame/Temp/HotReload/` へビルドし直して差し替える(ホットリロード)
 3. 遊んでもらう用の配布フォルダは、Release をビルドしてから `Tools/MakeGameBuild.ps1` で作る
+
+exe と GameModule.dll は同じ構成(Debug/Release)でビルドすること。違う構成の組み合わせは STL の ABI が食い違って落ちる。
 
 ### エディタ操作(Scene ウィンドウ)
 
@@ -70,4 +73,5 @@ git fetch engine
 4. **docs/** — 詳細資料の置き場(提出資料、今後のコードリーディングで作る図解 `docs/architecture/` 等)。
 
 1 と 2 は全ゲームのリポジトリで同じ内容に保つ(エンジン更新の取り込みで衝突させないため)。
+ReadMe はこのファイルに一本化し、ソースのフォルダには置かない(例外はゲーム固有の説明を書く 3 だけ)。
 原則: **コードや git log から分かることはドキュメントに書かない**(二重管理で腐るため)。書くのは「コードから読み取れない意図・規約・罠」だけ。
