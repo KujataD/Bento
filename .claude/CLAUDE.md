@@ -31,6 +31,7 @@
 - **Component 等の共有ヘッダ(ABI)を変更したら、必ず .sln 経由で exe と GameModule を同時に再ビルド**すること。片方だけ古いと起動時にエントリポイントエラーで落ちる。
 - Release 確認時は Rebuild 禁止(自動 Play で確認可。マウスは効くがキー注入は届かない)。
 - 生成物は `build/` と各プロジェクトの `Temp/` に集約。遊んでもらう用の配布フォルダは `Tools/MakeGameBuild.ps1`(Release をビルドしてから実行)。
+- **assimp のライブラリは git 管理外**(`DirectXGame/externals/assimp/lib/Debug/assimp-vc143-mdd.lib` と `assimp-vc143-mtd.pdb`、`lib/Release/assimp-vc143-md.lib`)。`.gitignore` の `Debug/` `Release/` 規則にかかり、Debug 用 lib は 67MB ある。clone 直後は手元の別コピーから置かないと LNK1104 / LNK4099(警告がエラー扱い)でビルドが通らない。
 
 ## ディレクトリ構成(エンジンは externals 除き約 4 万行)
 

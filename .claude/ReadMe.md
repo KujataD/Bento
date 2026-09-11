@@ -8,6 +8,7 @@ DirectX 12 製の自作ゲームエンジン(Unity 風エディタ内蔵)。
 
 - Windows 11 / Visual Studio 18(2026、ツールセット v145、x64)
 - ソリューション: `KujataEngine.sln`(exe = エンジン/エディタ、`GameModule` = ゲームロジック DLL)
+- **clone 直後は assimp のライブラリを手で置く**(git 管理外): `DirectXGame/externals/assimp/lib/Debug/` に `assimp-vc143-mdd.lib` と `assimp-vc143-mtd.pdb`、`lib/Release/` に `assimp-vc143-md.lib`
 - ゲームによっては追加で必要なもの(隣に置くライブラリ等)がある。`Game/README.md` を確認する
 
 ## ビルドと実行
