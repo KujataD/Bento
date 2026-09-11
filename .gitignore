@@ -382,3 +382,5 @@ DirectXGame/GameModule/bin/
 
 # エンジン実行時ログ
 DirectXGame/logs/
+# Claude Code の個人用権限設定(共有しない)
+.claude/settings.local.json
