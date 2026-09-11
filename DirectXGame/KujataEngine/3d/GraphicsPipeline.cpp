@@ -45,9 +45,10 @@ void GraphicsPipeline::InitializeDXC() {
 }
 
 IDxcBlob* GraphicsPipeline::CompileShader(const std::wstring& filePath, const wchar_t* profile) {
-	// 呼び出し側は "shader/xxx.hlsl" のようなData相対パスで渡してくるため、
-	// カレントディレクトリに依存せずData配下から解決する(ソリューション実行/exe単体実行の両対応)。
-	std::wstring resolvedPath = (GetProjectDataRoot() / filePath).wstring();
+	// 呼び出し側は "shader/xxx.hlsl" のようなEngineData相対パスで渡してくるため、
+	// カレントディレクトリに依存せずEngineData配下から解決する(ソリューション実行/exe単体実行の両対応)。
+	// シェーダーはエンジンの持ち物なので、どのプロジェクトを開いても同じものを使う。
+	std::wstring resolvedPath = (GetEngineDataRoot() / filePath).wstring();
 
 	// シェーダーコンパイルする旨をログに出す
 	OutputDebugStringW(std::format(L"Begin CompileShader, path: {}, profile: {}\n", resolvedPath, profile).c_str());

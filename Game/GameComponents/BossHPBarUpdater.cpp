@@ -1,6 +1,6 @@
 #include "BossHPBarUpdater.h"
 
-#include "../KujataEngine/components/ImageComponent.h"
+#include "components/ImageComponent.h"
 #include "EnemyHealth.h"
 
 using namespace KujataEngine;

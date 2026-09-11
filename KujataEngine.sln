@@ -5,7 +5,7 @@ VisualStudioVersion = 18.3.11527.330
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KujataEngine", "DirectXGame\KujataEngine.vcxproj", "{A180AA57-47D1-4C0A-B744-751E038ADA71}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameModule", "DirectXGame\GameModule\GameModule.vcxproj", "{9DAB0B5A-5070-4A27-9E45-9B45FBEB1E32}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameModule", "Game\GameModule\GameModule.vcxproj", "{9DAB0B5A-5070-4A27-9E45-9B45FBEB1E32}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A180AA57-47D1-4C0A-B744-751E038ADA71} = {A180AA57-47D1-4C0A-B744-751E038ADA71}
 		{9F8C6D80-95E6-46D2-9376-BB6706427B57} = {9F8C6D80-95E6-46D2-9376-BB6706427B57}

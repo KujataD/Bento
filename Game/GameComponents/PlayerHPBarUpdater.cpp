@@ -1,5 +1,5 @@
 #include "PlayerHPBarUpdater.h"
-#include "../KujataEngine/components/ImageComponent.h"
+#include "components/ImageComponent.h"
 #include "PartyManager.h"
 #include "PlayerHealth.h"
 

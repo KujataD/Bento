@@ -12,7 +12,7 @@
 
 namespace KujataEngine {
 void TextureManager::Initialize() {
-	defaultWhiteTextureIndex_ = LoadTexture((GetProjectDataRoot() / "Resources" / "white1x1.png").generic_string());
+	defaultWhiteTextureIndex_ = LoadTexture((GetEngineDataRoot() / "white1x1.png").generic_string());
 }
 
 TextureManager* TextureManager::GetInstance() {

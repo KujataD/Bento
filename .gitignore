@@ -378,9 +378,13 @@ build/
 DirectXGame/Temp/
 
 # HotReload用ゲームDLLのビルド出力(GameModule.vcxprojのOutDir)
-DirectXGame/GameModule/bin/
+Game/GameModule/bin/
 
 # エンジン実行時ログ
 DirectXGame/logs/
 # Claude Code の個人用権限設定(共有しない)
 .claude/settings.local.json
+
+# プロジェクト側のホットリロード一時ファイルと、git 管理しない試作プロジェクト
+Game/Temp/
+Sandbox/

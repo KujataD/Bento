@@ -6,8 +6,9 @@
 # 要点:
 #   - Release構成を配る。DebugのCRT(MSVCP140D.dll等)は**再頒布不可**で、
 #     VSの入っていないPCでは起動しない。
-#   - Data は **exeの隣**へ置く。DetectEditorProjectRoot() は上へ辿って .sln / .vcxproj を
-#     探し、見つからなければカレントへ落ちるので、配布先では <exeの隣>/Data が使われる。
+#   - Data(Game/Data)と EngineData(DirectXGame/EngineData)は **exeの隣**へ置く。
+#     配布先には KujataEngine.sln も Game/ も無いので、エンジンとプロジェクトの起点は
+#     どちらもカレント(exeの隣)になる。
 #   - StartupScene は TitleScene にする(配布物はタイトルから始まる)。
 #
 # 使い方:  powershell -ExecutionPolicy Bypass -File Tools\MakeGameBuild.ps1
@@ -24,11 +25,14 @@ $ErrorActionPreference = "Stop"
 
 $repo = Split-Path -Parent $PSScriptRoot
 $binDir = Join-Path $repo "build\bin\$Configuration"
-$moduleDll = Join-Path $repo "DirectXGame\GameModule\bin\$Configuration\GameModule.dll"
-$dataSrc = Join-Path $repo "DirectXGame\Data"
+$moduleDll = Join-Path $repo "Game\GameModule\bin\$Configuration\GameModule.dll"
+$dataSrc = Join-Path $repo "Game\Data"
+$engineDataSrc = Join-Path $repo "DirectXGame\EngineData"
 
-if (-not (Test-Path (Join-Path $binDir "KujataEngine.exe"))) {
-    throw "exe が無い: $binDir\KujataEngine.exe  先に $Configuration をビルドすること"
+# exe名は Game/Game.props の KujataExeName で決まるので、決め打ちせず bin から探す。
+$exe = Get-ChildItem $binDir -Filter *.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+if (-not $exe) {
+    throw "exe が無い: $binDir  先に $Configuration をビルドすること"
 }
 if (-not (Test-Path $moduleDll)) {
     throw "GameModule.dll が無い: $moduleDll  先に $Configuration をビルドすること"
@@ -41,7 +45,7 @@ if (Test-Path $Destination) {
 New-Item -ItemType Directory -Path $Destination | Out-Null
 
 # --- 実行ファイル一式 ---
-Copy-Item (Join-Path $binDir "KujataEngine.exe") $Destination
+Copy-Item $exe.FullName $Destination
 Copy-Item $moduleDll $Destination
 foreach ($dll in @("dxcompiler.dll", "dxil.dll")) {
     $src = Join-Path $binDir $dll
@@ -70,6 +74,10 @@ if (Test-Path $redistRoot) {
     Write-Warning "再頒布可能なCRTが見つからない。配布先にVCランタイムが必要になる"
 }
 
+# --- EngineData(シェーダーと既定テクスチャ) ---
+robocopy $engineDataSrc (Join-Path $Destination "EngineData") /E /NFL /NDL /NJH /NJS /NP | Out-Null
+if ($LASTEXITCODE -ge 8) { throw "EngineData のコピーに失敗した (robocopy=$LASTEXITCODE)" }
+
 # --- Data(作業用の産物は持って行かない) ---
 $dataDst = Join-Path $Destination "Data"
 $exclude = @("logs", "Temp")
@@ -84,4 +92,4 @@ $size = (Get-ChildItem $Destination -Recurse -File | Measure-Object -Property Le
 Write-Host ""
 Write-Host "出力: $Destination"
 Write-Host ("ファイル数: {0}  合計: {1:N1} MB" -f (Get-ChildItem $Destination -Recurse -File).Count, ($size / 1MB))
-Write-Host "起動確認: $Destination\KujataEngine.exe"
+Write-Host "起動確認: $(Join-Path $Destination $exe.Name)"

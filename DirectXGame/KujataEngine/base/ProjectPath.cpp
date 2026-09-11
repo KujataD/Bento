@@ -68,6 +68,11 @@ std::filesystem::path FindProjectArgument() {
 std::filesystem::path DetectActiveProjectRoot() {
 	std::filesystem::path requested = FindProjectArgument();
 	if (requested.empty()) {
+		std::error_code error;
+		std::filesystem::path gameDirectory = GetEngineRoot().parent_path() / "Game";
+		if (std::filesystem::is_directory(gameDirectory, error)) {
+			return NormalizeEditorPath(gameDirectory);
+		}
 		return GetEngineRoot();
 	}
 
@@ -97,6 +102,10 @@ std::filesystem::path GetEngineRoot() {
 	// 探索はカレント依存なので、ファイルダイアログ等でカレントが変わる前の起動時の結果を使い続ける。
 	static const std::filesystem::path root = DetectEngineRoot();
 	return root;
+}
+
+std::filesystem::path GetEngineDataRoot() {
+	return GetEngineRoot() / "EngineData";
 }
 
 std::filesystem::path GetActiveProjectRoot() {

@@ -342,7 +342,7 @@ Component は次の目的を持ちます。
 
 ## 標準 Component
 
-現在登録されている標準 Component は `DirectXGame/GameModule/GameModule.cpp` の `RegisterGameComponents()` で登録されています。実装ファイルは `DirectXGame/KujataEngine/components` にありますが、ビルド対象は `GameModule.vcxproj` 側です。そのため、標準 Component の実装変更も `GameModule.dll` をビルドして `Reload DLL` すれば反映されます。
+現在登録されている標準 Component は `Game/GameModule/GameModule.cpp` の `RegisterGameComponents()` で登録されています。実装ファイルは `DirectXGame/KujataEngine/components` にありますが、ビルド対象は `GameModule.vcxproj` 側です。そのため、標準 Component の実装変更も `GameModule.dll` をビルドして `Reload DLL` すれば反映されます。
 
 | Component | 役割 |
 | --- | --- |
@@ -1050,7 +1050,7 @@ extern "C" __declspec(dllexport) void DestroyGameScene(Scene* scene);
 
 ### GameModule のサンプル
 
-`DirectXGame/GameModule/GameModule.cpp` には標準 Component の登録と、DLL 側 Component のサンプルを入れています。
+`Game/GameModule/GameModule.cpp` には標準 Component の登録と、DLL 側 Component のサンプルを入れています。
 
 Scene は `GameModuleScene : SampleScene` という薄い DLL 側派生クラスで作っています。Engine 側の `SampleScene` を DLL 側で直接 `new` すると、Debug CRT のヒープ境界で delete 時にアサートする可能性があるためです。
 
@@ -1084,7 +1084,7 @@ Scene は `GameModuleScene : SampleScene` という薄い DLL 側派生クラス
 
 ### 1. ヘッダを作る
 
-`DirectXGame/GameModule/MoveForwardComponent.h`
+`Game/GameModule/MoveForwardComponent.h`
 
 ```cpp
 #pragma once
@@ -1111,7 +1111,7 @@ private:
 
 ### 2. cpp を作る
 
-`DirectXGame/GameModule/MoveForwardComponent.cpp`
+`Game/GameModule/MoveForwardComponent.cpp`
 
 ```cpp
 #include "MoveForwardComponent.h"
@@ -1157,7 +1157,7 @@ void MoveForwardComponent::ReadJson(const nlohmann::json& json) {
 
 ### 3. Factory に登録する
 
-`DirectXGame/GameModule/GameModule.cpp` に include と登録を追加します。
+`Game/GameModule/GameModule.cpp` に include と登録を追加します。
 
 ```cpp
 #include "MoveForwardComponent.h"
@@ -1227,7 +1227,7 @@ Camera* MyScene::GetEditorCamera() {
 
 実際の `SampleScene` では、Edit 用の DebugCamera、Play 用の Main Camera、Light の適用、ModelRenderer への Camera 再設定なども行っています。新しい Scene を作る場合は、まず `SampleScene` を参考にするのが一番早いです。
 
-作成した Scene を使うには、`DirectXGame/GameModule/GameModule.cpp` の `CreateGameScene()` で返す Scene を変更します。
+作成した Scene を使うには、`Game/GameModule/GameModule.cpp` の `CreateGameScene()` で返す Scene を変更します。
 
 ```cpp
 extern "C" __declspec(dllexport) KujataEngine::Scene* CreateGameScene() {
@@ -1277,8 +1277,8 @@ extern "C" __declspec(dllexport) KujataEngine::Scene* CreateGameScene() {
 | `runtime/AnimationRecordingState.h/.cpp` | アニメーション録画モードの状態(録画フラグ、Component 文脈、変更キュー)を Engine / GameModule 双方から参照できるよう保持します。 |
 | `runtime/GameModule.h` | Game DLL が export する関数ポインタと Load 結果を定義します。 |
 | `runtime/GameModuleLoader.h/.cpp` | DLL のコピー、`LoadLibrary`、`GetProcAddress`、`FreeLibrary` を担当します。 |
-| `DirectXGame/GameModule/GameModule.cpp` | Hot Reload 用 Game DLL の入口です。標準 Component 登録、追加 Component 登録、Scene 作成 export を持ちます。 |
-| `DirectXGame/GameModule/GameModule.vcxproj` | `GameModule.dll` を `DirectXGame/GameModule/bin/<構成>` へ出力するプロジェクトです。標準 Component と `SampleScene.cpp` もここでビルドします。 |
+| `Game/GameModule/GameModule.cpp` | Hot Reload 用 Game DLL の入口です。標準 Component 登録、追加 Component 登録、Scene 作成 export を持ちます。 |
+| `Game/GameModule/GameModule.vcxproj` | `GameModule.dll` を `Game/GameModule/bin/<構成>` へ出力するプロジェクトです。標準 Component と `SampleScene.cpp` もここでビルドします。 |
 
 ### Scene
 
@@ -1452,13 +1452,13 @@ Project root の検出に失敗している可能性があります。`--project
 
 ### Reload DLL が失敗する
 
-`DirectXGame/GameModule/bin/<構成>/GameModule.dll` が存在するか確認してください。存在しない場合は `GameModule` プロジェクトを exe と同じ構成(`Debug|x64` または `Release|x64`)でビルドします。Play 中の Reload は拒否されるため、Stop して Edit に戻ってから実行してください。
+`Game/GameModule/bin/<構成>/GameModule.dll` が存在するか確認してください。存在しない場合は `GameModule` プロジェクトを exe と同じ構成(`Debug|x64` または `Release|x64`)でビルドします。Play 中の Reload は拒否されるため、Stop して Edit に戻ってから実行してください。
 
 Export 関数名が変わっている場合も読み込みに失敗します。`RegisterGameComponents`、`UnregisterGameComponents`、`CreateGameScene`、`DestroyGameScene` の 4 つが `extern "C"` で export されているか確認してください。
 
 ### Add Component に GameModule 側 Component が出ない
 
-起動時の Console に `[GameModule] Loaded` と `[GameModule] Register game components.` が出ているか確認してください。出ていない場合は `DirectXGame/GameModule/bin/<構成>/GameModule.dll` が存在しない、または export 関数の取得に失敗している可能性があります。
+起動時の Console に `[GameModule] Loaded` と `[GameModule] Register game components.` が出ているか確認してください。出ていない場合は `Game/GameModule/bin/<構成>/GameModule.dll` が存在しない、または export 関数の取得に失敗している可能性があります。
 
 ## 今後の拡張予定の入口
 

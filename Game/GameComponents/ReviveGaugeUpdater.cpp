@@ -1,6 +1,6 @@
 #include "ReviveGaugeUpdater.h"
 
-#include "../KujataEngine/components/ImageComponent.h"
+#include "components/ImageComponent.h"
 #include "PlayerHealth.h"
 
 #include <Editor/PrefabAsset.h>

@@ -44,23 +44,21 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <!-- exe名などゲーム固有の設定は Game/Game.props が持つ。無ければ既定の名前でビルドする。 -->
+  <Import Project="$(MSBuildThisFileDirectory)..\Game\Game.props" Condition="exists('$(MSBuildThisFileDirectory)..\Game\Game.props')" />
+  <PropertyGroup>
+    <KujataExeName Condition="'$(KujataExeName)'==''">KujataEngine</KujataExeName>
+  </PropertyGroup>
   <!-- 生成物はすべてリポジトリ直下の build/ に集約する(bin=実行ファイル, obj=中間ファイル)。 -->
-  <!--
-    TargetName はゲーム名に合わせる。**exeを後からリネームしてはいけない。**
-    GameModule.dll はこのexeから関数をインポートする(エンジンをextから公開する構成)ので、
-    インポート表に「ビルド時のexe名」が焼き込まれる。名前だけ変えるとDLLが読めなくなり、
-    ウィンドウは出るが**何も描画されない**(背景色のまま)という分かりにくい壊れ方をする。
-    名前を変えるときは GameModule 側の AdditionalDependencies(*.lib)も必ず揃えること。
-  -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)..\build\bin\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)..\build\obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <TargetName>LE2B_04_オオツカ_ダイチ_BoardBorder</TargetName>
+    <TargetName>$(KujataExeName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)..\build\bin\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)..\build\obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <TargetName>LE2B_04_オオツカ_ダイチ_BoardBorder</TargetName>
+    <TargetName>$(KujataExeName)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -72,7 +70,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)externals\DirectXTex;$(ProjectDir)KujataEngine;$(ProjectDir)externals\assimp\include;$(ProjectDir)externals\imgui;$(ProjectDir)externals\ImGuizmo-1.9\src;$(SolutionDir)..\BahamutAIMiddleware\BahamutAICore\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)externals\DirectXTex;$(ProjectDir)KujataEngine;$(ProjectDir)externals\assimp\include;$(ProjectDir)externals\imgui;$(ProjectDir)externals\ImGuizmo-1.9\src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -106,7 +104,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <!-- C4251: DLLエクスポートクラスのSTLメンバ警告。engine/GameModuleは同一ツールチェーン共有のため無害。 -->
       <!-- C4275: 非エクスポートの純粋仮想インターフェース(IRaycastTarget等)を基底に持つ警告。データを持たないため無害。 -->
       <DisableSpecificWarnings>4251;4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>$(ProjectDir)KujataEngine;$(ProjectDir)externals\assimp\include;$(ProjectDir)externals\imgui;$(ProjectDir)externals\ImGuizmo-1.9\src;$(SolutionDir)..\BahamutAIMiddleware\BahamutAICore\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)KujataEngine;$(ProjectDir)externals\assimp\include;$(ProjectDir)externals\imgui;$(ProjectDir)externals\ImGuizmo-1.9\src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -117,9 +115,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <PostBuildEvent>
       <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
 
-copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"
-
-xcopy /y /e /i /q "$(ProjectDir)Data" "$(TargetDir)Data\"</Command>
+copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -17,8 +17,14 @@ KUJATA_API std::filesystem::path NormalizeEditorPath(const std::filesystem::path
 KUJATA_API std::filesystem::path GetEngineRoot();
 
 /// <summary>
-/// 開いているプロジェクトのフォルダを返す。起動引数 `--project <フォルダ>` で指定し、
-/// 未指定ならエンジンのフォルダと同じ。GameModule / Data / Temp はすべてここが基準。
+/// エンジンが自前で持つデータ(シェーダー、既定テクスチャ)のフォルダを返す(GetEngineRoot()直下の EngineData)。
+/// </summary>
+KUJATA_API std::filesystem::path GetEngineDataRoot();
+
+/// <summary>
+/// 開いているプロジェクトのフォルダを返す。起動引数 `--project <フォルダ>` で指定する。
+/// 未指定なら、エンジンのフォルダの隣の `Game/`、それも無ければ(配布先など)エンジンのフォルダ。
+/// GameModule / Data / Temp はすべてここが基準。
 /// </summary>
 KUJATA_API std::filesystem::path GetActiveProjectRoot();
 

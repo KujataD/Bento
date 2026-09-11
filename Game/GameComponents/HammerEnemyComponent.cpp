@@ -1,6 +1,6 @@
 ﻿#include "HammerEnemyComponent.h"
 
-#include "../KujataEngine/components/AnimatorComponent.h"
+#include "components/AnimatorComponent.h"
 #include "EnemyHealth.h"
 #include "HateTable.h"
 #include "PlayerHealth.h"

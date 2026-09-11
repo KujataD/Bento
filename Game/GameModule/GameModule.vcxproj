@@ -44,6 +44,11 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <!-- exe名などゲーム固有の設定。エンジンは Game/ の隣の DirectXGame/ にある前提。 -->
+  <Import Project="$(MSBuildThisFileDirectory)..\Game.props" />
+  <PropertyGroup>
+    <KujataEngineDir>$(MSBuildThisFileDirectory)..\..\DirectXGame\</KujataEngineDir>
+  </PropertyGroup>
   <!-- 出力先はこのプロジェクト直下の bin/。EditorApplication::GetGameModuleDllPath がここから DLL を読むため、変更時は必ず両方を揃えること。 -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)bin\$(Configuration)\</OutDir>
@@ -63,22 +68,18 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\KujataEngine;$(ProjectDir)..\externals\assimp\include;$(ProjectDir)..\externals\imgui;$(ProjectDir)..\externals\ImGuizmo-1.9\src;$(SolutionDir)..\BahamutAIMiddleware\BahamutAICore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(KujataEngineDir)KujataEngine;$(KujataEngineDir)externals\assimp\include;$(KujataEngineDir)externals\imgui;$(KujataEngineDir)externals\ImGuizmo-1.9\src;$(SolutionDir)..\BahamutAIMiddleware\BahamutAICore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <ProgramDataBaseFile>$(IntDir)$(TargetName).pdb</ProgramDataBaseFile>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\build\bin\$(Configuration);$(ProjectDir)..\externals\assimp\lib\Debug;$(SolutionDir)build\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>LE2B_04_オオツカ_ダイチ_BoardBorder.lib;assimp-vc143-mdd.lib;BahamutAICore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\build\bin\$(Configuration);$(KujataEngineDir)externals\assimp\lib\Debug;$(SolutionDir)build\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(KujataExeName).lib;assimp-vc143-mdd.lib;BahamutAICore.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <!-- LNK4232: インポート元のexe名に非ASCIIが含まれる警告。提出名(日本語)を使うため個別に見送る。 -->
       <AdditionalOptions>/ignore:4049 /ignore:4098 /ignore:4232 /ignore:4233 %(AdditionalOptions)</AdditionalOptions>
     </Link>
-    <PostBuildEvent>
-      <!-- エンジンのexe(BoardBorder.exe)と同じフォルダにもDLLを複製する。zip配布時にexe隣を探すEditorApplication::GetGameModuleDllPathのフォールバックに対応するため。 -->
-      <Command>xcopy /y "$(TargetPath)" "$(ProjectDir)..\..\build\bin\$(Configuration)\"</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -92,20 +93,16 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\KujataEngine;$(ProjectDir)..\externals\assimp\include;$(ProjectDir)..\externals\imgui;$(ProjectDir)..\externals\ImGuizmo-1.9\src;$(SolutionDir)..\BahamutAIMiddleware\BahamutAICore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(KujataEngineDir)KujataEngine;$(KujataEngineDir)externals\assimp\include;$(KujataEngineDir)externals\imgui;$(KujataEngineDir)externals\ImGuizmo-1.9\src;$(SolutionDir)..\BahamutAIMiddleware\BahamutAICore\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDataBaseFile>$(IntDir)$(TargetName).pdb</ProgramDataBaseFile>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\build\bin\$(Configuration);$(ProjectDir)..\externals\assimp\lib\Release;$(SolutionDir)build\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>LE2B_04_オオツカ_ダイチ_BoardBorder.lib;assimp-vc143-md.lib;BahamutAICore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\build\bin\$(Configuration);$(KujataEngineDir)externals\assimp\lib\Release;$(SolutionDir)build\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(KujataExeName).lib;assimp-vc143-md.lib;BahamutAICore.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4049 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
     </Link>
-    <PostBuildEvent>
-      <!-- エンジンのexe(BoardBorder.exe)と同じフォルダにもDLLを複製する。zip配布時にexe隣を探すEditorApplication::GetGameModuleDllPathのフォールバックに対応するため。 -->
-      <Command>xcopy /y "$(TargetPath)" "$(ProjectDir)..\..\build\bin\$(Configuration)\"</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\GameComponents\*.cpp" />

@@ -1,5 +1,5 @@
 #include "PlayerStaminaBarUpdater.h"
-#include "../KujataEngine/components/ImageComponent.h"
+#include "components/ImageComponent.h"
 #include "PartyManager.h"
 #include "StaminaComponent.h"
 

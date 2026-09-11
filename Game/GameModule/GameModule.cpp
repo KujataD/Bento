@@ -1,5 +1,5 @@
-#include "../KujataEngine/KujataEngine.h"
-#include "../KujataEngine/scene/SampleScene.h"
+#include "KujataEngine.h"
+#include "scene/SampleScene.h"
 #include "../GameComponents/ActionFeedback.h"
 #include "../GameComponents/AllyAIBrain.h"
 #include "../GameComponents/BossIntroCutscene.h"

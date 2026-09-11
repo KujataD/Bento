@@ -1044,14 +1044,8 @@ std::filesystem::path EditorApplication::GetGameModuleProjectPath() const {
 }
 
 std::filesystem::path EditorApplication::GetGameModuleDllPath() const {
-	// 配布パッケージ(exeと同じフォルダにGameModule.dllをコピー済み)を最優先で探す。
-	// これが無い場合のみ、開発ツリー(.sln探索)側のHotReload用配置にフォールバックする。
-	std::filesystem::path besideExe = GetExecutableDirectory() / "GameModule.dll";
-	std::error_code error;
-	if (std::filesystem::exists(besideExe, error)) {
-		return besideExe;
-	}
-
+	// 開いているプロジェクトのビルド出力を最優先で探す。exeの隣を先に見ると、
+	// 別プロジェクトを開いても「最後にexeの隣へ置かれたDLL」が黙って読まれてしまう。
 	// GameModule.dllはビルド構成(Debug/Release)ごとに別フォルダへ出力される。
 	// exeと同じ構成のDLLを読み込まないとstd::string等のABIが食い違いクラッシュするため、
 	// exe自身の構成に対応するサブフォルダを選ぶ(GameModule.vcxprojのOutDirと一致させること)。
@@ -1060,8 +1054,14 @@ std::filesystem::path EditorApplication::GetGameModuleDllPath() const {
 #else
 	const char* configuration = "Release";
 #endif
-	std::filesystem::path root = GetActiveProjectRoot();
-	return root / "GameModule" / "bin" / configuration / "GameModule.dll";
+	std::filesystem::path projectDll = GetActiveProjectRoot() / "GameModule" / "bin" / configuration / "GameModule.dll";
+	std::error_code error;
+	if (std::filesystem::exists(projectDll, error)) {
+		return projectDll;
+	}
+
+	// 配布パッケージにはプロジェクトのビルド出力が無く、exeと同じフォルダにGameModule.dllを置く。
+	return GetExecutableDirectory() / "GameModule.dll";
 }
 
 std::filesystem::path EditorApplication::GetGameModuleHotReloadBuildRoot() const {

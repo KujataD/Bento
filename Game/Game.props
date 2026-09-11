@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  このゲーム固有のビルド設定。エンジン(DirectXGame/KujataEngine.vcxproj)と Game/GameModule/GameModule.vcxproj の両方が読み込む。
+  ゲームを別のエンジンのコピーへ持っていくときは、Game/ フォルダごと移せばこの設定も一緒に移る。
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <!--
+      exe名。GameModule.dll はこのexeから関数をインポートするので、インポート表に「ビルド時のexe名」が焼き込まれる。
+      **ビルド後にexeをリネームしてはいけない**(ウィンドウは出るが何も描画されない壊れ方をする)。変えるときはここを変えて両方をビルドし直す。
+    -->
+    <KujataExeName>LE2B_04_オオツカ_ダイチ_BoardBorder</KujataExeName>
+  </PropertyGroup>
+</Project>
