@@ -177,8 +177,8 @@ void ImGuiManager::ExportCurrentSceneJson() {
 		return;
 	}
 
-	// Project Windowの表示ルートはDirectXGameだが、シーンJSONの読み書きはData配下が基準。
-	// GetProjectRoot()を渡すとDirectXGame/SceneJsonへ書き出してしまい、Importerが読まない場所に保存される。
+	// Project Windowの表示ルートはプロジェクトのフォルダだが、シーンJSONの読み書きはData配下が基準。
+	// プロジェクトのフォルダを渡すと <プロジェクト>/SceneJson へ書き出してしまい、Importerが読まない場所に保存される。
 	SceneJsonExporter::ExportResult exportResult = SceneJsonExporter::ExportScene(*scene, GetProjectDataRoot());
 	if (exportResult.succeeded) {
 		AddConsoleLog("[Editor] Scene JSON exported: " + exportResult.outputDirectory.string());
@@ -199,7 +199,7 @@ void ImGuiManager::DrawEditor() {
 	// Windowメニューの表示フラグに応じて各ウィンドウを描画する。
 	// 各ウィンドウのBeginにp_openを渡すことで、閉じるボタン[x]でもフラグが下りる。
 	if (windowVisibility_.scene) {
-		sceneView_.Draw(projectWindow_.GetProjectRoot(), &windowVisibility_.scene);
+		sceneView_.Draw(&windowVisibility_.scene);
 	} else {
 		// 非表示のビューは描画パスをスキップさせる。
 		SetSceneViewVisible(false);

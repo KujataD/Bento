@@ -893,7 +893,7 @@ bool EditorApplication::BuildGameModuleForHotReload(std::filesystem::path& outDl
 		return false;
 	}
 
-	std::filesystem::path solutionDirectory = DetectEditorProjectRoot().parent_path();
+	std::filesystem::path solutionDirectory = GetEngineRoot().parent_path();
 	std::wstring solutionDirectoryText = ToMSBuildDirectoryProperty(solutionDirectory);
 	if (solutionDirectoryText.empty()) {
 		AddConsoleLog("[HotReload] Solution directory was not found.");
@@ -1040,7 +1040,7 @@ void EditorApplication::UnregisterAndUnloadGameModule() {
 }
 
 std::filesystem::path EditorApplication::GetGameModuleProjectPath() const {
-	return DetectEditorProjectRoot() / "GameModule" / "GameModule.vcxproj";
+	return GetActiveProjectRoot() / "GameModule" / "GameModule.vcxproj";
 }
 
 std::filesystem::path EditorApplication::GetGameModuleDllPath() const {
@@ -1060,7 +1060,7 @@ std::filesystem::path EditorApplication::GetGameModuleDllPath() const {
 #else
 	const char* configuration = "Release";
 #endif
-	std::filesystem::path root = DetectEditorProjectRoot();
+	std::filesystem::path root = GetActiveProjectRoot();
 	return root / "GameModule" / "bin" / configuration / "GameModule.dll";
 }
 
@@ -1070,7 +1070,7 @@ std::filesystem::path EditorApplication::GetGameModuleHotReloadBuildRoot() const
 
 std::filesystem::path EditorApplication::GetGameModuleCopyDirectory() const {
 #ifdef USE_IMGUI
-	return DetectEditorProjectRoot() / "Temp" / "HotReload";
+	return GetActiveProjectRoot() / "Temp" / "HotReload";
 #else
 	// エディタUI無し(ゲーム単体)ビルドではHotReloadしないため、コピー先を持たない。
 	// GameModuleLoaderは空のcopyDirectoryならDLLを直接読み込み、Tempフォルダを作らない。

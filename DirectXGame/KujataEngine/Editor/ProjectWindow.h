@@ -26,7 +26,6 @@ public:
 	void Draw(bool* pOpen = nullptr);
 	void RenderModelPreviews();
 	void Refresh();
-	const std::filesystem::path& GetProjectRoot();
 
 private:
 	struct ProjectItem {

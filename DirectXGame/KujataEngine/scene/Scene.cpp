@@ -9,6 +9,7 @@
 #include "../2d/UICanvasRenderer.h"
 #include "../base/DirectXCommon.h"
 #include "../base/FrameProfiler.h"
+#include "../base/ProjectPath.h"
 #include "../base/Time.h"
 #include "../input/Input.h"
 #include "../runtime/UIEventBus.h"
@@ -38,7 +39,6 @@ namespace KujataEngine {
 namespace {
 
 constexpr float kEditorBillboardScale = 0.45f;
-constexpr const char* kEditorBillboardTextureDirectory = "KujataEngine/resources/images/";
 constexpr int32_t kColliderSphereSubdivision = 12;
 constexpr float kColliderDebugPi = 3.14159265358979323846f;
 constexpr Vector4 kColliderDebugColor = {0.1f, 1.0f, 0.35f, 1.0f};
@@ -714,7 +714,7 @@ Model* GetOrCreateEditorBillboardModel(const std::string& iconName) {
 	}
 
 	// Editor用アイコンも通常の3Dモデルと同じTexture/Model経路で扱い、GameWindow内の実体あるPlaneとして描画する。
-	std::string texturePath = std::string(kEditorBillboardTextureDirectory) + iconName;
+	std::string texturePath = (GetEditorIconDirectory() / iconName).string();
 	std::unique_ptr<Model> model(Model::CreatePlane(texturePath, ShaderModel::kNone));
 	Model* rawModel = model.get();
 	cache.models.emplace(iconName, std::move(model));

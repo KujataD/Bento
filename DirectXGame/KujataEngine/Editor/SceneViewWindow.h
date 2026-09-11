@@ -10,8 +10,7 @@ namespace KujataEngine {
 // Gameウィンドウ（RenderTarget表示 + Transformギズモ + オブジェクト選択）を描画する。
 class SceneViewWindow {
 public:
-	// projectRoot はギズモアイコンの読み込み元（ImGuiManagerが保持するProjectRootを渡す）。
-	void Draw(const std::filesystem::path& projectRoot, bool* pOpen = nullptr);
+	void Draw(bool* pOpen = nullptr);
 
 private:
 	enum class TransformGizmoOperation {
@@ -34,8 +33,8 @@ private:
 		ResizeL,
 	};
 
-	void LoadGizmoIcons(const std::filesystem::path& projectRoot);
-	void DrawGizmoToolbar(const std::filesystem::path& projectRoot);
+	void LoadGizmoIcons();
+	void DrawGizmoToolbar();
 	bool DrawGizmoModeButton(const char* id, const char* fallbackLabel, uint32_t textureIndex, TransformGizmoOperation operation, const char* tooltip);
 	void DrawTransformGizmo(const ImVec2& imagePosition, const ImVec2& imageSize);
 	void HandleGameWindowObjectSelection(const ImVec2& imagePosition, const ImVec2& imageSize);

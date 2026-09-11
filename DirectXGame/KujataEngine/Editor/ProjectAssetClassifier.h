@@ -36,10 +36,10 @@ struct ProjectItemViewInfo {
 /// </summary>
 class ProjectAssetClassifier {
 public:
-	explicit ProjectAssetClassifier(const std::filesystem::path& projectRoot);
+	explicit ProjectAssetClassifier(const std::filesystem::path& iconDirectory);
 
 	ProjectItemViewInfo Classify(const std::filesystem::path& path) const;
-	
+
 	bool IsPrefabFile(const std::filesystem::path& path) const;
 
 	bool IsMaterialFile(const std::filesystem::path& path) const;
@@ -50,7 +50,7 @@ public:
 	/// モデルプレビュー対象かどうかを拡張子で判定する。
 	/// </summary>
 	bool IsModelFile(const std::filesystem::path& path) const;
-	
+
 	bool IsAudioFile(const std::filesystem::path& path) const;
 
 private:
@@ -60,8 +60,8 @@ private:
 	std::filesystem::path GetIconPath(ProjectItemType type) const;
 
 private:
-	// アイコンパスをProjectDir基準で作るため保持する。
-	std::filesystem::path projectRoot_;
+	// 固定アイコン画像のフォルダ(エンジン側の持ち物)。
+	std::filesystem::path iconDirectory_;
 };
 
 } // namespace KujataEngine

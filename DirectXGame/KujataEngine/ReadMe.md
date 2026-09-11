@@ -591,7 +591,7 @@ GameObject 側の JSON は、名前、Active、Component 一覧を持ちます�
 currentScene_ = api.CreateScene();
 if (currentScene_) {
 	currentScene_->Initialize();
-	SceneJsonImporter::ImportScene(*currentScene_, DetectEditorProjectRoot());
+	SceneJsonImporter::ImportScene(*currentScene_, GetProjectDataRoot());
 }
 ```
 
@@ -930,7 +930,7 @@ GameObject に追加し、Inspector で以下を設定します。Canvas も Rec
 
 `ProjectWindow` は Unity の Project Window に近いファイル閲覧 UI です。
 
-Project root は `EditorProjectPath::DetectEditorProjectRoot()` で検出します。通常は `DirectXGame` が root になります。
+Project root は `GetActiveProjectRoot()`(`base/ProjectPath.h`)で決まります。起動引数 `--project <フォルダ>` で指定し、未指定ならエンジンのフォルダ(`DirectXGame`)が root になります。
 
 表示対象は ProjectDir 配下に制限されます。ProjectDir 外へ移動しないようにガードしています。
 
@@ -1444,7 +1444,7 @@ KujataEngine のコメントは UTF-8 として扱います。新しくコメン
 
 ### Project Window にファイルが出ない
 
-Project root の検出に失敗している可能性があります。`EditorProjectPath::DetectEditorProjectRoot()` は、`KujataEngine.vcxproj`、`DirectXGame/KujataEngine.vcxproj`、`KujataEngine.sln` を手がかりに ProjectDir を探します。
+Project root の検出に失敗している可能性があります。`--project` を指定していなければ、`GetEngineRoot()` が起動時カレントから `KujataEngine.vcxproj`、`DirectXGame/KujataEngine.vcxproj`、`KujataEngine.sln` を手がかりにエンジンのフォルダを探し、それが root になります。
 
 ### Game Window のクリック選択が効かない
 

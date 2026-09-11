@@ -5,6 +5,7 @@
 #include "../3d/Camera.h"
 #include "../3d/WorldTransform.h"
 #include "../base/DirectXCommon.h"
+#include "../base/ProjectPath.h"
 #include "../base/TextureManager.h"
 #include "../components/CanvasComponent.h"
 #include "../components/RectTransformComponent.h"
@@ -77,13 +78,13 @@ float SnapToGuides(float value, const std::vector<float>& guides, float threshol
 
 } // namespace
 
-void SceneViewWindow::LoadGizmoIcons(const std::filesystem::path& projectRoot) {
+void SceneViewWindow::LoadGizmoIcons() {
 #ifdef USE_IMGUI
 	if (gizmoIconsLoaded_) {
 		return;
 	}
 
-	std::filesystem::path imageDirectory = projectRoot / "KujataEngine" / "resources" / "images";
+	std::filesystem::path imageDirectory = GetEditorIconDirectory();
 	TextureManager* textureManager = TextureManager::GetInstance();
 
 	textureManager->TryLoadTexture((imageDirectory / "icon_guizmo_translate.png").string(), gizmoTranslateIconIndex_);
@@ -91,8 +92,6 @@ void SceneViewWindow::LoadGizmoIcons(const std::filesystem::path& projectRoot) {
 	textureManager->TryLoadTexture((imageDirectory / "icon_guizmo_scale.png").string(), gizmoScaleIconIndex_);
 
 	gizmoIconsLoaded_ = true;
-#else
-	(void)projectRoot;
 #endif // USE_IMGUI
 }
 
@@ -133,9 +132,9 @@ bool SceneViewWindow::DrawGizmoModeButton(const char* id, const char* fallbackLa
 	return false;
 }
 
-void SceneViewWindow::DrawGizmoToolbar(const std::filesystem::path& projectRoot) {
+void SceneViewWindow::DrawGizmoToolbar() {
 #ifdef USE_IMGUI
-	LoadGizmoIcons(projectRoot);
+	LoadGizmoIcons();
 
 	DrawGizmoModeButton("##GizmoTranslate", "T", gizmoTranslateIconIndex_, TransformGizmoOperation::Translate, "Translate");
 	ImGui::SameLine();
@@ -195,8 +194,6 @@ void SceneViewWindow::DrawGizmoToolbar(const std::filesystem::path& projectRoot)
 			ImGui::SetTooltip("UI Edit Mode: drag to move/resize UI, snaps to guides (PowerPoint-like)");
 		}
 	}
-#else
-	(void)projectRoot;
 #endif // USE_IMGUI
 }
 
@@ -348,7 +345,7 @@ void SceneViewWindow::HandleGameWindowObjectSelection(const ImVec2& imagePositio
 #endif // USE_IMGUI
 }
 
-void SceneViewWindow::Draw(const std::filesystem::path& projectRoot, bool* pOpen) {
+void SceneViewWindow::Draw(bool* pOpen) {
 #ifdef USE_IMGUI
 	// Begin の戻り値で可視性(タブ非アクティブ/折り畳み時はfalse)を判定し、非表示ならパスをスキップさせる。
 	bool visible = ImGui::Begin("Scene", pOpen);
@@ -366,7 +363,7 @@ void SceneViewWindow::Draw(const std::filesystem::path& projectRoot, bool* pOpen
 		return;
 	}
 
-	DrawGizmoToolbar(projectRoot);
+	DrawGizmoToolbar();
 	ImGui::Separator();
 
 	// DockされたGameウィンドウの内側サイズを取得する。タブや枠の分を除いた描画可能領域。
@@ -443,7 +440,6 @@ void SceneViewWindow::Draw(const std::filesystem::path& projectRoot, bool* pOpen
 
 	ImGui::End();
 #else
-	(void)projectRoot;
 	(void)pOpen;
 #endif // USE_IMGUI
 }

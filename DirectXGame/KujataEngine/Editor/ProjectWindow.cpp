@@ -36,8 +36,7 @@ constexpr const char* kRenameMaterialPopupName = "Rename Material";
 } // namespace
 
 void ProjectWindow::Initialize() {
-	// Project Windowの基準になるディレクトリを決める。
-	// ここでは実行時カレントから上方向へ探索し、KujataEngine.vcxprojがあるDirectXGameをProjectDirとして扱う。
+	// Project Windowの基準は開いているプロジェクトのフォルダ(起動引数 --project。未指定ならエンジンのフォルダ)。
 	projectRoot_ = DetectProjectRoot();
 	// アセットの実体(Resources/Materials/Prefabs等)はDataフォルダ配下にまとまっているため、
 	// AssetDatabaseの基準はProject Windowの表示ルートとは別にDataフォルダへ向ける。
@@ -45,7 +44,7 @@ void ProjectWindow::Initialize() {
 	// 起動時はProjectDir直下を表示する。
 	currentDirectory_ = projectRoot_;
 	// ファイル種別の判定はProjectAssetClassifierに寄せ、UI描画側へ拡張子判定を散らさない。
-	classifier_ = std::make_unique<ProjectAssetClassifier>(projectRoot_);
+	classifier_ = std::make_unique<ProjectAssetClassifier>(GetEditorIconDirectory());
 	initialized_ = true;
 	// 初期表示用にProjectDir直下をスキャンする。
 	Refresh();
@@ -103,13 +102,8 @@ void ProjectWindow::Draw(bool* pOpen) {
 	ImGui::End();
 }
 
-const std::filesystem::path& ProjectWindow::GetProjectRoot() {
-	EnsureInitialized();
-	return projectRoot_;
-}
-
 std::filesystem::path ProjectWindow::DetectProjectRoot() const {
-	return DetectEditorProjectRoot();
+	return GetActiveProjectRoot();
 }
 
 std::filesystem::path ProjectWindow::NormalizePath(const std::filesystem::path& path) const {
@@ -603,7 +597,7 @@ bool ProjectWindow::TryResolveTexture(ProjectItem& item) {
 	if (item.viewInfo.usePreview) {
 		item.viewInfo.usePreview = false;
 		item.viewInfo.type = ProjectItemType::OtherFile;
-		item.viewInfo.iconPath = projectRoot_ / "KujataEngine" / "resources" / "images" / "icon_file.png";
+		item.viewInfo.iconPath = GetEditorIconDirectory() / "icon_file.png";
 		return TryResolveTexture(item);
 	}
 
@@ -616,7 +610,7 @@ bool ProjectWindow::TryResolveModelPreview(ProjectItem& item) {
 		// モデル読み込みに失敗した場合もProject Window全体は止めず、通常ファイルアイコンへ戻す。
 		item.viewInfo.useModelPreview = false;
 		item.viewInfo.type = ProjectItemType::OtherFile;
-		item.viewInfo.iconPath = projectRoot_ / "KujataEngine" / "resources" / "images" / "icon_file.png";
+		item.viewInfo.iconPath = GetEditorIconDirectory() / "icon_file.png";
 		item.hasTexture = false;
 		return TryResolveTexture(item);
 	}

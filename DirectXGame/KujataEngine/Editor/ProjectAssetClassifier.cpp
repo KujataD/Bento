@@ -6,7 +6,7 @@
 
 namespace KujataEngine {
 
-ProjectAssetClassifier::ProjectAssetClassifier(const std::filesystem::path& projectRoot) : projectRoot_(projectRoot) {}
+ProjectAssetClassifier::ProjectAssetClassifier(const std::filesystem::path& iconDirectory) : iconDirectory_(iconDirectory) {}
 
 ProjectItemViewInfo ProjectAssetClassifier::Classify(const std::filesystem::path& path) const {
 	ProjectItemViewInfo viewInfo{};
@@ -144,26 +144,23 @@ bool ProjectAssetClassifier::IsFolderEmpty(const std::filesystem::path& path) co
 }
 
 std::filesystem::path ProjectAssetClassifier::GetIconPath(ProjectItemType type) const {
-	// 指定アイコンはProjectDir配下のKujataEngine/resources/imagesに置く。
-	std::filesystem::path iconDirectory = projectRoot_ / "KujataEngine" / "resources" / "images";
-
 	if (type == ProjectItemType::FolderFilled) {
-		return iconDirectory / "icon_folder_fill.png";
+		return iconDirectory_ / "icon_folder_fill.png";
 	}
 	if (type == ProjectItemType::FolderEmpty) {
-		return iconDirectory / "icon_folder_empty.png";
+		return iconDirectory_ / "icon_folder_empty.png";
 	}
 	if (type == ProjectItemType::AudioFile) {
-		return iconDirectory / "icon_file_audio.png";
+		return iconDirectory_ / "icon_file_audio.png";
 	}
 	if (type == ProjectItemType::PrefabFile) {
-		return iconDirectory / "icon_prefab.png";
+		return iconDirectory_ / "icon_prefab.png";
 	}
 	if (type == ProjectItemType::MaterialFile) {
-		return iconDirectory / "icon_file.png";
+		return iconDirectory_ / "icon_file.png";
 	}
 
-	return iconDirectory / "icon_file.png";
+	return iconDirectory_ / "icon_file.png";
 }
 
 } // namespace KujataEngine

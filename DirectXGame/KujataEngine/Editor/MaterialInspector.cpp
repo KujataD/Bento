@@ -120,7 +120,7 @@ void ApplyTextureSelection(MaterialInspectorState& state, MaterialTextureSlot sl
 // プロジェクト内の画像ファイル(.png/.jpg/.jpeg)を列挙する。
 std::vector<std::filesystem::path> EnumerateProjectTextures() {
 	std::vector<std::filesystem::path> textures;
-	std::filesystem::path projectRoot = DetectEditorProjectRoot();
+	std::filesystem::path projectRoot = GetActiveProjectRoot();
 	if (projectRoot.empty()) {
 		return textures;
 	}
