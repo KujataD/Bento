@@ -498,6 +498,13 @@ SceneJsonImporter::ImportResult SceneJsonImporter::ImportScene(Scene& scene, con
 	return result;
 }
 
+void SceneJsonImporter::ApplyComponentProperties(Scene& scene, Component& component, const json& properties) {
+	component.ReadJson(properties);
+	component.OnAfterReadJson();
+	SceneObjectResolver resolver(scene);
+	component.ResolveReferences(resolver);
+}
+
 SceneJsonImporter::ImportResult SceneJsonImporter::ApplySceneJsonString(Scene& scene, const std::string& sceneJsonText) {
 	ImportResult result{};
 	result.imported = true;

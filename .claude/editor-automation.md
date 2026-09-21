@@ -143,7 +143,7 @@ wait 60
 | | `quit` | エディタを終了する |
 
 - 編集系のコマンドは Play 中も使える(Inspector と同じ。Stop すると Play 前の状態に戻る)。
-- `field.set` は、シーンの JSON の該当フィールドだけを書き換えて Undo と同じ経路(`SceneJsonImporter::ApplySceneJsonString`)で適用する。
+- `field.set` は、そのコンポーネントの全フィールドを `WriteJson` で書き出し、1 つだけ差し替えて読み込ませる(`SceneJsonImporter::ApplyComponentProperties`。シーンの読み込みと同じ ReadJson → OnAfterReadJson → 参照の解決を、そのコンポーネントだけに行う)。シーン全体を JSON にして読み戻すことはしない。
   参照フィールド(ObjectRef)も JSON 上の instanceId として書き換えられる。
 
 ### 5.1 スクリーンショット(view.screenshot)

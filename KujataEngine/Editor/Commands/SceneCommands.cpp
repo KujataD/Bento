@@ -46,21 +46,6 @@ void AppendHierarchy(const GameObject& gameObject, json& out) {
 	}
 }
 
-// Scene::ToJson の components 配列での位置(nullのコンポーネントは書き出されないので数えない)。
-size_t FindComponentJsonIndex(const GameObject& gameObject, const Component* target) {
-	size_t index = 0;
-	for (const std::unique_ptr<Component>& component : gameObject.GetComponents()) {
-		if (!component) {
-			continue;
-		}
-		if (component.get() == target) {
-			return index;
-		}
-		++index;
-	}
-	return static_cast<size_t>(-1);
-}
-
 // 書き換える前後で値の種類が変わらないかを確かめる(数値の欄に文字列を入れる等の打ち間違いを弾く)。
 bool IsCompatibleValue(const json& before, const json& after, std::string& error) {
 	if (before.is_number() && !after.is_number()) {
@@ -400,39 +385,22 @@ EditorCommandResult CommandFieldSet(const EditorCommandArgs& args) {
 		value = rawValue;
 	}
 
-	// Undoと同じ経路で反映する: シーンのJSONの該当フィールドだけ書き換えて、ApplySceneJsonStringで読み戻す。
-	json sceneJson = json::parse(scene->ToJson(), nullptr, false);
-	if (sceneJson.is_discarded() || !sceneJson.contains("objects")) {
-		return EditorCommandResult::Failure("シーンのJSONを作れませんでした。");
-	}
-	json* objectJson = nullptr;
-	for (json& entry : sceneJson["objects"]) {
-		if (entry.value("instanceId", std::string()) == gameObject->GetInstanceId()) {
-			objectJson = &entry;
-			break;
-		}
-	}
-	const size_t componentIndex = FindComponentJsonIndex(*gameObject, component);
-	if (!objectJson || !objectJson->contains("components") || componentIndex >= (*objectJson)["components"].size()) {
-		return EditorCommandResult::Failure("シーンのJSONにこのコンポーネントが見つかりません。");
-	}
-	json& componentJson = (*objectJson)["components"][componentIndex];
+	// そのコンポーネントだけを読み書きする: 今の全フィールドを書き出し、1 つだけ差し替えて読み込ませる
+	// (シーンの読み込みと同じ手順。シーン全体を JSON にして読み戻すことはしない)。
+	json properties = json::object();
+	component->WriteJson(properties);
 
 	json before;
 	if (key == "enabled") {
 		if (!value.is_boolean()) {
 			return EditorCommandResult::Failure("enabled は true / false で指定してください。");
 		}
-		before = componentJson.value("enabled", true);
-		componentJson["enabled"] = value;
+		before = component->IsEnabled();
 	} else {
-		json& properties = componentJson["properties"];
-		if (!properties.is_object() || !properties.contains(key)) {
+		if (!properties.contains(key)) {
 			std::string keys;
-			if (properties.is_object()) {
-				for (auto it = properties.begin(); it != properties.end(); ++it) {
-					keys += " " + it.key();
-				}
+			for (auto it = properties.begin(); it != properties.end(); ++it) {
+				keys += " " + it.key();
 			}
 			return EditorCommandResult::Failure("フィールドが見つかりません: " + key + "。書き換えられるキー: enabled" + keys);
 		}
@@ -452,21 +420,22 @@ EditorCommandResult CommandFieldSet(const EditorCommandArgs& args) {
 
 	const std::string label = "field.set " + MakeObjectPath(gameObject) + "/" + args.Get(1) + "." + key;
 	CaptureUndo(*scene, label);
-	SceneJsonImporter::ImportResult importResult = SceneJsonImporter::ApplySceneJsonString(*scene, sceneJson.dump());
-	if (!importResult.succeeded) {
-		return EditorCommandResult::Failure("反映に失敗しました: " + importResult.message);
+	if (key == "enabled") {
+		component->SetEnabled(value.get<bool>());
+	} else {
+		SceneJsonImporter::ApplyComponentProperties(*scene, *component, properties);
 	}
 	scene->UpdateWorldTransforms();
 
-	// 読み戻した後の値を返す(コンポーネント側で丸められた等も分かるように)。
+	// 読み込ませた後の値を返す(コンポーネント側で丸められた等も分かるように)。
 	json after = nullptr;
 	if (key == "enabled") {
 		after = component->IsEnabled();
 	} else {
-		json properties = json::object();
-		component->WriteJson(properties);
-		if (properties.contains(key)) {
-			after = properties[key];
+		json written = json::object();
+		component->WriteJson(written);
+		if (written.contains(key)) {
+			after = written[key];
 		}
 	}
 
