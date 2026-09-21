@@ -412,14 +412,10 @@ void AcceptHierarchyObjectDropOnNode(Scene& scene, GameObject* target, const ImV
 
 } // namespace
 
-void HierarchyWindow::DrawObject(Scene& scene, GameObject* gameObject, GameObject* selectedObject, bool& selectedObjectExists) {
+void HierarchyWindow::DrawObject(Scene& scene, GameObject* gameObject, GameObject* selectedObject) {
 #ifdef USE_IMGUI
 	if (!gameObject) {
 		return;
-	}
-
-	if (gameObject == selectedObject) {
-		selectedObjectExists = true;
 	}
 
 	std::string displayName = gameObject->GetName();
@@ -516,7 +512,7 @@ void HierarchyWindow::DrawObject(Scene& scene, GameObject* gameObject, GameObjec
 	if (hasChildren && opened) {
 		std::vector<GameObject*> children = childRefs;
 		for (GameObject* child : children) {
-			DrawObject(scene, child, selectedObject, selectedObjectExists);
+			DrawObject(scene, child, selectedObject);
 		}
 		ImGui::TreePop();
 	}
@@ -526,7 +522,6 @@ void HierarchyWindow::DrawObject(Scene& scene, GameObject* gameObject, GameObjec
 	(void)scene;
 	(void)gameObject;
 	(void)selectedObject;
-	(void)selectedObjectExists;
 #endif // USE_IMGUI
 }
 
@@ -543,7 +538,6 @@ void HierarchyWindow::Draw(bool* pOpen) {
 	}
 
 	GameObject* selectedObject = EditorSelection::GetInstance()->GetSelectedGameObject();
-	bool selectedObjectExists = false;
 
 	// DrawObject内のD&D(並び替え=MoveGameObjectOrder / Prefab生成など)はgameObjects_を
 	// 変更・再確保するため、range-forの参照が無効化されてクラッシュする。
@@ -560,7 +554,7 @@ void HierarchyWindow::Draw(bool* pOpen) {
 	}
 
 	for (GameObject* rootObject : rootObjects) {
-		DrawObject(*scene, rootObject, selectedObject, selectedObjectExists);
+		DrawObject(*scene, rootObject, selectedObject);
 	}
 
 	ImVec2 remainingRegion = ImGui::GetContentRegionAvail();
@@ -578,7 +572,11 @@ void HierarchyWindow::Draw(bool* pOpen) {
 		ImGui::EndPopup();
 	}
 
-	if (selectedObject && !selectedObjectExists) {
+	// 選択中のオブジェクトが消えていたら選択を外す。
+	// **「今回描いたか」では判定しない。** 折りたたまれた親の子は描かれないので、
+	// Sceneビューのクリックや CUI の select で子を選ぶと、次のフレームで選択が外れてしまう。
+	GameObject* currentSelection = EditorSelection::GetInstance()->GetSelectedGameObject();
+	if (currentSelection && !SceneContainsGameObject(*scene, currentSelection)) {
 		EditorSelection::GetInstance()->Clear();
 	}
 
