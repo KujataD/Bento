@@ -35,7 +35,7 @@
   - 見た目の確認は `view.screenshot <scene|game|editor> <パス>` で撮って画像を読む(ウィンドウの撮影より確実。隠れたビューも撮れる)。エディタの UI を撮るときは先に `window.show <ウィンドウ名>` で前に出す。
   - ログは `log.tail 50 error`、または `log.file` の JSON Lines を読む。変更の前後比較は `state.dump` の差分で見る。
   - 起動からの確認を 1 回で済ませるときは `KujataEngine.exe --run <ファイル> --exit`(終了コードで成否が分かる)。
-  - 新しいエディタ機能を作ったら、その操作もコマンドとして登録する(`Editor/EditorCommands.cpp`)。UI にしかない操作を増やさない。処理は UI とコマンドの両方から呼べる関数に置く(例: `Editor/PrefabEditing`・`Editor/AnimationEditing`)。
+  - 新しいエディタ機能を作ったら、その操作もコマンドとして登録する(`Editor/Commands/` の分野ごとのファイル。共通の関数は `EditorCommandUtil`)。UI にしかない操作を増やさない。処理は UI とコマンドの両方から呼べる関数に置く(例: `Editor/PrefabEditing`・`Editor/AnimationEditing`)。
   - **KujataEngine で `prefab.create` / `animation.createClip` / `scene.save` などを試すと、`DirectXGame/Data` にファイルができる**(テンプレートを変えない決まりに反する)。試した後は消してからコミットする。
   - 新しく書くログは重さを明示して出す(`EditorConsole::AddLog(message, EditorLogLevel::Error)` など)。
   - フィールドを書き換える前に `schema.get <型名>` で型・範囲・説明を確かめる。新しいコンポーネントは `KUJATA_SERIALIZED_FIELDS_BEGIN` で登録する(手書きの DrawInspector/WriteJson だと型情報が推測になる)。

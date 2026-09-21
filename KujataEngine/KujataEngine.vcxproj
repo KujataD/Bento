@@ -172,6 +172,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Editor\EditorCommand.cpp" />
     <ClCompile Include="Editor\EditorCommands.cpp" />
     <ClCompile Include="Editor\EditorCommandServer.cpp" />
+    <ClCompile Include="Editor\Commands\EditorCommandUtil.cpp" />
+    <ClCompile Include="Editor\Commands\CoreCommands.cpp" />
+    <ClCompile Include="Editor\Commands\SceneCommands.cpp" />
+    <ClCompile Include="Editor\Commands\SchemaCommands.cpp" />
+    <ClCompile Include="Editor\Commands\ViewCommands.cpp" />
+    <ClCompile Include="Editor\Commands\PrefabCommands.cpp" />
+    <ClCompile Include="Editor\Commands\AnimationCommands.cpp" />
     <ClCompile Include="Editor\PrefabEditing.cpp" />
     <ClCompile Include="Editor\AnimationEditing.cpp" />
     <ClCompile Include="Editor\EditorLog.cpp" />
@@ -330,6 +337,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Editor\EditorApplication.h" />
     <ClInclude Include="Editor\EditorCommand.h" />
     <ClInclude Include="Editor\EditorCommandServer.h" />
+    <ClInclude Include="Editor\Commands\EditorCommandUtil.h" />
     <ClInclude Include="Editor\PrefabEditing.h" />
     <ClInclude Include="Editor\AnimationEditing.h" />
     <ClInclude Include="Editor\EditorLog.h" />

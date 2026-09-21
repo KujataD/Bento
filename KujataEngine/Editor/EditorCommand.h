@@ -95,7 +95,7 @@ private:
 };
 
 /// <summary>
-/// 標準のコマンド(参照・選択・編集・実行)を登録する。EditorCommands.cppに実装がある。
+/// 標準のコマンドを登録する。コマンドの中身は Editor/Commands/ に分野ごとに置いてある。
 /// </summary>
 void RegisterBuiltinEditorCommands();
 

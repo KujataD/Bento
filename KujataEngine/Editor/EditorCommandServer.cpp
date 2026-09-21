@@ -4,6 +4,7 @@
 #include "EditorConsole.h"
 #include "EditorSelection.h"
 #include "EditorUndoManager.h"
+#include "Commands/EditorCommandUtil.h"
 #include "../runtime/AppControl.h"
 #include "../scene/GameObject.h"
 #include "../scene/Scene.h"
@@ -30,15 +31,6 @@ const char* ToModeName(EditorMode mode) {
 	default:
 		return "Edit";
 	}
-}
-
-// 親をたどって "Stage/Enemies/Guardian" の形にする。
-std::string MakeObjectPath(const GameObject* gameObject) {
-	std::string path;
-	for (const GameObject* current = gameObject; current; current = current->GetParent()) {
-		path = path.empty() ? current->GetName() : current->GetName() + "/" + path;
-	}
-	return path;
 }
 
 std::string Utf16ToUtf8(const std::wstring& text) {
@@ -257,7 +249,7 @@ nlohmann::json EditorCommandServer::BuildState() const {
 	nlohmann::json state;
 	state["mode"] = ToModeName(application->GetEditorMode());
 	state["scene"] = scene ? scene->GetSceneName() : "";
-	state["selection"] = selected ? MakeObjectPath(selected) : "";
+	state["selection"] = selected ? EditorCommandUtil::MakeObjectPath(selected) : "";
 	state["undoTop"] = EditorUndoManager::GetInstance()->GetUndoTopLabel();
 	state["frame"] = frame_;
 	return state;

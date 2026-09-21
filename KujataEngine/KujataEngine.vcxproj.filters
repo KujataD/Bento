@@ -183,6 +183,27 @@
     <ClCompile Include="Editor\EditorCommandServer.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="Editor\Commands\EditorCommandUtil.cpp">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\CoreCommands.cpp">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\SceneCommands.cpp">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\SchemaCommands.cpp">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\ViewCommands.cpp">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\PrefabCommands.cpp">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\AnimationCommands.cpp">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClCompile>
     <ClCompile Include="Editor\PrefabEditing.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
@@ -675,6 +696,9 @@
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
     <ClInclude Include="Editor\EditorCommandServer.h">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Commands\EditorCommandUtil.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
     <ClInclude Include="Editor\PrefabEditing.h">
