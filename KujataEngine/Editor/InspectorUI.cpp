@@ -85,6 +85,16 @@ bool ColorEdit4(const char* label, float* values) {
 #endif
 }
 
+bool ColorEdit3(const char* label, float* values) {
+#ifdef USE_IMGUI
+	return ImGui::ColorEdit3(label, values);
+#else
+	(void)label;
+	(void)values;
+	return false;
+#endif
+}
+
 bool Combo(const char* label, int* currentItem, const char* const* items, int itemCount) {
 #ifdef USE_IMGUI
 	return ImGui::Combo(label, currentItem, items, itemCount);

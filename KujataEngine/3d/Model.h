@@ -174,14 +174,13 @@ public:
 
 	/// <summary>
 	/// ローポリ・トゥーン調の見た目を全サブメッシュへ設定する。
-	/// steps / smoothness / shadowColor は ShaderModel::kToon のときだけ効く。flat と pointSampling はどの方式でも効く。
+	/// steps / smoothness は ShaderModel::kToon のときだけ効く。flat と pointSampling はどの方式でも効く。
 	/// </summary>
-	void SetStylize(int32_t steps, float smoothness, const Vector3& shadowColor, bool flat, bool pointSampling) {
+	void SetStylize(int32_t steps, float smoothness, bool flat, bool pointSampling) {
 		for (SubMesh& subMesh : subMeshes_) {
 			if (subMesh.materialMap) {
 				subMesh.materialMap->toonSteps = steps;
 				subMesh.materialMap->toonSmoothness = smoothness;
-				subMesh.materialMap->shadowColor = shadowColor;
 				subMesh.materialMap->flatShading = flat ? 1 : 0;
 				subMesh.materialMap->pointSampling = pointSampling ? 1 : 0;
 			}

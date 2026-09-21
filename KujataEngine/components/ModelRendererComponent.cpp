@@ -544,7 +544,7 @@ void ModelRendererComponent::ApplyMaterialToModel() {
 	model_->SetBlendMode(static_cast<BlendMode>(material_.blendMode));
 	model_->SetDepthWrite(material_.depthWrite);
 	// トゥーン・ローポリ調もシェーダー方式と同じく、常に全サブメッシュへ反映する(パーツ別マテリアルでも見た目をそろえる)。
-	model_->SetStylize(material_.toonSteps, material_.toonSmoothness, material_.shadowColor, material_.flatShading, material_.pointSampling);
+	model_->SetStylize(material_.toonSteps, material_.toonSmoothness, material_.flatShading, material_.pointSampling);
 
 	// 色/テクスチャの上書き方針(方式B):
 	//  - Material Assetを参照している場合は、Unityの共有Material同様に全サブメッシュを一括上書き。

@@ -21,9 +21,9 @@ struct Material
     float32_t bloomSoftKnee;     // 閾値の柔らかさ(0=ハード)
     float32_t triplanarScale;    // >0でワールド座標貼り。1ワールドユニットあたりの繰り返し数(0でUV貼り)
     // トゥーン(enableLighting == 8)。C++側 3d/GraphicsPipeline.h の MaterialData と並びを一致させること。
+    // 影の色はマテリアルではなく世界共通(gDirectionalLight.shadowColor)。
     int32_t toonSteps;           // 明るさを何段に分けるか(2以上)
     float32_t toonSmoothness;    // 段の境目のぼかし幅(明るさの単位。0=くっきり)
-    float32_t3 shadowColor;      // いちばん暗い段の色(元の色に掛ける)
     int32_t flatShading;         // 1=面ごとに平らな陰(どの方式でも効く)
     int32_t pointSampling;       // 1=テクスチャをぼかさずに読む(どの方式でも効く)
 };
@@ -411,14 +411,14 @@ PixelShaderOutput main(VertexShaderOutput input)
             output.color.a = gMaterial.color.a * textureColor.a * profile;
         }
         else if (gMaterial.enableLighting == 8)
-        { // トゥーン(セル調)。明るさを段に分け、暗い側は黒ではなく影の色(shadowColor)で塗る。
+        { // トゥーン(セル調)。明るさを段に分け、暗い側は黒ではなく影の色(世界共通。Directional Light の Shadow Color)で塗る。
             float32_t3 normal = normalize(input.normal);
             float32_t3 albedo = gMaterial.color.rgb * textureColor.rgb;
 
             // DirectionalLight: いちばん暗い段 = 元の色×影の色、いちばん明るい段 = 元の色×ライトの色。その間を段で分ける。
             // ライトが影の色より暗い(強さ0など)ときに、光の当たる側が影より暗くならないよう、明るい段は影の色を下限にする。
             float32_t lit = ToonStep(saturate(dot(normal, -normalize(gDirectionalLight.direction))));
-            float32_t3 shadow = albedo * gMaterial.shadowColor;
+            float32_t3 shadow = albedo * gDirectionalLight.shadowColor;
             float32_t3 bright = max(albedo * gDirectionalLight.color.rgb * gDirectionalLight.intensity, shadow);
             float32_t3 result = lerp(shadow, bright, lit);
 

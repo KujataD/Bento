@@ -62,6 +62,8 @@ void DirectionalLightComponent::DrawInspector() {
 	InspectorUI::ColorEdit4("Color", &data_.color.x);
 	InspectorUI::DragFloat3("Direction", &data_.direction.x, 0.01f);
 	InspectorUI::DragFloat("Intensity", &data_.intensity, 0.01f, 0.0f, 100.0f);
+	// 影の色(世界共通)。トゥーンのマテリアルの影の側がこの色になる。
+	InspectorUI::ColorEdit3("Shadow Color", &data_.shadowColor.x);
 
 	if (data_.intensity < 0.0f) {
 		data_.intensity = 0.0f;
@@ -84,12 +86,14 @@ void DirectionalLightComponent::WriteJson(nlohmann::json& json) const {
 	json["color"] = {data_.color.x, data_.color.y, data_.color.z, data_.color.w};
 	json["direction"] = {data_.direction.x, data_.direction.y, data_.direction.z};
 	json["intensity"] = data_.intensity;
+	json["shadowColor"] = {data_.shadowColor.x, data_.shadowColor.y, data_.shadowColor.z};
 }
 
 void DirectionalLightComponent::ReadJson(const nlohmann::json& json) {
 	data_.color = ReadVector4(json, "color", data_.color);
 	data_.direction = ReadVector3(json, "direction", data_.direction);
 	data_.intensity = ReadFloat(json, "intensity", data_.intensity);
+	data_.shadowColor = ReadVector3(json, "shadowColor", data_.shadowColor);
 
 	if (data_.intensity < 0.0f) {
 		data_.intensity = 0.0f;

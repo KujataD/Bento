@@ -77,7 +77,7 @@ void TrailRendererComponent::ApplyMaterial() {
 	model_->SetTexture(MaterialAsset::ResolveTextureIndex(material, MaterialTextureSlot::BaseColor));
 	model_->SetEmissive(material.emissiveColor, material.emissiveIntensity, material.emissiveEnabled);
 	model_->SetEmissiveBloom(material.bloomIntensity, material.bloomThreshold, material.bloomSoftKnee);
-	model_->SetStylize(material.toonSteps, material.toonSmoothness, material.shadowColor, material.flatShading, material.pointSampling);
+	model_->SetStylize(material.toonSteps, material.toonSmoothness, material.flatShading, material.pointSampling);
 	// 帯は裏からも見えてよい(カメラを向く板なので基本は表を向くが、急カーブで裏返ることがある)。
 	model_->SetDoubleSided(true);
 	materialDirty_ = false;

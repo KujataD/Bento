@@ -523,7 +523,6 @@ MaterialAssetData MaterialAsset::ReadJsonObject(const nlohmann::json& json, cons
 	if (json.contains("toonSmoothness") && json.at("toonSmoothness").is_number()) {
 		material.toonSmoothness = json.at("toonSmoothness").get<float>();
 	}
-	material.shadowColor = ReadVector3(json, "shadowColor", material.shadowColor);
 	if (json.contains("flatShading") && json.at("flatShading").is_boolean()) {
 		material.flatShading = json.at("flatShading").get<bool>();
 	}
@@ -562,7 +561,6 @@ void MaterialAsset::WriteJsonObject(nlohmann::json& json, const MaterialAssetDat
 	json["uvRotation"] = material.uvRotation;
 	json["toonSteps"] = material.toonSteps;
 	json["toonSmoothness"] = material.toonSmoothness;
-	json["shadowColor"] = {material.shadowColor.x, material.shadowColor.y, material.shadowColor.z};
 	json["flatShading"] = material.flatShading;
 	json["pointSampling"] = material.pointSampling;
 

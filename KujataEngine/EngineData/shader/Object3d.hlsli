@@ -18,6 +18,8 @@ struct DirectionalLight
     float32_t4 color;
     float32_t3 direction;
     float32_t intensity;
+    // 影の色(世界共通)。C++側 3d/DirectionalLight.h の DirectionalLightData と並びを一致させること。
+    float32_t3 shadowColor;
 };
 
 struct Camera

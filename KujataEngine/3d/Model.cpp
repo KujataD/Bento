@@ -32,7 +32,6 @@ void WriteMaterialConstants(MaterialData* destination, const MaterialData& sourc
 	destination->triplanarScale = source.triplanarScale;
 	destination->toonSteps = source.toonSteps;
 	destination->toonSmoothness = source.toonSmoothness;
-	destination->shadowColor = source.shadowColor;
 	destination->flatShading = source.flatShading;
 	destination->pointSampling = source.pointSampling;
 }

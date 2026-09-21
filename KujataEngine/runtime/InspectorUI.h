@@ -13,6 +13,7 @@ KUJATA_API bool DragFloat3(const char* label, float* values, float speed = 1.0f,
 KUJATA_API bool DragInt(const char* label, int* value, float speed = 1.0f, int minValue = 0, int maxValue = 0);
 KUJATA_API bool Checkbox(const char* label, bool* value);
 KUJATA_API bool ColorEdit4(const char* label, float* values);
+KUJATA_API bool ColorEdit3(const char* label, float* values);
 KUJATA_API bool Combo(const char* label, int* currentItem, const char* const* items, int itemCount);
 KUJATA_API bool InputText(const char* label, char* buffer, std::size_t bufferSize);
 KUJATA_API bool Button(const char* label);

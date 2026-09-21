@@ -393,7 +393,7 @@ void DrawMaterialAssetInspector(ProjectWindow& projectWindow) {
 		changed = true;
 	}
 
-	// トゥーンの段と影の色。Toon を選んだときだけ効くので、そのときだけ出す。
+	// トゥーンの段。Toon を選んだときだけ効くので、そのときだけ出す。
 	if (state.material.shaderModel == static_cast<int>(ShaderModel::kToon)) {
 		ImGui::Indent();
 		if (ImGui::SliderInt("Toon Steps", &state.material.toonSteps, 2, 8)) {
@@ -408,12 +408,7 @@ void DrawMaterialAssetInspector(ProjectWindow& projectWindow) {
 		if (ImGui::IsItemHovered()) {
 			ImGui::SetTooltip("段の境目のぼかし幅。0でくっきり分かれる。");
 		}
-		if (ImGui::ColorEdit3("Shadow Color", &state.material.shadowColor.x)) {
-			changed = true;
-		}
-		if (ImGui::IsItemHovered()) {
-			ImGui::SetTooltip("影の側の色(元の色に掛ける)。紺などにすると影がやわらかく見える。");
-		}
+		ImGui::TextDisabled("影の色は世界共通(Directional Light の Shadow Color)");
 		ImGui::Unindent();
 	}
 

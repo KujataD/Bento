@@ -75,7 +75,8 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - **Shader Model を Toon(`shaderModel` 8)** にすると、明るさを段に分けて塗る(セル調)
   - `Toon Steps`(`toonSteps`): 何段に分けるか(いちばん暗い段と明るい段を含む。4 なら 4 色)
   - `Toon Smoothness`(`toonSmoothness`): 段の境目のぼかし幅。0 でくっきり
-  - `Shadow Color`(`shadowColor`): いちばん暗い段の色(元の色に掛ける)。紺などにすると影がやわらかく見える。ライトが暗くても、光の当たる側がこれより暗くなることはない
+- **影の色は世界共通**: Directional Light の `Shadow Color`(`shadowColor`)で決める(マテリアルごとには持たない)。いちばん暗い段の色で、元の色に掛ける。紺などにすると影がやわらかく見える。ライトが暗くても、光の当たる側がこれより暗くなることはない
+  - 例: `kujata field.set "Directional Light" DirectionalLightComponent shadowColor [0.22, 0.24, 0.42]`
 - どの Shader Model でも使えるもの
   - `Flat Shading`(`flatShading`): 面ごとに平らな陰にする(ローポリの角をはっきり見せる)
   - `Point Sampling`(`pointSampling`): テクスチャをぼかさずに読む(粗いテクスチャをドットのまま見せる)

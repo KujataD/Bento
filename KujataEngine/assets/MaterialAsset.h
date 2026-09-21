@@ -74,10 +74,10 @@ struct MaterialAssetData {
 	Vector2 uvScale = {1.0f, 1.0f};
 	float uvRotation = 0.0f; // ラジアン
 	// トゥーン(shaderModel = 8 = Toon のときだけ効く)。明るさを toonSteps 段に分け、
-	// いちばん暗い段を shadowColor で塗る(黒くしない)。toonSmoothness は段の境目のぼかし幅(0=くっきり)。
+	// いちばん暗い段を影の色で塗る(黒くしない)。toonSmoothness は段の境目のぼかし幅(0=くっきり)。
+	// 影の色は世界共通なので、マテリアルではなく Directional Light の Shadow Color で決める。
 	int toonSteps = 4;
 	float toonSmoothness = 0.0f;
-	Vector3 shadowColor = {0.22f, 0.24f, 0.42f};
 	// 面ごとに平らな陰にする(ローポリの角をはっきり見せる)。どのシェーダー方式でも効く。
 	bool flatShading = false;
 	// テクスチャをぼかさずに読む(粗いテクスチャをドットのまま見せる)。どのシェーダー方式でも効く。
