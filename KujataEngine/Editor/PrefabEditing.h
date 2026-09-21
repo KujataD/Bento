@@ -33,7 +33,10 @@ Result Instantiate(Scene& scene, const std::filesystem::path& prefabPath, GameOb
 /// <summary>インスタンスの変更をプレハブファイルへ書き戻す(シーンの他のインスタンスも更新される)。</summary>
 Result Apply(Scene& scene, GameObject& instance);
 
-/// <summary>インスタンスをプレハブの内容に戻す(オブジェクトは作り直される)。</summary>
+/// <summary>
+/// インスタンスをプレハブの内容に戻す。既存のオブジェクトはそのまま使い回して中身を上書きし、
+/// プレハブに無いオブジェクトは消え、足りないものは作られる。
+/// </summary>
 Result Revert(Scene& scene, GameObject& instance, const std::string& undoLabel);
 
 /// <summary>インスタンスとプレハブのつながりを切り、普通のオブジェクトにする。</summary>

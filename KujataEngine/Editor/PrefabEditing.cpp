@@ -81,7 +81,7 @@ Result Revert(Scene& scene, GameObject& instance, const std::string& undoLabel) 
 	if (!revertResult.succeeded) {
 		return Fail("Revert failed: " + revertResult.message);
 	}
-	// Revertはオブジェクトを作り直すので、選択も新しいルートへ移す(消えたオブジェクトを指さないように)。
+	// Revertはプレハブに無いオブジェクトを消すことがあるので、選択はルートへ移す(消えたオブジェクトを指さないように)。
 	EditorSelection::GetInstance()->SetSelectedGameObject(revertResult.rootObject);
 	Log("Reverted.", EditorLogLevel::Info);
 
