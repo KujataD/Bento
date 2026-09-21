@@ -26,41 +26,48 @@ void EditorStyle::Apply() {
 
 	ImVec4* colors = style.Colors;
 
-	const ImVec4 textColor = ImVec4(0.86f, 0.93f, 0.89f, 0.78f);
-	const ImVec4 textDisabledColor = ImVec4(0.86f, 0.93f, 0.89f, 0.28f);
-	const ImVec4 mainBgColor = ImVec4(0.02f, 0.02f, 0.02f, 1.00f);
-	const ImVec4 mainBgTransparentColor = ImVec4(0.02f, 0.02f, 0.02f, 0.73f);
-	const ImVec4 popupBgColor = ImVec4(0.02f, 0.02f, 0.02f, 1.00f);   // メニュー/ポップアップ背景は完全不透明で視認性を確保
-	const ImVec4 titleCollapsedColor = ImVec4(0.02f, 0.02f, 0.02f, 0.75f);
-	const ImVec4 menuBarBgColor = ImVec4(0.02f, 0.02f, 0.02f, 1.00f); // メニューバーも完全不透明
+	// 配色はセージグリーン1色で統一する。
+	// 各色はOKLCHの明るさ(L)を元の配色(赤アクセント+黒)から変えずに、色相をセージ(h=128°、#9CAF88と同じ)へ揃えたもの。
+	// 彩度はアクセントでも0.06〜0.085に抑え、背景・区切り線はほぼ無彩色に近い薄い緑にしている。
+	// ただしアクセントだけは、上に載る文字(ヘッダー・選択タブ等)が読めるよう暗くしている(画面上で #4F6236 前後)。
+	// 描画先がsRGBフォーマットなので、ここに書く値はリニア値として扱われ、画面では明るく表示される。
+	// 色を調整するときは画面上の色で考え、sRGB→リニア変換した値を書くこと(文字とのコントラスト比は約5)。
 
-	const ImVec4 frameBgColor = ImVec4(0.110f, 0.110f, 0.110f, 1.00f);
-	const ImVec4 tabBgColor = ImVec4(0.110f, 0.110f, 0.110f, 0.92f);
-	const ImVec4 tableRowAltColor = ImVec4(0.110f, 0.110f, 0.110f, 0.25f);
+	const ImVec4 textColor = ImVec4(0.891f, 0.924f, 0.855f, 0.78f);
+	const ImVec4 textDisabledColor = ImVec4(0.891f, 0.924f, 0.855f, 0.28f);
+	const ImVec4 mainBgColor = ImVec4(0.018f, 0.022f, 0.014f, 1.00f);
+	const ImVec4 mainBgTransparentColor = ImVec4(0.018f, 0.022f, 0.014f, 0.73f);
+	const ImVec4 popupBgColor = ImVec4(0.018f, 0.022f, 0.014f, 1.00f);   // メニュー/ポップアップ背景は完全不透明で視認性を確保
+	const ImVec4 titleCollapsedColor = ImVec4(0.018f, 0.022f, 0.014f, 0.75f);
+	const ImVec4 menuBarBgColor = ImVec4(0.018f, 0.022f, 0.014f, 1.00f); // メニューバーも完全不透明
 
-	const ImVec4 accentColor = ImVec4(0.92f, 0.18f, 0.29f, 1.00f);
-	const ImVec4 accentHoveredColor = ImVec4(0.92f, 0.18f, 0.29f, 0.78f);
-	const ImVec4 accentHoveredStrong = ImVec4(0.92f, 0.18f, 0.29f, 0.86f);
-	const ImVec4 accentHeaderColor = ImVec4(0.92f, 0.18f, 0.29f, 0.76f);
-	const ImVec4 accentPreviewColor = ImVec4(0.92f, 0.18f, 0.29f, 0.50f);
-	const ImVec4 accentSelectedBgColor = ImVec4(0.92f, 0.18f, 0.29f, 0.43f);
-	const ImVec4 accentDropTargetColor = ImVec4(0.92f, 0.18f, 0.29f, 0.90f);
+	const ImVec4 frameBgColor = ImVec4(0.103f, 0.115f, 0.088f, 1.00f);
+	const ImVec4 tabBgColor = ImVec4(0.103f, 0.115f, 0.088f, 0.92f);
+	const ImVec4 tableRowAltColor = ImVec4(0.103f, 0.115f, 0.088f, 0.25f);
 
-	const ImVec4 cyanColor = ImVec4(0.27f, 0.9f, 1.0f, 0.78f);
-	const ImVec4 cyanWeakColor = ImVec4(0.27f, 0.9f, 1.0f, 0.14f);
-	const ImVec4 cyanVeryWeakColor = ImVec4(0.27f, 0.9f, 1.0f, 0.04f);
-	const ImVec4 cyanLineColor = ImVec4(0.27f, 0.9f, 1.0f, 0.80f);
-	const ImVec4 cyanLineDimmedColor = ImVec4(0.27f, 0.9f, 1.0f, 0.40f);
+	const ImVec4 accentColor = ImVec4(0.079f, 0.123f, 0.038f, 1.00f);
+	const ImVec4 accentHoveredColor = ImVec4(0.079f, 0.123f, 0.038f, 0.78f);
+	const ImVec4 accentHoveredStrong = ImVec4(0.079f, 0.123f, 0.038f, 0.86f);
+	const ImVec4 accentHeaderColor = ImVec4(0.079f, 0.123f, 0.038f, 0.76f);
+	const ImVec4 accentPreviewColor = ImVec4(0.079f, 0.123f, 0.038f, 0.50f);
+	const ImVec4 accentSelectedBgColor = ImVec4(0.079f, 0.123f, 0.038f, 0.43f);
+	const ImVec4 accentDropTargetColor = ImVec4(0.079f, 0.123f, 0.038f, 0.90f);
 
-	const ImVec4 borderColor = ImVec4(0.31f, 0.31f, 1.00f, 0.00f);
+	const ImVec4 lightAccentColor = ImVec4(0.765f, 0.842f, 0.678f, 0.78f);
+	const ImVec4 lightAccentWeakColor = ImVec4(0.765f, 0.842f, 0.678f, 0.14f);
+	const ImVec4 lightAccentVeryWeakColor = ImVec4(0.765f, 0.842f, 0.678f, 0.04f);
+	const ImVec4 lightAccentLineColor = ImVec4(0.765f, 0.842f, 0.678f, 0.80f);
+	const ImVec4 lightAccentLineDimmedColor = ImVec4(0.765f, 0.842f, 0.678f, 0.40f);
+
+	const ImVec4 borderColor = ImVec4(0.403f, 0.470f, 0.321f, 0.00f);
 	const ImVec4 borderShadowColor = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	const ImVec4 scrollbarGrabColor = ImVec4(0.09f, 0.15f, 0.16f, 1.00f);
-	const ImVec4 checkMarkColor = ImVec4(0.71f, 0.22f, 0.27f, 1.00f);
-	const ImVec4 separatorColor = ImVec4(0.14f, 0.16f, 0.19f, 1.00f);
-	const ImVec4 separatorLightColor = ImVec4(0.14f, 0.16f, 0.19f, 0.75f);
-	const ImVec4 transparentRowColor = ImVec4(0.02f, 0.02f, 0.02f, 0.00f);
-	const ImVec4 textHighlightColor = ImVec4(0.86f, 0.93f, 0.89f, 0.70f);
-	const ImVec4 plotColor = ImVec4(0.86f, 0.93f, 0.89f, 0.63f);
+	const ImVec4 scrollbarGrabColor = ImVec4(0.127f, 0.146f, 0.106f, 1.00f);
+	const ImVec4 checkMarkColor = ImVec4(0.765f, 0.842f, 0.678f, 1.00f); // アクセント(ホバー時の枠)より暗いと見えなくなるため明るいセージ
+	const ImVec4 separatorColor = ImVec4(0.151f, 0.164f, 0.135f, 1.00f);
+	const ImVec4 separatorLightColor = ImVec4(0.151f, 0.164f, 0.135f, 0.75f);
+	const ImVec4 transparentRowColor = ImVec4(0.018f, 0.022f, 0.014f, 0.00f);
+	const ImVec4 textHighlightColor = ImVec4(0.891f, 0.924f, 0.855f, 0.70f);
+	const ImVec4 plotColor = ImVec4(0.891f, 0.924f, 0.855f, 0.63f);
 
 	colors[ImGuiCol_Text] = textColor;                                // 通常テキストの色
 	colors[ImGuiCol_TextDisabled] = textDisabledColor;                // 無効状態のテキスト色
@@ -81,7 +88,7 @@ void EditorStyle::Apply() {
 	colors[ImGuiCol_ScrollbarGrabHovered] = accentHoveredColor;       // スクロールバーつまみにマウスを重ねた時の色
 	colors[ImGuiCol_ScrollbarGrabActive] = accentColor;               // スクロールバーつまみを操作中の色
 	colors[ImGuiCol_CheckMark] = checkMarkColor;                      // チェックマークの色
-	colors[ImGuiCol_SliderGrab] = cyanWeakColor;                      // スライダーつまみの色
+	colors[ImGuiCol_SliderGrab] = lightAccentWeakColor;                      // スライダーつまみの色
 	colors[ImGuiCol_SliderGrabActive] = accentColor;                  // スライダーつまみを操作中の色
 	colors[ImGuiCol_Button] = frameBgColor;                           // 通常ボタンの色
 	colors[ImGuiCol_ButtonHovered] = accentHoveredStrong;             // ボタンにマウスを重ねた時の色
@@ -92,16 +99,16 @@ void EditorStyle::Apply() {
 	colors[ImGuiCol_Separator] = separatorColor;                      // 区切り線の通常色
 	colors[ImGuiCol_SeparatorHovered] = accentHoveredColor;           // 区切り線にマウスを重ねた時の色
 	colors[ImGuiCol_SeparatorActive] = accentColor;                   // 区切り線を操作中の色
-	colors[ImGuiCol_ResizeGrip] = cyanVeryWeakColor;                  // ウィンドウリサイズつまみの通常色
+	colors[ImGuiCol_ResizeGrip] = lightAccentVeryWeakColor;                  // ウィンドウリサイズつまみの通常色
 	colors[ImGuiCol_ResizeGripHovered] = accentHoveredColor;          // リサイズつまみにマウスを重ねた時の色
 	colors[ImGuiCol_ResizeGripActive] = accentColor;                  // リサイズつまみを操作中の色
 	colors[ImGuiCol_Tab] = tabBgColor;                                // 非選択タブの色
 	colors[ImGuiCol_TabHovered] = accentHoveredStrong;                // タブにマウスを重ねた時の色
 	colors[ImGuiCol_TabSelected] = accentColor;                       // 選択中タブの色
-	colors[ImGuiCol_TabSelectedOverline] = cyanLineColor;             // 選択中タブ上部ラインの色
+	colors[ImGuiCol_TabSelectedOverline] = lightAccentLineColor;             // 選択中タブ上部ラインの色
 	colors[ImGuiCol_TabDimmed] = popupBgColor;                        // 暗く表示された非選択タブの色
 	colors[ImGuiCol_TabDimmedSelected] = frameBgColor;                // 暗く表示された選択中タブの色
-	colors[ImGuiCol_TabDimmedSelectedOverline] = cyanLineDimmedColor; // 暗く表示された選択中タブ上部ラインの色
+	colors[ImGuiCol_TabDimmedSelectedOverline] = lightAccentLineDimmedColor; // 暗く表示された選択中タブ上部ラインの色
 	colors[ImGuiCol_DockingPreview] = accentPreviewColor;             // ドッキング先プレビューの色
 	colors[ImGuiCol_DockingEmptyBg] = mainBgColor;                    // ドッキング領域の空背景色
 	colors[ImGuiCol_PlotLines] = plotColor;                           // 折れ線グラフの線色
@@ -115,7 +122,7 @@ void EditorStyle::Apply() {
 	colors[ImGuiCol_TableRowBgAlt] = tableRowAltColor;                // テーブル交互行の背景色
 	colors[ImGuiCol_TextSelectedBg] = accentSelectedBgColor;          // テキスト選択時の背景色
 	colors[ImGuiCol_DragDropTarget] = accentDropTargetColor;          // ドラッグ＆ドロップ先の強調色
-	colors[ImGuiCol_NavCursor] = cyanColor;                           // キーボード・ゲームパッド操作時のカーソル色
+	colors[ImGuiCol_NavCursor] = lightAccentColor;                           // キーボード・ゲームパッド操作時のカーソル色
 	colors[ImGuiCol_NavWindowingHighlight] = textHighlightColor;      // ナビゲーション時のウィンドウ強調色
 	colors[ImGuiCol_NavWindowingDimBg] = mainBgTransparentColor;      // ナビゲーション時の背景暗転色
 	colors[ImGuiCol_ModalWindowDimBg] = mainBgTransparentColor;       // モーダルウィンドウ表示時の背景暗転色

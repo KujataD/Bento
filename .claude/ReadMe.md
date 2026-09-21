@@ -25,6 +25,10 @@ exe と GameModule.dll は同じ構成(Debug/Release)でビルドすること。
 
 - クリックでフォーカスしてから: WASD 移動 / QE 上下 / 右クリックホールド+マウスで視点
 
+### エディタの見た目
+
+- 配色はセージグリーンで統一している(`KujataEngine/Editor/EditorStyle.cpp`)。描画先が sRGB なので、書いた値より画面では明るく出る
+
 ## 新しいゲームを作る
 
 エンジン用リポジトリ KujataEngine を clone して作る(`DirectXGame/` は空のテンプレートになっている)。
