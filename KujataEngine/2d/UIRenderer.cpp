@@ -12,7 +12,9 @@ float gTargetWidth = 0.0f;
 float gTargetHeight = 0.0f;
 
 // ビューポート/シザー/トポロジ/ヒープの積み込み。Overlay・World共通。
-void SetupRenderState(float targetWidth, float targetHeight) {
+// targetWidth/Height はUIの座標の大きさ、viewportWidth/Height は実際の描画先の大きさ
+// (World Space Canvas はドット絵化で小さくなったGameの描画先へ描くので、2つが違うことがある)。
+void SetupRenderState(float targetWidth, float targetHeight, float viewportWidth, float viewportHeight) {
 	gTargetWidth = targetWidth;
 	gTargetHeight = targetHeight;
 
@@ -23,8 +25,8 @@ void SetupRenderState(float targetWidth, float targetHeight) {
 	commandList->SetDescriptorHeaps(1, descriptorHeaps);
 
 	D3D12_VIEWPORT viewport{};
-	viewport.Width = targetWidth;
-	viewport.Height = targetHeight;
+	viewport.Width = viewportWidth;
+	viewport.Height = viewportHeight;
 	viewport.TopLeftX = 0.0f;
 	viewport.TopLeftY = 0.0f;
 	viewport.MinDepth = 0.0f;
@@ -34,8 +36,8 @@ void SetupRenderState(float targetWidth, float targetHeight) {
 	D3D12_RECT scissorRect{};
 	scissorRect.left = 0;
 	scissorRect.top = 0;
-	scissorRect.right = static_cast<LONG>(targetWidth);
-	scissorRect.bottom = static_cast<LONG>(targetHeight);
+	scissorRect.right = static_cast<LONG>(viewportWidth);
+	scissorRect.bottom = static_cast<LONG>(viewportHeight);
 	commandList->RSSetScissorRects(1, &scissorRect);
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -44,14 +46,17 @@ void SetupRenderState(float targetWidth, float targetHeight) {
 } // namespace
 
 void UIRenderer::Begin(float targetWidth, float targetHeight) {
-	SetupRenderState(targetWidth, targetHeight);
+	// Screen Space はポスト後の出力へ描くので、UIの座標と描画先の大きさが同じ。
+	SetupRenderState(targetWidth, targetHeight, targetWidth, targetHeight);
 	// 左上原点のスクリーン空間オルソ(y下方向)。ピクセル座標をそのまま頂点に使う。
 	gUITransform = MakeOrthographicMatrix(0.0f, 0.0f, targetWidth, targetHeight, 0.0f, 100.0f);
 	gUIPipelineType = PipelineType::kUI;
 }
 
 void UIRenderer::BeginWorld(const Matrix4x4& canvasToClip, float targetWidth, float targetHeight) {
-	SetupRenderState(targetWidth, targetHeight);
+	// World Space は3Dと同じ描画先(ドット絵化していれば小さい)へ描く。クリップ座標で描くので、ビューポートを描画先に合わせれば位置はずれない。
+	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
+	SetupRenderState(targetWidth, targetHeight, static_cast<float>(dxCommon->GetCurrentTargetWidth()), static_cast<float>(dxCommon->GetCurrentTargetHeight()));
 	gUITransform = canvasToClip;
 	// world空間UIは3Dに遮蔽されるが深度は書かない(スプライトと同じ扱い)。
 	gUIPipelineType = PipelineType::kSprite2D;

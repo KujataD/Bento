@@ -73,6 +73,7 @@
 - **Play の状態持ち越し**: コンポーネントは使い回されるので、非シリアライズ状態は `OnPlayStart` で必ず初期化する。
 - GameModule DLL からエンジン側シンボルを使うには `KUJATA_API` エクスポートが必要(未エクスポートだとリンク不可)。
 - テクスチャ/フォントの読み込みは描画パス外(Prepare)で行うこと。日本語パスでテクスチャ読込が死ぬ罠あり。
+- **Game の描画先は画面より小さいことがある**(カメラの `pixelSize` によるドット絵化)。ビューポートを `WinApp::kWindowWidth` 固定で書かず、`DirectXCommon::GetCurrentTargetWidth/Height`(今の描画先)を使う。UI の座標(クリック判定・Canvas のレイアウト)は `GetGameOutputWidth/Height`、3D を描く先の大きさは `GetGameRenderWidth/Height`。
 - **エンジンとゲームの境界**: ゲーム固有の設定は `DirectXGame/Game.props`(exe 名)と `DirectXGame/Data/ProjectSettings/Project.json`(ウィンドウタイトル・背景色)に置き、`KujataEngine/` には書かない。
 - **パスの起点は2つ**(`base/ProjectPath.h`): エンジンの持ち物は `GetEngineRoot()`(= `KujataEngine/`)/ `GetEngineDataRoot()`、プロジェクトの持ち物(GameModule・Data・Temp)は `GetActiveProjectRoot()` / `GetProjectDataRoot()` を使う。どちらも起動時に一度だけ決まり、キャッシュされる。
 - **開くプロジェクトの決まり方**: 起動引数 `--project <フォルダ>` → 無ければエンジンの隣の `DirectXGame/` → それも無ければ(配布先)エンジンのフォルダ(= exe の隣)。

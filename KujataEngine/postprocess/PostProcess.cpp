@@ -40,18 +40,22 @@ D3D12_GPU_DESCRIPTOR_HANDLE PostProcess::GetDisplaySrvHandle(uint32_t viewIndex)
 	return (viewIndex == DirectXCommon::kGameViewIndex) ? dxCommon->GetGameRenderSrvHandle() : dxCommon->GetSceneRenderSrvHandle();
 }
 
-void PostProcess::EnsureTargets(ViewTargets& targets, int32_t width, int32_t height) {
+void PostProcess::EnsureTargets(ViewTargets& targets, int32_t width, int32_t height, int32_t outputWidth, int32_t outputHeight) {
+	if (targets.outputWidth != outputWidth || targets.outputHeight != outputHeight) {
+		// 毎フレームPostDrawでGPU完了を待つ設計のため、前フレームまでに旧リソースを参照するコマンドは残っていない。
+		// そのままComPtr再代入で解放してよい(追加のWaitForGpu不要)。
+		targets.outputWidth = outputWidth;
+		targets.outputHeight = outputHeight;
+		// Resolve(トーンマップ後LDR)は出力の大きさ(ドット絵化していなければsourceと同じ)。
+		// リソースはUNORM、View/出力は_SRGB(リニア値をHWでsRGBエンコードし、ImGuiのSRVでデコードする既存RTと同じ流儀)。
+		RecreateTarget(targets.resolve, outputWidth, outputHeight, DXGI_FORMAT_R8G8B8A8_UNORM, DirectXCommon::kResolveColorFormat);
+	}
+
 	if (targets.sourceWidth == width && targets.sourceHeight == height) {
 		return;
 	}
-	// 毎フレームPostDrawでGPU完了を待つ設計のため、前フレームまでに旧リソースを参照するコマンドは残っていない。
-	// そのままComPtr再代入で解放してよい(追加のWaitForGpu不要)。
 	targets.sourceWidth = width;
 	targets.sourceHeight = height;
-
-	// Resolve(トーンマップ後LDR)はsourceと同解像度。
-	// リソースはUNORM、View/出力は_SRGB(リニア値をHWでsRGBエンコードし、ImGuiのSRVでデコードする既存RTと同じ流儀)。
-	RecreateTarget(targets.resolve, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, DirectXCommon::kResolveColorFormat);
 
 	// フォグ適用後のHDRシーン(トーンマップの入力)。sourceと同解像度・同フォーマット。
 	RecreateTarget(targets.fogScratch, width, height, DirectXCommon::kSceneColorFormat, DirectXCommon::kSceneColorFormat);
@@ -287,7 +291,8 @@ void PostProcess::DrawTonemap(D3D12_GPU_DESCRIPTOR_HANDLE sceneSrv, const ViewTa
 	commandList->DrawInstanced(3, 1, 0, 0);
 }
 
-void PostProcess::Render(uint32_t viewIndex, const RenderTexture& source, const Camera* camera, const OverlayDrawFunc& drawOverlay) {
+void PostProcess::Render(uint32_t viewIndex, const RenderTexture& source, const Camera* camera, const OverlayDrawFunc& drawOverlay, int32_t outputWidth,
+                         int32_t outputHeight) {
 	assert(viewIndex < DirectXCommon::kRenderViewCount);
 	if (!PostEffectPipeline::GetInstance()->IsInitialized()) {
 		return;
@@ -296,7 +301,7 @@ void PostProcess::Render(uint32_t viewIndex, const RenderTexture& source, const 
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 	ID3D12GraphicsCommandList* commandList = dxCommon->GetCommandList();
 	ViewTargets& targets = viewTargets_[viewIndex];
-	EnsureTargets(targets, source.width, source.height);
+	EnsureTargets(targets, source.width, source.height, outputWidth > 0 ? outputWidth : source.width, outputHeight > 0 ? outputHeight : source.height);
 
 	const bool bloomActive = activeProfile_.bloom.enabled && targets.activeMipCount > 0;
 	if (bloomActive) {
@@ -338,7 +343,8 @@ void PostProcess::RenderToBackBuffer(const RenderTexture& source, const Camera* 
 	ID3D12GraphicsCommandList* commandList = dxCommon->GetCommandList();
 	// エディタ無しビルドはGameビューのターゲットを使う(中間RTはブルーム/フォグ用のみ使用)。
 	ViewTargets& targets = viewTargets_[DirectXCommon::kGameViewIndex];
-	EnsureTargets(targets, source.width, source.height);
+	// 出力はバックバッファへ直接描くので、Resolveは使わない(sourceと同じ大きさで作っておくだけ)。
+	EnsureTargets(targets, source.width, source.height, source.width, source.height);
 
 	const bool bloomActive = activeProfile_.bloom.enabled && targets.activeMipCount > 0;
 	if (bloomActive) {

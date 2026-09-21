@@ -43,8 +43,11 @@ public:
 	/// EndSceneRender/EndGameRenderの直後に呼ぶこと(sourceはPIXEL_SHADER_RESOURCE状態)。
 	/// 終了時に描画先はバックバッファへ戻る。cameraはフォグの深度復元用(nullptrならフォグをスキップ)。
 	/// drawOverlayを渡すと、トーンマップ直後のResolve RTへ重ねて描ける(ポストの影響を受けないUI用)。
+	/// outputWidth/Heightを渡すと、Resolve RTをその大きさにする(0ならsourceと同じ)。sourceより大きいときは
+	/// ぼかさずに拡大する(ドット絵化)。フォグとブルームはsourceの解像度のままかける。
 	/// </summary>
-	void Render(uint32_t viewIndex, const RenderTexture& source, const Camera* camera = nullptr, const OverlayDrawFunc& drawOverlay = nullptr);
+	void Render(uint32_t viewIndex, const RenderTexture& source, const Camera* camera = nullptr, const OverlayDrawFunc& drawOverlay = nullptr, int32_t outputWidth = 0,
+	            int32_t outputHeight = 0);
 
 	/// <summary>
 	/// エディタ無しビルド用: フォグ+ブルーム適用後、最終トーンマップをSwapChainバックバッファへ直接出力する。
@@ -108,10 +111,13 @@ private:
 		PostTarget resolve; // トーンマップ後のLDR出力(ImGui::Imageが表示する)
 		int32_t sourceWidth = 0; // 生成時のsourceサイズ(リサイズ検知用)
 		int32_t sourceHeight = 0;
+		int32_t outputWidth = 0; // 生成時のResolveサイズ(リサイズ検知用)
+		int32_t outputHeight = 0;
 	};
 
-	// sourceサイズが変わっていたら中間RT一式を作り直す(ハンドルは使い回す)。
-	void EnsureTargets(ViewTargets& targets, int32_t width, int32_t height);
+	// sourceか出力のサイズが変わっていたら中間RT一式を作り直す(ハンドルは使い回す)。
+	// Resolveだけが出力の大きさで、フォグとブルームの中間RTはsourceの大きさ。
+	void EnsureTargets(ViewTargets& targets, int32_t width, int32_t height, int32_t outputWidth, int32_t outputHeight);
 	// PostTargetのリソースとViewを(再)生成する。クリアしない運用なのでClearValueはnullptr。
 	void RecreateTarget(PostTarget& target, int32_t width, int32_t height, DXGI_FORMAT resourceFormat, DXGI_FORMAT viewFormat);
 	// ブルームチェーン(BrightPass→Down→Up)を実行し、結果をbloomMips[0]へ残す。

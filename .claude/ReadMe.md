@@ -81,6 +81,15 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
   - `Point Sampling`(`pointSampling`): テクスチャをぼかさずに読む(粗いテクスチャをドットのまま見せる)
 - 落ち影(物が地面に落とす影)はない。段と影の色は、物体の光が当たらない側(陰)にかかる
 
+### ドット絵化
+
+- メインカメラの CameraComponent の **Pixel Size**(`pixelSize`)を 2 以上にすると、Game ビューの 3D を 1/Pixel Size の解像度で描き、ぼかさずに拡大する(1 ドット = Pixel Size × Pixel Size ピクセル)。1 で通常の解像度
+  - 例: `kujata field.set "Main Camera" CameraComponent pixelSize 4`
+- Screen Space の UI(Canvas)は拡大の後に元の解像度で重なるので、文字はくっきりしたまま。World Space の Canvas は 3D と一緒にドットになる
+- フォグ・ブルームも低い解像度のままかかる(1 ドットの中で色が変わらない)
+- 1280×720 を割り切れる値(2 / 4 / 5 / 8 / 10 / 16 / 20)にすると、ドットの大きさがそろう
+- Scene ビューはドットにしない(編集しやすさのため)
+
 ## 新しいゲームを作る
 
 エンジン用リポジトリ KujataEngine を clone して作る(`DirectXGame/` は空のテンプレートになっている)。

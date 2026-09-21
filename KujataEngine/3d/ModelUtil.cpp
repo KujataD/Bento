@@ -216,10 +216,12 @@ void SetCommonRenderState() {
 	ID3D12DescriptorHeap* descriptorHeaps[] = { dxCommon->GetSrvDescriptorHeap() };
 	commandList->SetDescriptorHeaps(1, descriptorHeaps);
 
-	// ビューポートの設定
+	// ビューポートの設定。今の描画先の大きさに合わせる(ドット絵化でGameの描画先が小さくなるため、画面の大きさ固定にしない)。
+	const int32_t targetWidth = dxCommon->GetCurrentTargetWidth();
+	const int32_t targetHeight = dxCommon->GetCurrentTargetHeight();
 	D3D12_VIEWPORT viewport{};
-	viewport.Width = static_cast<float>(WinApp::kWindowWidth);
-	viewport.Height = static_cast<float>(WinApp::kWindowHeight);
+	viewport.Width = static_cast<float>(targetWidth);
+	viewport.Height = static_cast<float>(targetHeight);
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
 	viewport.MinDepth = 0.0f;
@@ -229,9 +231,9 @@ void SetCommonRenderState() {
 	// シザー矩形の設定
 	D3D12_RECT scissorRect{};
 	scissorRect.left = 0;
-	scissorRect.right = WinApp::kWindowWidth;
+	scissorRect.right = targetWidth;
 	scissorRect.top = 0;
-	scissorRect.bottom = WinApp::kWindowHeight;
+	scissorRect.bottom = targetHeight;
 	commandList->RSSetScissorRects(1, &scissorRect);
 
 	// プリミティブトポロジの設定（main.cppで毎フレームセットしていたものに対応）

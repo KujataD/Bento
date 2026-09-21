@@ -126,6 +126,13 @@ public:
 	/// </summary>
 	void ResizeSceneRenderTarget(int32_t width, int32_t height);
 
+	/// <summary>
+	/// Game用RenderTextureを指定サイズへリサイズする(ドット絵化で 1/pixelSize にするため)。
+	/// 条件は ResizeSceneRenderTarget と同じ(サイズ変化時のみ・描画コマンドを積む前に呼ぶ)。
+	/// 表示とUIの座標は GetGameOutputWidth/Height のまま変わらない。
+	/// </summary>
+	void ResizeGameRenderTarget(int32_t width, int32_t height);
+
 	void PostDraw();
 
 	void ClearRenderTarget();
@@ -185,8 +192,18 @@ public:
 	int32_t GetBackBufferWidth() const { return backBufferWidth_; }
 	int32_t GetBackBufferHeight() const { return backBufferHeight_; }
 
+	// Game用RenderTexture(3Dを描く先)の大きさ。ドット絵化していると GetGameOutputWidth/Height より小さい。
 	int32_t GetGameRenderWidth() const { return gameRenderTexture_.width; }
 	int32_t GetGameRenderHeight() const { return gameRenderTexture_.height; }
+
+	// Gameビューの出力(表示)の大きさ。ポスト後の画像とScreen Space UIはこの大きさで、
+	// UIの座標(クリック判定・Canvasのレイアウト)もこれを基準にする。ドット絵化しても変わらない。
+	int32_t GetGameOutputWidth() const { return WinApp::kWindowWidth; }
+	int32_t GetGameOutputHeight() const { return WinApp::kWindowHeight; }
+
+	// 今の描画先(BeginRenderTextureで選んだRenderTexture)の大きさ。モデル描画のビューポートに使う。
+	int32_t GetCurrentTargetWidth() const { return currentTargetWidth_; }
+	int32_t GetCurrentTargetHeight() const { return currentTargetHeight_; }
 
 	uint32_t GetSwapChainBufferCount() const { return kSwapChainBufferCount; }
 	void SetBackBufferRenderTarget();
@@ -244,6 +261,8 @@ private:
 	void CreateGameRenderTarget();
 	// RenderTextureのカラー/深度リソースとViewを(再)生成する(width/heightと確保済みハンドルを使う)。
 	void RecreateRenderTextureResources(RenderTexture& target);
+	// サイズが変わったときだけ、GPUの完了を待ってRenderTextureを作り直す(ディスクリプタは使い回す)。
+	void ResizeRenderTexture(RenderTexture& target, int32_t width, int32_t height);
 	void CreateFence();
 
 	void WaitForGpu();
@@ -301,6 +320,9 @@ private:
 	int32_t backBufferHeight_ = 0;
 	// 現在描画中のビュー番号(Scene=0/Game=1)。BeginSceneRender/BeginGameRenderで切り替える。
 	uint32_t renderViewIndex_ = kSceneViewIndex;
+	// 現在の描画先の大きさ。BeginRenderTextureで更新する。
+	int32_t currentTargetWidth_ = WinApp::kWindowWidth;
+	int32_t currentTargetHeight_ = WinApp::kWindowHeight;
 
 	// 画面の色
 	float clearColor_[4] = {0.1f, 0.25f, 0.5f, 1.0f}; // 青っぽい色。RGBAの順

@@ -67,7 +67,8 @@ void PerformanceWindow::Draw(bool* pOpen) {
 	// 各RenderTextureの解像度(Sceneは表示サイズ追従、Gameは固定)。
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 	ImGui::Text("Scene RT: %d x %d", dxCommon->GetSceneRenderWidth(), dxCommon->GetSceneRenderHeight());
-	ImGui::Text("Game RT : %d x %d", dxCommon->GetGameRenderWidth(), dxCommon->GetGameRenderHeight());
+	ImGui::Text("Game RT : %d x %d (output %d x %d)", dxCommon->GetGameRenderWidth(), dxCommon->GetGameRenderHeight(), dxCommon->GetGameOutputWidth(),
+	            dxCommon->GetGameOutputHeight());
 
 	ImGui::End();
 #else

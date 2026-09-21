@@ -43,6 +43,11 @@ void CameraComponent::DrawInspector() {
 	InspectorUI::DragFloat("Aspect", &camera_.aspectRatio, 0.001f, 0.01f, 10.0f);
 	InspectorUI::DragFloat("Near Z", &camera_.nearZ, 0.001f, 0.001f, 1000.0f);
 	InspectorUI::DragFloat("Far Z", &camera_.farZ, 1.0f, 0.01f, 100000.0f);
+	// ドット絵化(メインカメラのときだけ効く)。1で通常の解像度。
+	int pixelSize = camera_.pixelSize;
+	if (InspectorUI::DragInt("Pixel Size", &pixelSize, 0.05f, 1, 32)) {
+		camera_.pixelSize = pixelSize;
+	}
 
 	if (camera_.fovAngleY < 0.01f) {
 		camera_.fovAngleY = 0.01f;
@@ -64,6 +69,7 @@ void CameraComponent::WriteJson(nlohmann::json& json) const {
 	json["aspectRatio"] = camera_.aspectRatio;
 	json["nearZ"] = camera_.nearZ;
 	json["farZ"] = camera_.farZ;
+	json["pixelSize"] = camera_.pixelSize;
 }
 
 void CameraComponent::ReadJson(const nlohmann::json& json) {
@@ -71,6 +77,13 @@ void CameraComponent::ReadJson(const nlohmann::json& json) {
 	camera_.aspectRatio = ReadFloat(json, "aspectRatio", camera_.aspectRatio);
 	camera_.nearZ = ReadFloat(json, "nearZ", camera_.nearZ);
 	camera_.farZ = ReadFloat(json, "farZ", camera_.farZ);
+	// ドット絵化の大きさ(キーが無い旧シーンは 1 = 通常の解像度)。
+	if (json.contains("pixelSize") && json.at("pixelSize").is_number()) {
+		camera_.pixelSize = static_cast<int32_t>(json.at("pixelSize").get<double>());
+	}
+	if (camera_.pixelSize < 1) {
+		camera_.pixelSize = 1;
+	}
 
 	if (camera_.fovAngleY < 0.01f) {
 		camera_.fovAngleY = 0.01f;

@@ -35,8 +35,8 @@ void GameViewWindow::Draw(bool* pOpen) {
 
 	// Game用RenderTextureは固定解像度。アスペクト比を保ってレターボックス表示する。
 	float gameAspect = 16.0f / 9.0f;
-	if (dxCommon->GetGameRenderHeight() > 0) {
-		gameAspect = static_cast<float>(dxCommon->GetGameRenderWidth()) / static_cast<float>(dxCommon->GetGameRenderHeight());
+	if (dxCommon->GetGameOutputHeight() > 0) {
+		gameAspect = static_cast<float>(dxCommon->GetGameOutputWidth()) / static_cast<float>(dxCommon->GetGameOutputHeight());
 	}
 
 	ImVec2 imageSize = contentSize;
@@ -69,8 +69,9 @@ void GameViewWindow::Draw(bool* pOpen) {
 		const float localX = mousePos.x - imagePosition.x;
 		const float localY = mousePos.y - imagePosition.y;
 		const bool inside = ImGui::IsWindowHovered() && localX >= 0.0f && localY >= 0.0f && localX <= imageSize.x && localY <= imageSize.y;
-		const float rtWidth = static_cast<float>(dxCommon->GetGameRenderWidth());
-		const float rtHeight = static_cast<float>(dxCommon->GetGameRenderHeight());
+		// UIの座標はGameの出力の大きさ(ドット絵化で3Dの描画先が小さくなっても変わらない)。
+		const float rtWidth = static_cast<float>(dxCommon->GetGameOutputWidth());
+		const float rtHeight = static_cast<float>(dxCommon->GetGameOutputHeight());
 		pointer.x = imageSize.x > 0.0f ? (localX / imageSize.x) * rtWidth : 0.0f;
 		pointer.y = imageSize.y > 0.0f ? (localY / imageSize.y) * rtHeight : 0.0f;
 		pointer.inside = inside;

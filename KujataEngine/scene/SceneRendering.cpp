@@ -79,7 +79,8 @@ void Scene::RenderView(Camera* camera, bool drawEditorOverlays) {
 	// World Space Canvas。ワールドに置かれたUIなので、選択状態に関わらず常に描く。
 	{
 		DirectXCommon* dxCommon = DirectXCommon::GetInstance();
-		DrawSceneWorldCanvases(*this, camera, static_cast<float>(dxCommon->GetGameRenderWidth()), static_cast<float>(dxCommon->GetGameRenderHeight()));
+		// レイアウトはUIの座標(Gameの出力の大きさ)で決める。クリック判定(UpdateUIEventSystem)と同じ基準にするため。
+		DrawSceneWorldCanvases(*this, camera, static_cast<float>(dxCommon->GetGameOutputWidth()), static_cast<float>(dxCommon->GetGameOutputHeight()));
 	}
 
 	// Screen Space CanvasはここでHDRシーンRTへは描かない。フォグ/ブルーム/トーンマップの影響を

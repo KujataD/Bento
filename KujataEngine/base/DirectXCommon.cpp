@@ -397,19 +397,23 @@ void DirectXCommon::RecreateRenderTextureResources(RenderTexture& target) {
 	device_->CreateShaderResourceView(target.depthResource.Get(), &depthSrvDesc, target.depthSrvHandleCPU);
 }
 
-void DirectXCommon::ResizeSceneRenderTarget(int32_t width, int32_t height) {
+void DirectXCommon::ResizeSceneRenderTarget(int32_t width, int32_t height) { ResizeRenderTexture(sceneRenderTexture_, width, height); }
+
+void DirectXCommon::ResizeGameRenderTarget(int32_t width, int32_t height) { ResizeRenderTexture(gameRenderTexture_, width, height); }
+
+void DirectXCommon::ResizeRenderTexture(RenderTexture& target, int32_t width, int32_t height) {
 	if (width <= 0 || height <= 0) {
 		return;
 	}
-	if (sceneRenderTexture_.width == width && sceneRenderTexture_.height == height) {
+	if (target.width == width && target.height == height) {
 		return;
 	}
 	// 旧リソースがGPUで使用中の可能性があるため、解放・再生成の前にGPU完了を待つ。
-	// 描画パスの外(SceneViewWindow::Draw=Update中)から呼ぶこと。
+	// このフレームでまだ target を使うコマンドを積んでいないこと(積んだ後に作り直すと、積んだコマンドが消えたリソースを指す)。
 	WaitForGpu();
-	sceneRenderTexture_.width = width;
-	sceneRenderTexture_.height = height;
-	RecreateRenderTextureResources(sceneRenderTexture_);
+	target.width = width;
+	target.height = height;
+	RecreateRenderTextureResources(target);
 }
 
 ID3D12Resource* DirectXCommon::CreateBufferResource(size_t sizeInBytes) {
@@ -656,6 +660,9 @@ void DirectXCommon::BeginRenderTexture(RenderTexture& target) {
 	commandList_->ClearDepthStencilView(target.dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	// Viewport/ScissorをRenderTexture全体に合わせる。ここが小さいと描画が途中で切れる。
+	// モデル等は描くたびにビューポートを積み直すので、その大きさとして覚えておく。
+	currentTargetWidth_ = target.width;
+	currentTargetHeight_ = target.height;
 	D3D12_VIEWPORT viewport{};
 	viewport.Width = static_cast<float>(target.width);
 	viewport.Height = static_cast<float>(target.height);

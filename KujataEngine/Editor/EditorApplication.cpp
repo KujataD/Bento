@@ -106,6 +106,17 @@ private:
 	Camera camera_;
 };
 
+// ドット絵化: メインカメラの pixelSize に合わせて、Gameの描画先(3Dを描く先)を 1/pixelSize の大きさにする。
+// 表示とUIは元の大きさのまま(PostProcess がぼかさずに拡大する)。このフレームでGameの描画先を使う前に呼ぶこと。
+void FitGameRenderTargetToPixelSize(const Camera* camera) {
+	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
+	const int32_t pixelSize = (camera && camera->pixelSize > 1) ? camera->pixelSize : 1;
+	// 割り切れないときは切り上げる(拡大したときに画面の端まで埋まるように)。
+	const int32_t width = (dxCommon->GetGameOutputWidth() + pixelSize - 1) / pixelSize;
+	const int32_t height = (dxCommon->GetGameOutputHeight() + pixelSize - 1) / pixelSize;
+	dxCommon->ResizeGameRenderTarget(width, height);
+}
+
 } // namespace
 
 EditorApplication* EditorApplication::GetInstance() {
@@ -221,7 +232,7 @@ void EditorApplication::Update() {
 	if (ShouldUpdateGame() && currentScene_) {
 		DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 		// World Space Canvasはゲームカメラからレイを飛ばして判定するため、カメラを渡す。
-		UpdateUIEventSystem(*currentScene_, static_cast<float>(dxCommon->GetGameRenderWidth()), static_cast<float>(dxCommon->GetGameRenderHeight()),
+		UpdateUIEventSystem(*currentScene_, static_cast<float>(dxCommon->GetGameOutputWidth()), static_cast<float>(dxCommon->GetGameOutputHeight()),
 		                    currentScene_->GetGameViewCamera());
 	}
 }
@@ -273,6 +284,7 @@ void EditorApplication::Draw() {
 		// Gameビュー(メインカメラ・オーバーレイ無し)。
 		if (gameVisible) {
 			FrameProfiler::Scope profile(FrameProfiler::kGameViewRender);
+			FitGameRenderTargetToPixelSize(gameCamera);
 			dxCommon->BeginGameRender();
 			currentScene_->RenderView(gameCamera, false);
 			// Collider可視化などRenderViewが積んだ線をGameビューRTへ描画(Sceneビューと同様にフラッシュ)。
@@ -282,7 +294,10 @@ void EditorApplication::Draw() {
 			// Screen Space UIはポストの影響を受けないよう、トーンマップ後のLDR RTへ重ねて描く。
 			Scene* scene = currentScene_;
 			scene->ApplyVolumes(gameCamera);
-			PostProcess::GetInstance()->Render(DirectXCommon::kGameViewIndex, dxCommon->GetGameRenderTexture(), gameCamera, [scene](float width, float height) { scene->RenderScreenSpaceUI(width, height, false); });
+			// 出力は元の大きさ(ドット絵化していれば、ここでぼかさずに拡大される。UIは拡大後に元の解像度で重なる)。
+			PostProcess::GetInstance()->Render(
+			    DirectXCommon::kGameViewIndex, dxCommon->GetGameRenderTexture(), gameCamera, [scene](float width, float height) { scene->RenderScreenSpaceUI(width, height, false); },
+			    dxCommon->GetGameOutputWidth(), dxCommon->GetGameOutputHeight());
 			screenshot.RecordViewCopy(DirectXCommon::kGameViewIndex);
 		}
 	} else if (currentScene_ && sceneVisible) {
@@ -315,6 +330,7 @@ void EditorApplication::Draw() {
 			camera = currentScene_->GetSceneViewCamera();
 		}
 		if (camera) {
+			FitGameRenderTargetToPixelSize(camera);
 			dxCommon->BeginGameRender();
 			currentScene_->RenderView(camera, false);
 			LineRenderer::GetInstance()->Render(*camera);

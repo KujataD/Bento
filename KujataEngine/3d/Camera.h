@@ -39,6 +39,10 @@ public:
 	float aspectRatio = static_cast<float>(WinApp::kWindowWidth) / static_cast<float>(WinApp::kWindowHeight); // アスペクト比
 	float nearZ = 0.1f;                                                                                       // 深度限界（手前側）
 	float farZ = 1000.0f;                                                                                      // 深度限界（奥側）
+	// ドット絵化。1より大きいと、Gameビューの3Dを 1/pixelSize の解像度で描き、ぼかさずに拡大する
+	// (1ドット = pixelSize×pixelSize ピクセル)。UIは元の解像度のまま重なる。メインカメラの値だけが使われる。
+	// 1280×720 を割り切れる値(2 / 4 / 5 / 8 / 10 / 16 / 20)にすると、ドットの大きさがそろう。
+	int32_t pixelSize = 1;
 
 	// ビュー・射影行列
 	Matrix4x4 matView; // ワールドからカメラへの変換行列
