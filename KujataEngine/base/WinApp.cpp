@@ -82,12 +82,16 @@ void WinApp::CreateGameWindow(const std::wstring& title, int32_t clientWidth, in
 
 bool WinApp::ProcessMessage() {
 	MSG msg{};
-	// Windowにメッセージが来てたら最優先で処理させる
-	if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+	// 溜まっているメッセージはフレームごとに全部処理する。
+	// 1フレーム1件だと、キー入力1文字で3件(KEYDOWN/CHAR/KEYUP)届くため、速く打つと数秒遅れて入力される。
+	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+		if (msg.message == WM_QUIT) {
+			return true;
+		}
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-	return msg.message == WM_QUIT;
+	return false;
 }
 
 void WinApp::TerminateGameWindow() {
