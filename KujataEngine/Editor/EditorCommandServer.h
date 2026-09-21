@@ -72,11 +72,10 @@ private:
 	std::deque<Request> queue_;
 	std::vector<std::string> pendingLogs_;
 
-	// wait中のコマンド。waitが終わるまで次のコマンドは実行しない(順番を保つため)。
+	// 返事待ち(poll 中)のコマンド。終わるまで次のコマンドは実行しない(順番を保つため)。
 	bool hasActiveRequest_ = false;
 	Request activeRequest_;
 	EditorCommandResult activeResult_;
-	int activeWaitFrames_ = 0;
 
 	uint64_t frame_ = 0;
 

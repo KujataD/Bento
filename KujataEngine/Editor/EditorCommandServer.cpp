@@ -157,22 +157,14 @@ void EditorCommandServer::ProcessFrame() {
 		pendingLogs_.clear();
 	}
 
-	// 返事待ちのコマンド(wait / poll)があれば、それが終わるまで次へは進まない(実行順を保つ)。
+	// 返事待ち(poll 中)のコマンドがあれば、それが終わるまで次へは進まない(実行順を保つ)。
 	if (hasActiveRequest_) {
-		if (activeResult_.poll) {
-			EditorCommandResult finished;
-			if (!activeResult_.poll(finished)) {
-				return;
-			}
-			hasActiveRequest_ = false;
-			Respond(activeRequest_, finished);
-		} else {
-			if (--activeWaitFrames_ > 0) {
-				return;
-			}
-			hasActiveRequest_ = false;
-			Respond(activeRequest_, activeResult_);
+		EditorCommandResult finished;
+		if (!activeResult_.poll(finished)) {
+			return;
 		}
+		hasActiveRequest_ = false;
+		Respond(activeRequest_, finished);
 	}
 
 	Request request;
@@ -195,11 +187,10 @@ void EditorCommandServer::ProcessFrame() {
 	EditorConsole::GetInstance()->AddLog("> " + request.line + "  [" + request.source + "]", EditorLogLevel::Info);
 	EditorCommandResult result = EditorCommandRegistry::GetInstance().Execute(request.line);
 
-	if (result.ok && (result.waitFrames > 0 || result.poll)) {
+	if (result.ok && result.poll) {
 		hasActiveRequest_ = true;
 		activeRequest_ = std::move(request);
 		activeResult_ = std::move(result);
-		activeWaitFrames_ = activeResult_.waitFrames;
 		return;
 	}
 	Respond(request, result);

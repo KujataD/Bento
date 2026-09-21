@@ -128,9 +128,16 @@ EditorCommandResult CommandWait(const EditorCommandArgs& args) {
 	if (frames < 1 || frames > kMaxWaitFrames) {
 		return EditorCommandResult::Failure("フレーム数は 1 〜 " + std::to_string(kMaxWaitFrames) + " で指定してください。");
 	}
-	EditorCommandResult result = EditorCommandResult::Success(json{{"frames", frames}});
-	result.waitFrames = frames;
-	return result;
+	// 次のフレームから数えて frames 回目の頭で返事をする(待っている間のログも返事に入る)。
+	EditorCommandResult pending = EditorCommandResult::Success();
+	pending.poll = [remaining = frames, frames](EditorCommandResult& out) mutable {
+		if (--remaining > 0) {
+			return false;
+		}
+		out = EditorCommandResult::Success(json{{"frames", frames}});
+		return true;
+	};
+	return pending;
 }
 
 EditorCommandResult CommandSceneSave(const EditorCommandArgs&) {
