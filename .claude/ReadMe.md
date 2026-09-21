@@ -70,7 +70,7 @@ git fetch engine
 | `DirectXGame/` | このリポジトリのゲーム(GameModule / GameComponents / Data / Game.props / README.md) |
 | `Sandbox/` | 使い捨ての試作プロジェクト(git 管理外) |
 | `Tools/` | 配布フォルダ作成などのスクリプト |
-| `docs/` | 提出資料・設計ドキュメント |
+| `.claude/` | ReadMe・CLAUDE.md と、設計書などのドキュメント(`docs/` は作らない) |
 | `build/` | ビルド生成物(git 管理外) |
 
 ## ドキュメントの運用方法
@@ -80,7 +80,7 @@ git fetch engine
 1. **.claude/ReadMe.md(本ファイル)** — 人間向けの入口。エンジン共通の概要・ビルド手順・操作方法だけを置く。
 2. **[.claude/CLAUDE.md](CLAUDE.md)** — AI アシスタント(Claude Code)と共有する開発コンテキスト。規約・罠・現在の方針を記載し、方針転換や構成変更のたびにその場で更新する。AI とのセッション開始時に自動で読み込まれる。
 3. **DirectXGame/README.md** — そのゲーム固有の説明・依存・設定の置き場所。
-4. **docs/** — 詳細資料の置き場(提出資料、今後のコードリーディングで作る図解 `docs/architecture/` 等)。
+4. **.claude/ のそのほかのファイル** — 設計書・図解など詳細資料の置き場(例: 決定論の設計 [determinism.md](determinism.md))。`docs/` は作らない。
 
 1 と 2 は全ゲームのリポジトリで同じ内容に保つ(エンジン更新の取り込みで衝突させないため)。
 ReadMe はこのファイルに一本化し、ソースのフォルダには置かない(例外はゲーム固有の説明を書く 3 だけ)。
