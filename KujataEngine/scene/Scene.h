@@ -62,13 +62,6 @@ public:
 	KUJATA_API virtual void RenderView(Camera* camera, bool drawEditorOverlays);
 
 	/// <summary>
-	/// DirectionalLight視点でシャドウマップへ深度を書く。
-	/// 影はビューに依存しないので、Scene/Gameの描画前にフレーム1回だけ呼べばよい。
-	/// 内部でビュー番号をkShadowViewIndexへ切り替え、終了時にelseへ戻す。
-	/// </summary>
-	KUJATA_API void RenderShadowPass();
-
-	/// <summary>
 	/// シーン上のVolumeComponentを解決し、このビューで使うポストエフェクト設定をPostProcessへ適用する。
 	/// Local Volumeの内外判定にcameraの位置を使うため、ポスト処理を走らせるビューごとに呼ぶこと。
 	/// Volumeが1つも無いシーンでは既定値(ポスト無し相当)が適用される。

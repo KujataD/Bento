@@ -231,8 +231,6 @@ void EditorApplication::Draw() {
 		// 表示中のビューがあれば準備(カメラ同期・ライト・ワールド行列)は1回だけ行う。
 		if (sceneVisible || gameVisible) {
 			currentScene_->PrepareFrame();
-			// シャドウマップはライト視点なのでビューに依存しない。両ビューの描画前に1回だけ書く。
-			currentScene_->RenderShadowPass();
 		}
 
 		// Sceneビュー(デバッグカメラ + 編集オーバーレイ)。
@@ -295,7 +293,6 @@ void EditorApplication::Draw() {
 	if (currentScene_) {
 		FrameProfiler::Scope profile(FrameProfiler::kGameViewRender);
 		currentScene_->PrepareFrame();
-		currentScene_->RenderShadowPass();
 		Camera* camera = currentScene_->GetGameViewCamera();
 		if (!camera) {
 			camera = currentScene_->GetSceneViewCamera();

@@ -6,8 +6,6 @@
 #include "runtime/AppControl.h"
 #include "postprocess/PostEffectPipeline.h"
 #include "postprocess/PostProcess.h"
-#include "shadow/ShadowMap.h"
-#include "shadow/ShadowPipeline.h"
 #include <objbase.h>
 
 namespace KujataEngine {
@@ -39,10 +37,6 @@ void Initialize(const std::wstring& title, Vector4 color, bool enableDebugLayer)
 	// ポストプロセス(ブルーム/露出/トーンマップ)の初期化。DXCを共用するためGraphicsPipelineの後。
 	PostEffectPipeline::GetInstance()->Initialize();
 	PostProcess::GetInstance()->Initialize();
-
-	// シャドウマップの初期化。こちらもDXCを共用するためGraphicsPipelineの後。
-	ShadowPipeline::GetInstance()->Initialize();
-	ShadowMap::GetInstance()->Initialize();
 
 	// Light初期化
 	DirectionalLight::GetInstance()->Initialize();

@@ -24,10 +24,10 @@ struct TransformationMatrix {
 /// </summary>
 class KUJATA_API WorldTransform {
 public:
-	// 定数バッファの本数。ビュー(Scene/Game/Shadow)ごとに別々のWVPを持つため。
+	// 定数バッファの本数。ビュー(Scene/Game)ごとに別々のWVPを持つため。
 	// ここでDirectXCommon.hをincludeするとWindows.hが広く波及するので定数を再宣言し、
 	// DirectXCommon::kRenderViewCountとの一致は.cpp側のstatic_assertで守る。
-	static constexpr uint32_t kViewBufferCount = 3;
+	static constexpr uint32_t kViewBufferCount = 2;
 
 	// スケール・回転・平行移動
 	Vector3 scale_ = {1.0f, 1.0f, 1.0f};
@@ -76,14 +76,6 @@ public:
 
 	void TransferMatrix(const Camera& camera) const;
 	void TransferMatrix(const Camera& camera, const Matrix4x4& worldMatrix) const;
-
-	/// <summary>
-	/// Cameraを介さず、任意のビュープロジェクション行列でWVPを転送する。
-	/// シャドウパスがライト視点の行列を渡すために使う(ライトはCameraを持たない)。
-	/// 書き込み先は他と同じく現在のビュー番号の定数バッファなので、
-	/// 呼ぶ前にDirectXCommon::SetRenderViewIndex(kShadowViewIndex)しておくこと。
-	/// </summary>
-	void TransferMatrixWithViewProjection(const Matrix4x4& viewProjection, const Matrix4x4& worldMatrix) const;
 
 	TransformationMatrix GetMatrixData(const Camera& camera) const;
 	TransformationMatrix GetBillboardMatrixData(const Camera& camera) const;

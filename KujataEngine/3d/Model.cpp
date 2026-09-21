@@ -7,8 +7,6 @@
 #include "ModelUtil.h"
 #include "PointLight.h"
 #include "SpotLight.h"
-#include "../shadow/ShadowMap.h"
-#include "../shadow/ShadowPipeline.h"
 #include <filesystem>
 #include <algorithm>
 #include <cmath>
@@ -549,12 +547,6 @@ void Model::Draw(const WorldTransform& worldTransform, const Camera& camera, Fil
 	// pointlight / spotlight
 	commandList->SetGraphicsRootConstantBufferView(5, PointLight::GetInstance()->GetResource()->GetGPUVirtualAddress());
 	commandList->SetGraphicsRootConstantBufferView(6, SpotLight::GetInstance()->GetResource()->GetGPUVirtualAddress());
-	// シャドウマップ(t1)とライト行列(b5)。未初期化時はバインドせず、PS側はshadow=1(影なし)で動く。
-	ShadowMap* shadowMap = ShadowMap::GetInstance();
-	if (shadowMap->IsInitialized()) {
-		commandList->SetGraphicsRootDescriptorTable(7, shadowMap->GetSrvHandleGPU());
-		commandList->SetGraphicsRootConstantBufferView(8, shadowMap->GetConstBuffer()->GetGPUVirtualAddress());
-	}
 
 	// サブメッシュごとに 頂点バッファ・マテリアル・テクスチャ を切り替えて描画する。
 	for (const SubMesh& subMesh : subMeshes_) {
@@ -568,33 +560,12 @@ void Model::Draw(const WorldTransform& worldTransform, const Camera& camera, Fil
 		// テクスチャSRV（RootParameter[2]: DescriptorTable）
 		auto handle = TextureManager::GetInstance()->GetSrvHandle(subMesh.textureIndex);
 		commandList->SetGraphicsRootDescriptorTable(2, handle);
-		// エミッションマップ(RootParameter[9]: t2)。未指定(0)は白へ倒して「マップ無し=1倍」にする。
+		// エミッションマップ(RootParameter[7]: t2)。未指定(0)は白へ倒して「マップ無し=1倍」にする。
 		uint32_t emissiveIndex = subMesh.emissiveTextureIndex;
 		if (emissiveIndex == 0) {
 			emissiveIndex = TextureManager::GetInstance()->GetDefaultWhiteTexture();
 		}
-		commandList->SetGraphicsRootDescriptorTable(9, TextureManager::GetInstance()->GetSrvHandle(emissiveIndex));
-		commandList->DrawInstanced(subMesh.vertexCount, 1, 0, 0);
-	}
-}
-
-void Model::DrawShadow(const WorldTransform& worldTransform, const Matrix4x4& lightViewProjection) {
-	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList();
-
-	// Drawと同じくRootNodeのローカル行列を掛けてから、ライト視点のWVPをシャドウ枠へ転送する。
-	Matrix4x4 modelWorldMatrix = rootLocalMatrix_ * worldTransform.matWorld_;
-	worldTransform.TransferMatrixWithViewProjection(lightViewProjection, modelWorldMatrix);
-
-	ShadowPipeline::GetInstance()->SetCommandList();
-	commandList->SetGraphicsRootConstantBufferView(ShadowPipeline::kRootParamTransform, worldTransform.GetConstBuffer()->GetGPUVirtualAddress());
-
-	// マテリアルもテクスチャも要らないので、頂点バッファだけ差し替えて描く。
-	for (const SubMesh& subMesh : subMeshes_) {
-		// 動的メッシュは中身が空になることがある(トレイルの点がまだ無い等)。
-		if (subMesh.vertexCount == 0) {
-			continue;
-		}
-		commandList->IASetVertexBuffers(0, 1, &subMesh.vertexBufferView);
+		commandList->SetGraphicsRootDescriptorTable(7, TextureManager::GetInstance()->GetSrvHandle(emissiveIndex));
 		commandList->DrawInstanced(subMesh.vertexCount, 1, 0, 0);
 	}
 }

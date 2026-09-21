@@ -45,13 +45,6 @@ public:
 	/// </summary>
 	static Model* CreateCapsule(const std::string& textureFilePath, ShaderModel shaderModel = ShaderModel::kNone, float radius = 0.5f, float height = 2.0f, uint32_t subdivision = 16);
 
-	/// <summary>
-	/// シャドウマップへ深度だけ書く。lightViewProjectionはShadowMapが作るライト視点の行列。
-	/// 呼ぶ前に DirectXCommon::SetRenderViewIndex(kShadowViewIndex) と
-	/// ShadowMap::BeginWrite() を済ませておくこと。
-	/// </summary>
-	void DrawShadow(const WorldTransform& worldTransform, const Matrix4x4& lightViewProjection);
-
 	static Model* CreatePlane(const std::string& textureFilePath, ShaderModel shaderModel = ShaderModel::kNone);
 
 	/// <summary>

@@ -8,7 +8,6 @@
 #include "../postprocess/VolumeStack.h"
 #include "../scene/GameObject.h"
 #include "../scene/Scene.h"
-#include "../shadow/ShadowMap.h"
 #include "EditorApplication.h"
 #include "EditorSelection.h"
 #endif // USE_IMGUI
@@ -71,22 +70,6 @@ void RenderingWindow::Draw(bool* pOpen) {
 			ImGui::Unindent();
 		}
 		ImGui::PopID();
-	}
-
-	// シャドウマップの中身を直接見られるようにしておく。
-	// 影が出ないときの切り分け(ここが真っ白ならシャドウパスが描けていない)に使う。
-	ShadowMap* shadowMap = ShadowMap::GetInstance();
-	if (shadowMap->IsInitialized()) {
-		ImGui::SeparatorText("Shadow");
-		float bias = shadowMap->GetShadowBias();
-		if (ImGui::DragFloat("Depth Bias", &bias, 0.0001f, 0.0f, 0.05f, "%.4f")) {
-			shadowMap->SetShadowBias(bias);
-		}
-		if (ImGui::TreeNode("Shadow Map")) {
-			// 深度をR32_FLOATとして表示する。手前ほど黒、遠いほど白。
-			ImGui::Image(static_cast<ImTextureID>(shadowMap->GetSrvHandleGPU().ptr), ImVec2(256.0f, 256.0f));
-			ImGui::TreePop();
-		}
 	}
 
 	// フェードはVolumeとは独立した演出用のランタイム状態。動作確認用に現在値だけ表示する。

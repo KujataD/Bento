@@ -95,10 +95,9 @@ public:
 
 	// 同一フレームで同じオブジェクトを複数ビューへ描くため、ビュー毎に別々の定数バッファを使う。
 	// WorldTransform等がこの番号で書き込み/バインド先のバッファを選ぶ。Scene=0/Game=1。
-	static const uint32_t kRenderViewCount = 3;
+	static const uint32_t kRenderViewCount = 2;
 	static const uint32_t kSceneViewIndex = 0;	// シーンビュー枠。デバッグカメラ視点のWVP
 	static const uint32_t kGameViewIndex = 1;	// ゲームビュー枠。メインカメラ視点のWVP
-	static const uint32_t kShadowViewIndex = 2;	// シャドウマップ枠。ライト視点のWVP
 
 	void SetRenderViewIndex(uint32_t index) { renderViewIndex_ = index; }
 
@@ -298,7 +297,7 @@ private:
 	uint32_t backBufferIndex_ = 0;
 	int32_t backBufferWidth_ = 0;
 	int32_t backBufferHeight_ = 0;
-	// 現在描画中のビュー番号(Scene=0/Game=1/Shadow=2)。BeginSceneRender/BeginGameRenderで切り替える。
+	// 現在描画中のビュー番号(Scene=0/Game=1)。BeginSceneRender/BeginGameRenderで切り替える。
 	uint32_t renderViewIndex_ = kSceneViewIndex;
 
 	// 画面の色

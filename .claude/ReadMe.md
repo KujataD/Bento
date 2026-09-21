@@ -65,7 +65,7 @@ git fetch engine
 
 | パス | 内容 |
 |---|---|
-| `KujataEngine/` | エンジン本体(scene / runtime / components / Editor / 3d / 2d / base / postprocess / shapes / math / vfx / shadow / assets / input、`KujataEngine.vcxproj`、`main.cpp`) |
+| `KujataEngine/` | エンジン本体(scene / runtime / components / Editor / 3d / 2d / base / postprocess / shapes / math / vfx / assets / input、`KujataEngine.vcxproj`、`main.cpp`) |
 | `KujataEngine/EngineData/` | エンジンが持つデータ(シェーダー、既定テクスチャ) |
 | `externals/` | 外部ライブラリ(imgui / assimp / DirectXTex 等) |
 | `DirectXGame/` | このリポジトリのゲーム(GameModule / GameComponents / Data / Game.props / README.md) |

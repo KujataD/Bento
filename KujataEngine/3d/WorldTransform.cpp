@@ -108,16 +108,6 @@ void WorldTransform::TransferMatrix(const Camera& camera, const Matrix4x4& world
 	map->WorldInverseTranspose = Transpose(Inverse(worldMatrix));
 }
 
-void WorldTransform::TransferMatrixWithViewProjection(const Matrix4x4& viewProjection, const Matrix4x4& worldMatrix) const {
-	TransformationMatrix* map = constMap_[CurrentViewIndex()];
-	if (!map) {
-		return;
-	}
-	map->WVP = worldMatrix * viewProjection;
-	map->World = worldMatrix;
-	map->WorldInverseTranspose = Transpose(Inverse(worldMatrix));
-}
-
 TransformationMatrix WorldTransform::GetMatrixData(const Camera& camera) const {
 	TransformationMatrix data;
 

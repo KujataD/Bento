@@ -1,21 +1,18 @@
-// Sceneの描画まわり(影パス・Volume適用・ビュー描画・スクリーン空間UI)。
+// Sceneの描画まわり(Volume適用・ビュー描画・スクリーン空間UI)。
 // 何を描くかの中身はGameObject/Component・SceneGizmos・EditorBillboards・UIレンダラーにあり、
 // ここは描く順番とビューごとの出し分けだけを決める。
 #include "Scene.h"
 #include "EditorBillboards.h"
 #include "SceneGizmos.h"
 #include "../3d/Camera.h"
-#include "../3d/DirectionalLight.h"
 #include "../2d/Sprite2DRenderer.h"
 #include "../2d/UICanvasRenderer.h"
 #include "../base/DirectXCommon.h"
-#include "../components/ModelRendererComponent.h"
 #include "../input/Input.h"
 #include "../postprocess/PostProcess.h"
 #include "../postprocess/VolumeStack.h"
 #include "../runtime/PlayState.h"
 #include "../runtime/SelectionProvider.h"
-#include "../shadow/ShadowMap.h"
 
 namespace KujataEngine {
 
@@ -37,44 +34,6 @@ void Scene::Draw() {
 }
 
 void Scene::PrepareFrame() { UpdateWorldTransforms(); }
-
-void Scene::RenderShadowPass() {
-	ShadowMap* shadowMap = ShadowMap::GetInstance();
-	if (!shadowMap->IsInitialized()) {
-		return;
-	}
-
-	// ライトの向きは現在のDirectionalLight(=シーン上のDirectionalLightComponentが毎フレーム反映済み)。
-	const Vector3& lightDirection = DirectionalLight::GetInstance()->GetData().direction;
-	// TODO: focusPositionをプレイヤー/カメラ注視点へ追従させると、広いシーンでも影の解像度を保てる。
-	shadowMap->UpdateLightMatrix(lightDirection, {0.0f, 0.0f, 0.0f}, 40.0f, 100.0f);
-
-	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
-	const uint32_t previousViewIndex = dxCommon->GetRenderViewIndex();
-	// ライト視点のWVPをScene/Gameとは別の定数バッファ枠へ書くため、ここで切り替える。
-	dxCommon->SetRenderViewIndex(DirectXCommon::kShadowViewIndex);
-
-	shadowMap->BeginWrite();
-	for (const std::unique_ptr<GameObject>& gameObject : gameObjects_) {
-		if (!gameObject || !gameObject->IsActiveInHierarchy()) {
-			continue;
-		}
-		for (const std::unique_ptr<Component>& component : gameObject->GetComponents()) {
-			if (!component || !component->IsEnabled()) {
-				continue;
-			}
-			ModelRendererComponent* renderer = component->AsModelRendererComponent();
-			// **Cast Shadowを切ったものは影パスで描かない。**
-			// 小さなパーツを大量に置くと、個別の影は絵に効かないのにドローコールだけ倍になる。
-			if (renderer && renderer->CastsShadow()) {
-				renderer->DrawShadow(shadowMap->GetLightViewProjection());
-			}
-		}
-	}
-	shadowMap->EndWrite();
-
-	dxCommon->SetRenderViewIndex(previousViewIndex);
-}
 
 void Scene::ApplyVolumes(const Camera* camera) {
 	// カメラが無いビュー(まだシーンカメラが揃っていない等)は原点基準で解決しておく。

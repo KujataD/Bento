@@ -217,8 +217,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Editor\PrimitiveObjectFactory.cpp" />
     <ClCompile Include="Editor\LightObjectFactory.cpp" />
     <ClCompile Include="components\SpotLightComponent.cpp" />
-    <ClCompile Include="shadow\ShadowMap.cpp" />
-    <ClCompile Include="shadow\ShadowPipeline.cpp" />
     <ClCompile Include="postprocess\VolumeProfile.cpp" />
     <ClCompile Include="postprocess\VolumeStack.cpp" />
     <ClCompile Include="components\VolumeComponent.cpp" />
@@ -372,8 +370,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Editor\PrimitiveObjectFactory.h" />
     <ClInclude Include="Editor\LightObjectFactory.h" />
     <ClInclude Include="components\SpotLightComponent.h" />
-    <ClInclude Include="shadow\ShadowMap.h" />
-    <ClInclude Include="shadow\ShadowPipeline.h" />
     <ClInclude Include="postprocess\VolumeProfile.h" />
     <ClInclude Include="postprocess\VolumeStack.h" />
     <ClInclude Include="components\VolumeComponent.h" />

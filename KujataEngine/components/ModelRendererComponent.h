@@ -40,7 +40,6 @@ public:
 	const char* GetTypeName() const override { return "ModelRendererComponent"; }
 	bool AllowMultiple() const override { return false; }
 
-	ModelRendererComponent* AsModelRendererComponent() override { return this; }
 
 	void SetModel(std::unique_ptr<Model> model);
 
@@ -51,19 +50,6 @@ public:
 	/// 埋め込みMaterialのBaseColorへ反映されます(Texture/ColorはMaterialだけで管理します)。
 	/// </summary>
 	void SetPrimitive(PrimitiveType primitive, const std::string& textureFilePath);
-
-	/// <summary>
-	/// シャドウマップへ深度だけ書く。ワールド行列はPrepareFrameで更新済みの値を使うため、
-	/// ここではUpdateMatrixを呼ばない(カメラ依存の更新をシャドウパスへ持ち込まない)。
-	/// </summary>
-	void DrawShadow(const Matrix4x4& lightViewProjection);
-
-	/// <summary>
-	/// 影パスで描くか。**多数の小さなパーツでは切るとドローコールが半分になる**。
-	/// 脚のボーンのように、個別の影が絵に効かない割に描画回数だけ倍にするものが対象。
-	/// </summary>
-	bool CastsShadow() const { return castShadow_; }
-	void SetCastShadow(bool cast) { castShadow_ = cast; }
 
 	/// <summary>
 	/// 表示するModelをパス(プロジェクト相対)で設定します。存在するファイルならassetIdを補完し、
@@ -218,8 +204,6 @@ private:
 	bool billboardEnabled_ = false;
 	// 両面描画(背面カリングなし)。バリア球など内側からも見せたいものに使う。
 	bool doubleSided_ = false;
-	// 影パスで描くか。小さなパーツを大量に置くときに切る。
-	bool castShadow_ = true;
 	int billboardFaceMode_ = 0;
 	float cameraLocalZ_ = 1.0f;
 	// ランタイム発光上書き(演出用の一時値。シリアライズしない)。

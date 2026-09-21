@@ -70,51 +70,6 @@ cbuffer gSpotLight : register(b4)
     int32_t spotLightCount;
 };
 
-// --- シャドウマップ ---------------------------------------------------------
-// C++側 shadow/ShadowMap.h の ShadowConstants と一致させること。
-Texture2D<float32_t> gShadowMap : register(t1);
-SamplerComparisonState gShadowSampler : register(s1);
-
-cbuffer gShadow : register(b5)
-{
-    float32_t4x4 lightViewProjection;
-    float32_t shadowBias;
-    float32_t shadowTexelSize;
-    float32_t2 shadowPadding;
-};
-
-// 1.0=完全に照らされている / 0.0=完全に影。DirectionalLightの項にだけ掛ける。
-float32_t CalcShadowFactor(float32_t3 worldPosition)
-{
-    float32_t4 lightClip = mul(float32_t4(worldPosition, 1.0f), lightViewProjection);
-    // 正射影なのでw除算は本来不要だが、将来スポット影(透視)へ広げても壊れないようにしておく。
-    float32_t3 ndc = lightClip.xyz / max(lightClip.w, 1e-6f);
-
-    // シャドウマップの範囲外は影を落とさない(遠景まで真っ暗にしない)。
-    if (abs(ndc.x) > 1.0f || abs(ndc.y) > 1.0f || ndc.z > 1.0f || ndc.z < 0.0f)
-    {
-        return 1.0f;
-    }
-
-    // NDC(-1..1・Y上向き) → UV(0..1・Y下向き)。
-    float32_t2 uv = float32_t2(ndc.x * 0.5f + 0.5f, 0.5f - ndc.y * 0.5f);
-    float32_t compareDepth = ndc.z - shadowBias;
-
-    // 3x3 PCF。SampleCmpLevelZeroが比較とバイリニア補間をまとめてやってくれる。
-    float32_t sum = 0.0f;
-    [unroll]
-    for (int32_t y = -1; y <= 1; y++)
-    {
-        [unroll]
-        for (int32_t x = -1; x <= 1; x++)
-        {
-            float32_t2 offset = float32_t2(x, y) * shadowTexelSize;
-            sum += gShadowMap.SampleCmpLevelZero(gShadowSampler, uv + offset, compareDepth);
-        }
-    }
-    return sum / 9.0f;
-}
-
 // --- バリア(enableLighting == 6)用の定数 ---------------------------------
 // 切頂二十面体(サッカーボール)のセル中心方向。
 // 中心は「正二十面体の頂点12個(=五角形の中心)」+「正十二面体の頂点20個(=六角形の中心)」の計32個で、
@@ -197,8 +152,7 @@ PixelShaderOutput main(VertexShaderOutput input)
 
             // DirectionalLight
             float cos = saturate(dot(normal, -normalize(gDirectionalLight.direction)));
-            float32_t shadow = CalcShadowFactor(input.worldPosition);
-            float32_t3 result = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity * shadow;
+            float32_t3 result = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
 
             // PointLights (拡散反射)
             for (int32_t i = 0; i < pointLightCount; i++)
@@ -233,8 +187,7 @@ PixelShaderOutput main(VertexShaderOutput input)
             // DirectionalLight
             float NdotL = dot(normal, -normalize(gDirectionalLight.direction));
             float cos = pow(NdotL * 0.5f + 0.5f, 2.0f);
-            float32_t shadow = CalcShadowFactor(input.worldPosition);
-            float32_t3 result = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity * shadow;
+            float32_t3 result = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
 
             // PointLights (ハーフランバート拡散)
             for (int32_t i = 0; i < pointLightCount; i++)
@@ -275,9 +228,8 @@ PixelShaderOutput main(VertexShaderOutput input)
             float cos = saturate(dot(normal, -normalize(gDirectionalLight.direction)));
             float32_t3 reflectLight = reflect(normalize(gDirectionalLight.direction), normal);
             float32_t specularPow = pow(saturate(dot(reflectLight, toEye)), gMaterial.shininess);
-            float32_t shadow = CalcShadowFactor(input.worldPosition);
-            float32_t3 diffuse = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity * shadow;
-            float32_t3 specular = gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float32_t3(1.0f, 1.0f, 1.0f) * shadow;
+            float32_t3 diffuse = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
+            float32_t3 specular = gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float32_t3(1.0f, 1.0f, 1.0f);
             float32_t3 result = diffuse + specular;
 
             // --- PointLights ---
@@ -332,10 +284,9 @@ PixelShaderOutput main(VertexShaderOutput input)
             float specularPow = pow(saturate(NDotH), gMaterial.shininess);
             
             // 拡散反射
-            float32_t shadow = CalcShadowFactor(input.worldPosition);
-            float32_t3 directionalLightDiffuse = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity * shadow;
+            float32_t3 directionalLightDiffuse = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
             // 鏡面反射
-            float32_t3 directionalLightSpecular = gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float32_t3(1.0f, 1.0f, 1.0f) * shadow;
+            float32_t3 directionalLightSpecular = gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float32_t3(1.0f, 1.0f, 1.0f);
             // 拡散反射+鏡面反射
             output.color.rgb = directionalLightDiffuse + directionalLightSpecular;
             
