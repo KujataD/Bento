@@ -103,7 +103,32 @@ code, .mono { font-family: var(--font-mono); }
   border: 1px solid var(--line);
   border-radius: 8px;
 }
-.search { display: flex; gap: 6px; flex: 1 1 260px; max-width: 380px; }
+.search { position: relative; display: flex; gap: 6px; flex: 1 1 300px; max-width: 460px; }
+.suggest {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  max-height: min(60vh, 440px);
+  overflow: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+}
+.suggest[hidden] { display: none; }
+.suggest li { padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.suggest li[aria-selected="true"] { background: var(--accent-soft); }
+.suggest .s-head { display: flex; align-items: baseline; gap: 8px; }
+.suggest .s-name { font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; word-break: break-all; }
+.suggest .s-where { margin-left: auto; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.suggest .s-doc { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin-top: 1px; }
+.suggest .s-more, .suggest .s-none { font-size: 11.5px; color: var(--muted); cursor: default; }
+.suggest mark { background: color-mix(in srgb, var(--accent) 45%, transparent); color: inherit; border-radius: 2px; padding: 0 1px; }
 .search input {
   flex: 1;
   min-width: 0;
@@ -171,6 +196,8 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .atlas.focusing .chip:not(.rel):not(.selected) { opacity: 0.28; }
 .atlas.tagging .chip:not(.tagged) { opacity: 0.28; }
 .chip.tagged { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.atlas.searching .chip:not(.match) { opacity: 0.22; }
+.atlas.searching .chip.match { opacity: 1; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 
 /* 詳細 */
 .detail {
@@ -239,7 +266,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
     <section>
       <h2>使い方</h2>
       <ol>
-        <li>クラスの名前をクリックする(または上の欄で検索)</li>
+        <li>クラスの名前をクリックする(または上の欄で、名前・説明・ファイル名の一部から探す)</li>
         <li>関係するクラスが色付きで光り、右に説明・関係図・一覧が出る</li>
         <li>「関係」のボタンで、見たい種類だけに絞る</li>
       </ol>
@@ -249,9 +276,10 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 
   <div class="toolbar" role="toolbar" aria-label="絞り込み">
     <div class="search">
-      <input id="search" list="names" placeholder="クラス名で探す(例: GameObject)" autocomplete="off" aria-label="クラス名で探す">
+      <input id="search" placeholder="名前や説明の一部で探す(例: Fog、Undo、当たり判定)" autocomplete="off" aria-label="名前や説明の一部で探す"
+        role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list">
       <button id="search-go" type="button">探す</button>
-      <datalist id="names"></datalist>
+      <ul class="suggest" id="suggest" role="listbox" aria-label="候補" hidden></ul>
     </div>
     <div class="group" id="rel-toggles"><span class="group-label">関係</span></div>
     <div class="group seg" id="tag-filter"><span class="group-label">印</span></div>
@@ -349,7 +377,6 @@ function renderToolbar() {
     });
     tagBox.appendChild(b);
   });
-  document.getElementById("names").innerHTML = DATA.nodes.map(n => `<option value="${escapeHtml(n.qualified)}">`).join("");
 }
 
 function renderAtlas() {
@@ -369,7 +396,11 @@ function renderAtlas() {
   }).join("");
   atlas.addEventListener("click", ev => {
     const chip = ev.target.closest(".chip");
-    if (chip) select(chip.dataset.id, false);
+    if (!chip) return;
+    // 検索で光らせていた札は、選んだら関係の表示に切り替える
+    closeSuggest();
+    highlightMatches("");
+    select(chip.dataset.id, false);
   });
 }
 
@@ -506,19 +537,142 @@ function select(id, scrollAtlas) {
   try { history.replaceState(null, "", "#" + encodeURIComponent(id)); } catch (e) {}
 }
 
-function search() {
-  const q = document.getElementById("search").value.trim().toLowerCase();
-  if (!q) return;
-  const hit = DATA.nodes.find(n => n.qualified.toLowerCase() === q) || DATA.nodes.find(n => n.name.toLowerCase() === q)
-    || DATA.nodes.find(n => n.qualified.toLowerCase().includes(q));
-  if (hit) select(hit.id, true);
-  else document.getElementById("search").setCustomValidity("見つかりませんでした"), document.getElementById("search").reportValidity();
+// --- 検索: 名前・説明・ファイル名の部分一致。打つたびに候補を出し、一覧でも当たった札を光らせる ---
+const searchInput = document.getElementById("search");
+const suggestBox = document.getElementById("suggest");
+const SUGGEST_LIMIT = 30;
+let hits = [];
+let active = -1;
+
+// 当たった場所ごとに点を付けて並べる
+// (名前の完全一致 > 名前の先頭 > 名前の途中 > 説明 > メンバ名 > ファイル名 > 名前で当たったクラスと関係がある)
+function findMatches(q) {
+  const results = [];
+  const found = new Set();
+  for (const n of DATA.nodes) {
+    const name = n.name.toLowerCase(), qualified = n.qualified.toLowerCase();
+    let score = -1, where = "", detail = "";
+    if (name === q || qualified === q) { score = 0; where = "name"; }
+    else if (name.startsWith(q)) { score = 1; where = "name"; }
+    else if (qualified.includes(q)) { score = 2; where = "name"; }
+    else if ((n.doc || "").toLowerCase().includes(q)) { score = 3; where = "doc"; }
+    else {
+      const members = (n.members || []).filter(m => m.toLowerCase().includes(q));
+      if (members.length) { score = 4; where = "member"; detail = members.slice(0, 4).join(", ") + (members.length > 4 ? ` ほか ${members.length - 4}` : ""); }
+      else if (n.file.toLowerCase().includes(q)) { score = 5; where = "file"; }
+    }
+    if (score >= 0) { results.push({ node: n, score, where, detail }); found.add(n.id); }
+  }
+  // 名前で当たったクラスを継承・所有・参照・使用しているクラスも、関連として後ろに足す
+  // (逆向き = 当たったクラスが使っている側は足さない。Vector3 など基礎の型ばかりが並ぶため)
+  const nameHits = new Set(results.filter(r => r.where === "name").map(r => r.node.id));
+  const related = {};
+  DATA.edges.forEach(e => {
+    if (!nameHits.has(e.target) || found.has(e.source) || !nodeById[e.source]) return;
+    (related[e.source] = related[e.source] || []).push(`${nodeById[e.target].name} を${REL_LABEL[e.type]}`);
+  });
+  Object.entries(related).forEach(([id, notes]) => results.push({ node: nodeById[id], score: 6, where: "rel", detail: notes.slice(0, 2).join("、") + (notes.length > 2 ? ` ほか ${notes.length - 2}` : "") }));
+  return results.sort((a, b) => a.score - b.score || a.node.qualified.length - b.node.qualified.length || a.node.qualified.localeCompare(b.node.qualified));
 }
-document.getElementById("search-go").addEventListener("click", search);
-document.getElementById("search").addEventListener("keydown", ev => { if (ev.key === "Enter") search(); });
-document.getElementById("search").addEventListener("input", ev => ev.target.setCustomValidity(""));
+
+// 大文字小文字を無視して、当たった部分を <mark> で囲む(HTML は先にエスケープする)
+function markText(text, q) {
+  const lower = text.toLowerCase();
+  let out = "", from = 0;
+  for (let i = lower.indexOf(q); i >= 0 && q; i = lower.indexOf(q, from)) {
+    out += escapeHtml(text.slice(from, i)) + "<mark>" + escapeHtml(text.slice(i, i + q.length)) + "</mark>";
+    from = i + q.length;
+  }
+  return out + escapeHtml(text.slice(from));
+}
+
+// 説明が長いときは、当たった場所の前後だけを切り出す
+function docSnippet(doc, q) {
+  const text = doc.replace(/\*\*/g, "");
+  const i = text.toLowerCase().indexOf(q);
+  if (text.length <= 90) return markText(text, q);
+  const start = Math.max(0, (i < 0 ? 0 : i) - 30);
+  const part = text.slice(start, start + 90);
+  return (start > 0 ? "…" : "") + markText(part, q) + (start + 90 < text.length ? "…" : "");
+}
+
+function highlightMatches(q) {
+  const atlas = document.getElementById("atlas");
+  // 一覧で光らせるのは直接当たったものだけ(関係で足した候補まで光らせると、ほぼ全部が光る)
+  const ids = new Set(hits.filter(h => h.where !== "rel").map(h => h.node.id));
+  atlas.classList.toggle("searching", !!q);
+  atlas.querySelectorAll(".chip").forEach(chip => chip.classList.toggle("match", !!q && ids.has(chip.dataset.id)));
+}
+
+function renderSuggest() {
+  const q = searchInput.value.trim().toLowerCase();
+  hits = q ? findMatches(q) : [];
+  active = hits.length ? 0 : -1;
+  highlightMatches(q);
+  if (!q) { closeSuggest(); return; }
+  const where = { name: "名前", doc: "説明", member: "メンバ", file: "ファイル", rel: "関係" };
+  const items = hits.slice(0, SUGGEST_LIMIT).map((h, i) => {
+    const n = h.node;
+    const shortDoc = n.doc ? escapeHtml(n.doc.replace(/\*\*/g, "").slice(0, 70)) + (n.doc.length > 70 ? "…" : "") : "";
+    const line = h.where === "doc" ? docSnippet(n.doc, q)
+      : h.where === "member" ? markText(h.detail, q)
+      : h.where === "file" ? markText(n.file, q)
+      : h.where === "rel" ? markText(h.detail, q)
+      : shortDoc;
+    const doc = line ? `<div class="s-doc">${line}</div>` : "";
+    return `<li role="option" id="s${i}" data-id="${escapeHtml(n.id)}" aria-selected="${i === active}">
+      <div class="s-head"><span class="s-name">${markText(n.qualified, h.where === "name" ? q : "")}</span>
+      <span class="s-where">${where[h.where]} · ${escapeHtml(n.module)}</span></div>${doc}</li>`;
+  });
+  if (!hits.length) items.push(`<li class="s-none">見つかりませんでした</li>`);
+  else if (hits.length > SUGGEST_LIMIT) items.push(`<li class="s-more">ほか ${hits.length - SUGGEST_LIMIT} 件(一覧で光っています)</li>`);
+  suggestBox.innerHTML = items.join("");
+  suggestBox.hidden = false;
+  searchInput.setAttribute("aria-expanded", "true");
+  searchInput.setAttribute("aria-activedescendant", active >= 0 ? "s" + active : "");
+}
+
+function closeSuggest() {
+  suggestBox.hidden = true;
+  searchInput.setAttribute("aria-expanded", "false");
+  searchInput.removeAttribute("aria-activedescendant");
+}
+
+function moveActive(delta) {
+  const count = Math.min(hits.length, SUGGEST_LIMIT);
+  if (!count) return;
+  active = (active + delta + count) % count;
+  suggestBox.querySelectorAll("li[role=option]").forEach((li, i) => li.setAttribute("aria-selected", String(i === active)));
+  searchInput.setAttribute("aria-activedescendant", "s" + active);
+  suggestBox.querySelector(`#s${active}`)?.scrollIntoView({ block: "nearest" });
+}
+
+function choose(id) {
+  closeSuggest();
+  highlightMatches("");
+  select(id, true);
+}
+
+searchInput.addEventListener("input", renderSuggest);
+searchInput.addEventListener("focus", () => { if (searchInput.value.trim()) renderSuggest(); });
+searchInput.addEventListener("keydown", ev => {
+  if (ev.key === "ArrowDown") { ev.preventDefault(); if (suggestBox.hidden) renderSuggest(); else moveActive(1); }
+  else if (ev.key === "ArrowUp") { ev.preventDefault(); moveActive(-1); }
+  else if (ev.key === "Enter") { ev.preventDefault(); if (!suggestBox.hidden && active >= 0) choose(hits[active].node.id); else renderSuggest(); }
+  else if (ev.key === "Escape" && !suggestBox.hidden) { ev.stopPropagation(); closeSuggest(); }
+});
+document.getElementById("search-go").addEventListener("click", () => { renderSuggest(); searchInput.focus(); });
+// mousedown で選ぶ(click だと先に入力欄のフォーカスが外れて候補が閉じる)
+suggestBox.addEventListener("mousedown", ev => {
+  const li = ev.target.closest("li[data-id]");
+  if (li) { ev.preventDefault(); choose(li.dataset.id); }
+});
+document.addEventListener("mousedown", ev => { if (!ev.target.closest(".search")) closeSuggest(); });
+
 document.addEventListener("keydown", ev => {
   if (ev.key === "Escape") {
+    searchInput.value = "";
+    highlightMatches("");
     state.selected = null;
     highlightAtlas(null, { out: [], inc: [] });
     renderDetail(null);

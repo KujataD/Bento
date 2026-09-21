@@ -369,10 +369,15 @@ def main():
                 continue
             if depth == 0:
                 flat.append(ch)
+        members = []
         for statement in "".join(flat).split(";"):
             statement = re.sub(r"\b(public|protected|private)\s*:", "", statement).strip()
             if not statement or statement.startswith(("using ", "friend ", "typedef ", "static_assert", "enum ")):
                 continue
+            # 検索用に、宣言している名前(関数名・フィールド名)を残す
+            member = re.search(r"(~?[A-Za-z_]\w*)\s*\(", statement) or re.search(r"([A-Za-z_]\w*)\s*(?:\[[^\]]*\]\s*)*(?:=.*)?$", statement)
+            if member and member.group(1) not in members and member.group(1) != info["name"] and member.group(1) != "operator":
+                members.append(member.group(1))
             no_templates = re.sub(r"<[^<>]*>", "", re.sub(r"<[^<>]*>", "", re.sub(r"<[^<>]*>", "", statement)))
             if "(" in no_templates.split("=")[0]:
                 continue  # 関数の宣言
@@ -389,6 +394,7 @@ def main():
                     add_edge(node_id, target, "refers")
                 elif owns_wrappers or not pointer_like:
                     add_edge(node_id, target, "owns")
+        info["members"] = members
 
     # 使っている(関数の本体・クラス内のインライン関数)
     for node_id in nodes:
