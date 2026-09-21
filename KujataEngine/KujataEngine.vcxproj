@@ -169,6 +169,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Editor\AnimationWindow.cpp" />
     <ClCompile Include="Editor\AssetDatabase.cpp" />
     <ClCompile Include="Editor\EditorApplication.cpp" />
+    <ClCompile Include="Editor\GameModuleHotReloader.cpp" />
     <ClCompile Include="Editor\EditorConsole.cpp" />
     <ClCompile Include="Editor\EditorDockSpace.cpp" />
     <ClCompile Include="Editor\EditorImGuiUtil.cpp" />
@@ -322,6 +323,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Editor\AnimationWindow.h" />
     <ClInclude Include="Editor\AssetDatabase.h" />
     <ClInclude Include="Editor\EditorApplication.h" />
+    <ClInclude Include="Editor\GameModuleHotReloader.h" />
     <ClInclude Include="Editor\EditorConsole.h" />
     <ClInclude Include="Editor\EditorDockSpace.h" />
     <ClInclude Include="Editor\EditorImGuiUtil.h" />
