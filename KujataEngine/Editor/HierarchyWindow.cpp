@@ -14,6 +14,7 @@
 #include "EditorSelection.h"
 #include "LightObjectFactory.h"
 #include "PrefabAsset.h"
+#include "PrefabEditing.h"
 #include "PrimitiveObjectFactory.h"
 #include "UIObjectFactory.h"
 #include <cstring>
@@ -128,20 +129,6 @@ void DrawHierarchyCreateMenu(Scene& scene, GameObject* parent) {
 	}
 
 	ImGui::EndMenu();
-}
-
-void SaveHierarchyObjectAsPrefab(GameObject* gameObject) {
-	if (!gameObject) {
-		return;
-	}
-
-	PrefabAsset::SaveResult result = PrefabAsset::SaveAsPrefab(*gameObject, GetProjectDataRoot());
-	if (result.succeeded) {
-		PrefabAsset::BindHierarchyToPrefab(*gameObject, result.outputPath);
-		EditorConsole::GetInstance()->AddLog("[Prefab] Saved: " + result.outputPath.string());
-	} else {
-		EditorConsole::GetInstance()->AddLog("[Prefab] Save failed: " + result.message);
-	}
 }
 
 bool CanDropHierarchyObject(GameObject* dragged, GameObject* targetParent) {
@@ -316,14 +303,7 @@ void AcceptHierarchyObjectDrop(Scene& scene, GameObject* targetParent) {
 	const ImGuiPayload* prefabPayload = ImGui::AcceptDragDropPayload(kProjectPrefabDragPayloadType);
 	if (prefabPayload && prefabPayload->DataSize > 0) {
 		const char* prefabPathText = static_cast<const char*>(prefabPayload->Data);
-		CaptureUndo(scene, "Instantiate Prefab");
-		GameObject* created = PrefabAsset::Instantiate(scene, std::filesystem::path(prefabPathText)).rootObject;
-		if (created) {
-			if (targetParent) {
-				created->SetParent(targetParent);
-			}
-			EditorSelection::GetInstance()->SetSelectedGameObject(created);
-		}
+		PrefabEditing::Instantiate(scene, std::filesystem::path(prefabPathText), targetParent, "Instantiate Prefab");
 	}
 
 	const ImGuiPayload* materialPayload = ImGui::AcceptDragDropPayload(kProjectMaterialDragPayloadType);
@@ -390,14 +370,7 @@ void AcceptHierarchyObjectDropOnNode(Scene& scene, GameObject* target, const ImV
 	const ImGuiPayload* prefabPayload = ImGui::AcceptDragDropPayload(kProjectPrefabDragPayloadType);
 	if (prefabPayload && prefabPayload->DataSize > 0) {
 		const char* prefabPathText = static_cast<const char*>(prefabPayload->Data);
-		CaptureUndo(scene, "Instantiate Prefab");
-		GameObject* created = PrefabAsset::Instantiate(scene, std::filesystem::path(prefabPathText)).rootObject;
-		if (created) {
-			if (target) {
-				created->SetParent(target);
-			}
-			EditorSelection::GetInstance()->SetSelectedGameObject(created);
-		}
+		PrefabEditing::Instantiate(scene, std::filesystem::path(prefabPathText), target, "Instantiate Prefab");
 	}
 
 	const ImGuiPayload* materialPayload = ImGui::AcceptDragDropPayload(kProjectMaterialDragPayloadType);
@@ -486,8 +459,7 @@ void HierarchyWindow::DrawObject(Scene& scene, GameObject* gameObject, GameObjec
 
 		if (ImGui::BeginMenu("Prefab")) {
 			if (ImGui::MenuItem("Create Prefab")) {
-				CaptureUndo(scene, "Create Prefab");
-				SaveHierarchyObjectAsPrefab(gameObject);
+				PrefabEditing::Create(scene, *gameObject, "Create Prefab");
 			}
 			ImGui::EndMenu();
 		}

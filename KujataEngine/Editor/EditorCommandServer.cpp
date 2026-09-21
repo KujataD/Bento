@@ -106,7 +106,7 @@ void EditorCommandServer::ParseStartupArguments() {
 void EditorCommandServer::LoadScript(const std::filesystem::path& scriptPath) {
 	std::ifstream input(scriptPath);
 	if (!input) {
-		EditorConsole::GetInstance()->AddLog("[CUI] --run のファイルを開けません: " + scriptPath.string());
+		EditorConsole::GetInstance()->AddLog("[CUI] --run のファイルを開けません: " + scriptPath.string(), EditorLogLevel::Error);
 		exitCode_ = 1;
 		return;
 	}
@@ -140,7 +140,7 @@ void EditorCommandServer::LoadScript(const std::filesystem::path& scriptPath) {
 			--pendingScriptCommands_;
 		});
 	}
-	EditorConsole::GetInstance()->AddLog("[CUI] --run: " + std::to_string(pendingScriptCommands_) + " 件のコマンドを実行します: " + scriptPath.string());
+	EditorConsole::GetInstance()->AddLog("[CUI] --run: " + std::to_string(pendingScriptCommands_) + " 件のコマンドを実行します: " + scriptPath.string(), EditorLogLevel::Info);
 }
 
 void EditorCommandServer::Submit(const std::string& line, const std::string& source, ResponseCallback callback) {
@@ -160,7 +160,7 @@ void EditorCommandServer::ProcessFrame() {
 	{
 		std::lock_guard<std::mutex> lock(queueMutex_);
 		for (const std::string& message : pendingLogs_) {
-			EditorConsole::GetInstance()->AddLog(message);
+			EditorConsole::GetInstance()->AddLog(message, EditorLogLevel::Warning);
 		}
 		pendingLogs_.clear();
 	}
@@ -200,7 +200,7 @@ void EditorCommandServer::ProcessFrame() {
 
 	// そのコマンドの実行中(waitなら待っている間も)にConsoleへ出たログを、返事に含める。
 	EditorConsole::GetInstance()->BeginCapture();
-	EditorConsole::GetInstance()->AddLog("> " + request.line + "  [" + request.source + "]");
+	EditorConsole::GetInstance()->AddLog("> " + request.line + "  [" + request.source + "]", EditorLogLevel::Info);
 	EditorCommandResult result = EditorCommandRegistry::GetInstance().Execute(request.line);
 
 	if (result.ok && (result.waitFrames > 0 || result.poll)) {
@@ -241,7 +241,7 @@ void EditorCommandServer::Respond(Request& request, const EditorCommandResult& r
 	// kujata CLIや--runから来たコマンドの失敗も、エディタを見ている人に分かるようConsoleへ出す
 	// (Consoleから打ったものは返事の表示で出るので重ねない)。
 	if (!result.ok && request.source != "Console") {
-		EditorConsole::GetInstance()->AddLog("[CUI] 失敗: " + result.error);
+		EditorConsole::GetInstance()->AddLog("[CUI] 失敗: " + result.error, EditorLogLevel::Error);
 	}
 
 	if (request.callback) {

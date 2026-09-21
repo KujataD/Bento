@@ -2,6 +2,7 @@
 // 変更系のコマンドは、実行前に必ずUndoのスナップショットを取る(ラベルは "[CUI] ...")。
 #include "EditorCommand.h"
 
+#include "AnimationEditing.h"
 #include "EditorApplication.h"
 #include "EditorCommandServer.h"
 #include "EditorConsole.h"
@@ -10,9 +11,13 @@
 #include "EditorSelection.h"
 #include "EditorUndoManager.h"
 #include "ImGuiManager.h"
+#include "PrefabAsset.h"
+#include "PrefabEditing.h"
 #include "SceneJsonExporter.h"
 #include "SceneJsonImporter.h"
+#include "../assets/AnimationClipAsset.h"
 #include "../base/ProjectPath.h"
+#include "../components/AnimatorComponent.h"
 #include "../runtime/AppControl.h"
 #include "../scene/Component.h"
 #include "../scene/ComponentFactory.h"
@@ -271,6 +276,8 @@ EditorCommandResult CommandObjectGet(const EditorCommandArgs& args) {
 	result["active"] = gameObject->IsActive();
 	result["tag"] = gameObject->GetTag();
 	result["layer"] = gameObject->GetLayer();
+	// プレハブのインスタンスなら、元のプレハブ(Data 基準の相対パス)。そうでなければ空。
+	result["prefab"] = gameObject->IsPrefabInstance() ? gameObject->GetPrefabAssetPath() : "";
 	json children = json::array();
 	for (const GameObject* child : gameObject->GetChildren()) {
 		if (child) {
@@ -817,6 +824,355 @@ EditorCommandResult CommandWindowShow(const EditorCommandArgs& args) {
 	return EditorCommandResult::Success();
 }
 
+// ---- プレハブ(処理は PrefabEditing。Inspector / Hierarchy のボタンと同じもの) ----
+
+// プレハブのインスタンスの「ルート」を探す(子を指定しても、Apply/Revert/Unpack はルート単位で行う)。
+GameObject* ResolvePrefabInstanceRoot(Scene& scene, const std::string& spec, std::string& error) {
+	GameObject* gameObject = ResolveObject(scene, spec, error);
+	if (!gameObject) {
+		return nullptr;
+	}
+	if (!gameObject->IsPrefabInstance()) {
+		error = MakeObjectPath(gameObject) + " はプレハブのインスタンスではありません。";
+		return nullptr;
+	}
+	GameObject* root = PrefabAsset::FindPrefabInstanceRoot(scene, *gameObject);
+	return root ? root : gameObject;
+}
+
+json DescribePrefabResult(const PrefabEditing::Result& result) {
+	json value;
+	value["object"] = result.object ? MakeObjectPath(result.object) : "";
+	if (!result.prefabPath.empty()) {
+		value["prefab"] = result.prefabPath.generic_string();
+	}
+	return value;
+}
+
+EditorCommandResult CommandPrefabList(const EditorCommandArgs&) {
+	// Data 配下の *.prefab.json を、prefab.instantiate にそのまま渡せる相対パスで返す。
+	json prefabs = json::array();
+	const std::filesystem::path dataRoot = GetProjectDataRoot();
+	std::error_code errorCode;
+	for (auto it = std::filesystem::recursive_directory_iterator(dataRoot, errorCode); !errorCode && it != std::filesystem::recursive_directory_iterator(); it.increment(errorCode)) {
+		const std::string fileName = it->path().filename().string();
+		if (it->is_regular_file() && fileName.ends_with(".prefab.json")) {
+			prefabs.push_back(std::filesystem::relative(it->path(), dataRoot, errorCode).generic_string());
+		}
+	}
+	return EditorCommandResult::Success(prefabs);
+}
+
+EditorCommandResult CommandPrefabCreate(const EditorCommandArgs& args) {
+	Scene* scene = GetScene();
+	if (!scene) {
+		return EditorCommandResult::Failure("シーンがありません。");
+	}
+	std::string error;
+	GameObject* gameObject = ResolveObject(*scene, args.Get(0), error);
+	if (!gameObject) {
+		return EditorCommandResult::Failure(error);
+	}
+	PrefabEditing::Result result = PrefabEditing::Create(*scene, *gameObject, "[CUI] prefab.create " + MakeObjectPath(gameObject));
+	return result.succeeded ? EditorCommandResult::Success(DescribePrefabResult(result)) : EditorCommandResult::Failure(result.message);
+}
+
+EditorCommandResult CommandPrefabInstantiate(const EditorCommandArgs& args) {
+	Scene* scene = GetScene();
+	if (!scene) {
+		return EditorCommandResult::Failure("シーンがありません。");
+	}
+	if (args.Count() == 0) {
+		return EditorCommandResult::Failure("プレハブのパスを指定してください(prefab.list で一覧。例: prefab.instantiate Prefabs/Enemy.prefab.json)。");
+	}
+	GameObject* parent = nullptr;
+	if (args.Count() > 1) {
+		std::string error;
+		parent = ResolveObject(*scene, args.Get(1), error);
+		if (!parent) {
+			return EditorCommandResult::Failure(error);
+		}
+	}
+	PrefabEditing::Result result = PrefabEditing::Instantiate(*scene, args.Get(0), parent, "[CUI] prefab.instantiate " + args.Get(0));
+	return result.succeeded ? EditorCommandResult::Success(DescribePrefabResult(result)) : EditorCommandResult::Failure(result.message);
+}
+
+EditorCommandResult CommandPrefabApply(const EditorCommandArgs& args) {
+	Scene* scene = GetScene();
+	if (!scene) {
+		return EditorCommandResult::Failure("シーンがありません。");
+	}
+	std::string error;
+	GameObject* root = ResolvePrefabInstanceRoot(*scene, args.Get(0), error);
+	if (!root) {
+		return EditorCommandResult::Failure(error);
+	}
+	PrefabEditing::Result result = PrefabEditing::Apply(*scene, *root);
+	return result.succeeded ? EditorCommandResult::Success(DescribePrefabResult(result)) : EditorCommandResult::Failure(result.message);
+}
+
+EditorCommandResult CommandPrefabRevert(const EditorCommandArgs& args) {
+	Scene* scene = GetScene();
+	if (!scene) {
+		return EditorCommandResult::Failure("シーンがありません。");
+	}
+	std::string error;
+	GameObject* root = ResolvePrefabInstanceRoot(*scene, args.Get(0), error);
+	if (!root) {
+		return EditorCommandResult::Failure(error);
+	}
+	PrefabEditing::Result result = PrefabEditing::Revert(*scene, *root, "[CUI] prefab.revert " + MakeObjectPath(root));
+	return result.succeeded ? EditorCommandResult::Success(DescribePrefabResult(result)) : EditorCommandResult::Failure(result.message);
+}
+
+EditorCommandResult CommandPrefabUnpack(const EditorCommandArgs& args) {
+	Scene* scene = GetScene();
+	if (!scene) {
+		return EditorCommandResult::Failure("シーンがありません。");
+	}
+	std::string error;
+	GameObject* root = ResolvePrefabInstanceRoot(*scene, args.Get(0), error);
+	if (!root) {
+		return EditorCommandResult::Failure(error);
+	}
+	PrefabEditing::Result result = PrefabEditing::Unpack(*scene, *root, "[CUI] prefab.unpack " + MakeObjectPath(root));
+	return result.succeeded ? EditorCommandResult::Success(DescribePrefabResult(result)) : EditorCommandResult::Failure(result.message);
+}
+
+EditorCommandResult CommandPrefabOpen(const EditorCommandArgs& args) {
+	// ".prefab.json" で終わればプレハブのパス、そうでなければインスタンス(オブジェクト)として探す。
+	// (オブジェクトが見つからないときにパスとして読みに行くと、「同名が2つ」などの本当の理由が隠れてしまう)
+	const std::string target = args.RestFrom(0);
+	if (target.empty()) {
+		return EditorCommandResult::Failure("プレハブのインスタンスか、プレハブのパス(*.prefab.json)を指定してください。");
+	}
+	std::filesystem::path prefabPath = target;
+	if (!target.ends_with(".prefab.json")) {
+		Scene* scene = GetScene();
+		if (!scene) {
+			return EditorCommandResult::Failure("シーンがありません。");
+		}
+		std::string error;
+		GameObject* root = ResolvePrefabInstanceRoot(*scene, args.Get(0), error);
+		if (!root) {
+			return EditorCommandResult::Failure(error);
+		}
+		prefabPath = root->GetPrefabAssetPath();
+	}
+	if (!EditorApplication::GetInstance()->OpenPrefabEditMode(prefabPath)) {
+		return EditorCommandResult::Failure("プレハブを開けませんでした: " + prefabPath.generic_string() + "(log.tail で理由を確認できます)");
+	}
+	return EditorCommandResult::Success(prefabPath.generic_string());
+}
+
+EditorCommandResult CommandPrefabSave(const EditorCommandArgs&) {
+	if (!EditorApplication::GetInstance()->IsPrefabEditing()) {
+		return EditorCommandResult::Failure("プレハブ編集中ではありません(prefab.open で開きます)。");
+	}
+	if (!EditorApplication::GetInstance()->SavePrefabEditMode()) {
+		return EditorCommandResult::Failure("プレハブを保存できませんでした(log.tail で理由を確認できます)。");
+	}
+	return EditorCommandResult::Success();
+}
+
+EditorCommandResult CommandPrefabClose(const EditorCommandArgs& args) {
+	EditorApplication* application = EditorApplication::GetInstance();
+	if (!application->IsPrefabEditing()) {
+		return EditorCommandResult::Failure("プレハブ編集中ではありません。");
+	}
+	bool save = false;
+	if (args.Count() > 0 && !ParseBool(args.Get(0), save)) {
+		return EditorCommandResult::Failure("保存するかを true / false で指定してください(省略時は保存しない)。");
+	}
+	application->ClosePrefabEditMode(save);
+	return EditorCommandResult::Success();
+}
+
+// ---- アニメーション(処理は AnimationEditing。Animation ウィンドウと同じもの) ----
+
+AnimatorComponent* ResolveAnimator(Scene& scene, const std::string& spec, std::string& error, bool requireClip) {
+	GameObject* gameObject = ResolveObject(scene, spec, error);
+	if (!gameObject) {
+		return nullptr;
+	}
+	AnimatorComponent* animator = gameObject->GetComponent<AnimatorComponent>();
+	if (!animator) {
+		error = MakeObjectPath(gameObject) + " に AnimatorComponent がありません(component.add で足せます)。";
+		return nullptr;
+	}
+	if (requireClip && !animator->HasClip()) {
+		error = MakeObjectPath(gameObject) + " の Animator にクリップがありません(animation.createClip で作れます)。";
+		return nullptr;
+	}
+	return animator;
+}
+
+bool ParseFloat(const std::string& text, float& value) {
+	try {
+		size_t used = 0;
+		value = std::stof(text, &used);
+		return used == text.size();
+	} catch (...) {
+		return false;
+	}
+}
+
+EditorCommandResult CommandAnimationInfo(const EditorCommandArgs& args) {
+	Scene* scene = GetScene();
+	if (!scene) {
+		return EditorCommandResult::Failure("シーンがありません。");
+	}
+	std::string error;
+	AnimatorComponent* animator = ResolveAnimator(*scene, args.Get(0), error, false);
+	if (!animator) {
+		return EditorCommandResult::Failure(error);
+	}
+
+	json result;
+	json clips = json::array();
+	for (const AnimationClipReference& reference : animator->GetClipReferences()) {
+		clips.push_back(reference.path);
+	}
+	result["clips"] = clips;
+	result["currentClip"] = animator->GetCurrentClipIndex();
+	result["hasClip"] = animator->HasClip();
+	result["playing"] = animator->IsPlaying();
+	result["time"] = animator->GetTime();
+	if (animator->HasClip()) {
+		const AnimationClipData& clip = animator->GetClip();
+		result["name"] = clip.name;
+		result["wrapMode"] = AnimationClipAsset::ToString(clip.wrapMode);
+		result["duration"] = clip.GetDuration();
+		json tracks = json::array();
+		for (const AnimationTrack& track : clip.tracks) {
+			json keys = json::array();
+			for (const AnimationKeyframe& key : track.curve.keys) {
+				keys.push_back({{"time", key.time}, {"value", key.value}, {"easing", AnimationClipAsset::ToString(key.easing)}});
+			}
+			tracks.push_back({{"path", track.path}, {"additive", track.additive}, {"keys", keys}});
+		}
+		result["tracks"] = tracks;
+	}
+	return EditorCommandResult::Success(result);
+}
+
+EditorCommandResult CommandAnimationChannels(const EditorCommandArgs& args) {
+	Scene* scene = GetScene();
+	if (!scene) {
+		return EditorCommandResult::Failure("シーンがありません。");
+	}
+	std::string error;
+	AnimatorComponent* animator = ResolveAnimator(*scene, args.Get(0), error, false);
+	if (!animator) {
+		return EditorCommandResult::Failure(error);
+	}
+	return EditorCommandResult::Success(AnimationEditing::ListChannels(*animator));
+}
+
+EditorCommandResult CommandAnimationCreateClip(const EditorCommandArgs& args) {
+	Scene* scene = GetScene();
+	if (!scene) {
+		return EditorCommandResult::Failure("シーンがありません。");
+	}
+	std::string error;
+	AnimatorComponent* animator = ResolveAnimator(*scene, args.Get(0), error, false);
+	if (!animator) {
+		return EditorCommandResult::Failure(error);
+	}
+	if (args.Count() < 2) {
+		return EditorCommandResult::Failure("クリップの名前を指定してください(例: animation.createClip Door Open)。");
+	}
+	std::filesystem::path clipPath;
+	std::string message;
+	if (!AnimationEditing::CreateClip(*animator, args.Get(1), clipPath, message)) {
+		return EditorCommandResult::Failure(message);
+	}
+	EditorConsole::GetInstance()->AddLog("[Animation] " + message, EditorLogLevel::Info);
+	return EditorCommandResult::Success(clipPath.generic_string());
+}
+
+EditorCommandResult CommandAnimationAddKey(const EditorCommandArgs& args) {
+	Scene* scene = GetScene();
+	if (!scene) {
+		return EditorCommandResult::Failure("シーンがありません。");
+	}
+	if (args.Count() < 3) {
+		return EditorCommandResult::Failure("使い方: animation.addKey <オブジェクト> <トラック> <時刻(秒)> [値](トラックは animation.channels で一覧)");
+	}
+	std::string error;
+	AnimatorComponent* animator = ResolveAnimator(*scene, args.Get(0), error, true);
+	if (!animator) {
+		return EditorCommandResult::Failure(error);
+	}
+	const std::string& trackPath = args.Get(1);
+	float time = 0.0f;
+	if (!ParseFloat(args.Get(2), time) || time < 0.0f) {
+		return EditorCommandResult::Failure("時刻は 0 以上の秒数で指定してください(例: 0.5)。");
+	}
+
+	// 値を指定しなければ、そのチャンネルの今の値でキーを打つ(Animation ウィンドウの Add Key と同じ)。
+	float* channelValue = AnimationEditing::FindChannelValue(*animator, trackPath);
+	float explicitValue = 0.0f;
+	const float* keyValue = channelValue;
+	if (args.Count() > 3) {
+		if (!ParseFloat(args.Get(3), explicitValue)) {
+			return EditorCommandResult::Failure("値は数値で指定してください(例: 1.5)。");
+		}
+		keyValue = &explicitValue;
+	} else if (!channelValue && !animator->GetClip().FindTrack(trackPath)) {
+		// 値もなく、チャンネルも既存トラックもない = たぶんトラック名の打ち間違い。
+		return EditorCommandResult::Failure("トラックが見つかりません: " + trackPath + "(animation.channels で一覧を表示できます)");
+	}
+
+	const int keyIndex = AnimationEditing::AddKey(*animator, trackPath, time, keyValue);
+	const AnimationKeyframe& key = animator->GetClip().FindTrack(trackPath)->curve.keys[keyIndex];
+	json result;
+	result["track"] = trackPath;
+	result["time"] = key.time;
+	result["value"] = key.value;
+	result["note"] = "クリップのメモリ上だけの変更です。animation.save で保存します(シーンの Undo では戻りません)。";
+	return EditorCommandResult::Success(result);
+}
+
+EditorCommandResult CommandAnimationRemoveKey(const EditorCommandArgs& args) {
+	Scene* scene = GetScene();
+	if (!scene) {
+		return EditorCommandResult::Failure("シーンがありません。");
+	}
+	std::string error;
+	AnimatorComponent* animator = ResolveAnimator(*scene, args.Get(0), error, true);
+	if (!animator) {
+		return EditorCommandResult::Failure(error);
+	}
+	float time = 0.0f;
+	if (args.Count() < 3 || !ParseFloat(args.Get(2), time)) {
+		return EditorCommandResult::Failure("使い方: animation.removeKey <オブジェクト> <トラック> <時刻(秒)>");
+	}
+	// 表示や入力の丸めで少しずれても消せるよう、1/1000 秒の誤差は同じ時刻とみなす。
+	if (!AnimationEditing::RemoveKey(*animator, args.Get(1), time, 0.001f)) {
+		return EditorCommandResult::Failure("その時刻のキーがありません: " + args.Get(1) + " @ " + args.Get(2) + "(animation.info でキーを確認できます)");
+	}
+	return EditorCommandResult::Success();
+}
+
+EditorCommandResult CommandAnimationSave(const EditorCommandArgs& args) {
+	Scene* scene = GetScene();
+	if (!scene) {
+		return EditorCommandResult::Failure("シーンがありません。");
+	}
+	std::string error;
+	AnimatorComponent* animator = ResolveAnimator(*scene, args.Get(0), error, true);
+	if (!animator) {
+		return EditorCommandResult::Failure(error);
+	}
+	std::string message;
+	if (!animator->SaveClip(message)) {
+		return EditorCommandResult::Failure("クリップを保存できませんでした: " + message);
+	}
+	EditorConsole::GetInstance()->AddLog("[Animation] Saved: " + animator->GetClipPath(), EditorLogLevel::Info);
+	return EditorCommandResult::Success(animator->GetClipPath());
+}
+
 EditorCommandResult CommandQuit(const EditorCommandArgs&) {
 	RequestQuitApplication();
 	return EditorCommandResult::Success("エディタを終了します。");
@@ -856,6 +1212,24 @@ void RegisterBuiltinEditorCommands() {
 	registry.Register("wait", "wait <フレーム数>", "指定フレーム進むのを待ってから返す。待っている間のログも返す", CommandWait);
 	registry.Register("scene.save", "scene.save", "シーンを保存する(Ctrl+S と同じ)", CommandSceneSave);
 	registry.Register("module.reload", "module.reload", "GameModule をビルドし直して差し替える(Reload DLL と同じ)", CommandModuleReload);
+	registry.Register("prefab.list", "prefab.list", "プレハブファイルの一覧(prefab.instantiate にそのまま渡せるパス)", CommandPrefabList);
+	registry.Register("prefab.create", "prefab.create <オブジェクト>", "オブジェクトと子階層をプレハブとして保存し、インスタンスにする(Hierarchy の Create Prefab と同じ)", CommandPrefabCreate);
+	registry.Register("prefab.instantiate", "prefab.instantiate <プレハブのパス> [親]", "プレハブを配置して選択する", CommandPrefabInstantiate);
+	registry.Register("prefab.apply", "prefab.apply <インスタンス>", "インスタンスの変更をプレハブへ書き戻す(Inspector の Apply と同じ)", CommandPrefabApply);
+	registry.Register("prefab.revert", "prefab.revert <インスタンス>", "インスタンスをプレハブの内容に戻す(Inspector の Revert と同じ)", CommandPrefabRevert);
+	registry.Register("prefab.unpack", "prefab.unpack <インスタンス>", "プレハブとのつながりを切る(Inspector の Unpack と同じ)", CommandPrefabUnpack);
+	registry.Register("prefab.open", "prefab.open <インスタンス|プレハブのパス>", "プレハブ編集モードで開く(Open Prefab と同じ)", CommandPrefabOpen);
+	registry.Register("prefab.save", "prefab.save", "プレハブ編集モードの内容を保存する(シーンのインスタンスも更新される)", CommandPrefabSave);
+	registry.Register("prefab.close", "prefab.close [保存するか true|false]", "プレハブ編集モードを閉じてシーンに戻る(既定は保存しない)", CommandPrefabClose);
+
+	registry.Register("animation.info", "animation.info <オブジェクト>", "Animator のクリップ・トラック・キーを表示する", CommandAnimationInfo);
+	registry.Register("animation.channels", "animation.channels <オブジェクト>", "キーを打てるトラック(チャンネル)の一覧", CommandAnimationChannels);
+	registry.Register("animation.createClip", "animation.createClip <オブジェクト> <名前>", "新しいクリップを Data/Animations/ に作って Animator に持たせる", CommandAnimationCreateClip);
+	registry.Register("animation.addKey", "animation.addKey <オブジェクト> <トラック> <時刻(秒)> [値]",
+	                  "キーを打つ(値を省略すると今の値)。メモリ上の変更なので animation.save で保存する", CommandAnimationAddKey);
+	registry.Register("animation.removeKey", "animation.removeKey <オブジェクト> <トラック> <時刻(秒)>", "キーを消す", CommandAnimationRemoveKey);
+	registry.Register("animation.save", "animation.save <オブジェクト>", "クリップをファイルへ保存する(Animation ウィンドウの Save Clip と同じ)", CommandAnimationSave);
+
 	registry.Register("window.show", "window.show [ウィンドウ名] [true|false]",
 	                  "ウィンドウを開いて前面に出す(false で閉じる)。引数なしでウィンドウの一覧と開閉を表示する", CommandWindowShow);
 	registry.Register("quit", "quit", "エディタを終了する", CommandQuit);

@@ -16,9 +16,11 @@ constexpr size_t kMaxLogCount = 1000;
 
 // CUIの返事を、人間が読む形でConsoleへ出す(kujata CLIと同じ text を使う)。
 void PrintResponse(const nlohmann::json& response) {
+	// 結果の中身(フィールド名など)の文面で重さを推測させない。失敗はエラー、それ以外は情報。
+	const EditorLogLevel level = response.value("ok", false) ? EditorLogLevel::Info : EditorLogLevel::Error;
 	std::istringstream lines(response.value("text", std::string()));
 	for (std::string line; std::getline(lines, line);) {
-		EditorConsole::GetInstance()->AddLog("  " + line);
+		EditorConsole::GetInstance()->AddLog("  " + line, level);
 	}
 }
 
@@ -29,9 +31,9 @@ EditorConsole* EditorConsole::GetInstance() {
 	return &instance;
 }
 
-void EditorConsole::AddLog(const std::string& message) {
-	logs_.push_back(Entry{message, ClassifyEditorLog(message)});
-	EditorLog::Write("Console", message);
+void EditorConsole::AddLog(const std::string& message, EditorLogLevel level) {
+	logs_.push_back(Entry{message, level});
+	EditorLog::Write("Console", message, level);
 	if (capturing_) {
 		captured_.push_back(message);
 	}

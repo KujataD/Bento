@@ -3,7 +3,7 @@
 AI(Claude Code 等)と人間の両方が、同じコマンドでエディタを操作・確認できるようにするための設計文書。
 
 - 対象: KujataEngine のエディタ(`KujataEngine/Editor/`)と、起動・ログまわり。
-- 状態: **Step 1(CUI の土台)と Step 2(スクリーンショット・状態の書き出し・ログ)を実装済み。** Step 3 以降は未着手(§6)。
+- 状態: **Step 1(CUI の土台)・Step 2(スクリーンショット・状態の書き出し・ログ)・Step 3(ログの重さ・プレハブ・アニメーション)を実装済み。** Step 4 以降は未着手(§6)。
 - 関連: [CLAUDE.md](CLAUDE.md) の「現在の方針」②(決定論+リプレイ)、[determinism.md](determinism.md) の Step 4(入力の記録・再生)
 
 ---
@@ -102,7 +102,7 @@ wait 60
 返事の `text` は人間向けに整形した結果(Console と `kujata` はこれを表示する)。
 `kujata -Json` は返事の JSON をそのまま出す(AI・スクリプト向け)。失敗すると終了コード 1。
 
-## 5. コマンド一覧(Step 1・2 で実装したもの)
+## 5. コマンド一覧(Step 1〜3 で実装したもの)
 
 | 分類 | コマンド | 内容 |
 |---|---|---|
@@ -116,6 +116,16 @@ wait 60
 | | `state.dump [ファイル]` | エディタの状態と全オブジェクトの全フィールド(差分を取って変化を確かめる用) |
 | 確認 | `view.screenshot <scene\|game\|editor> [ファイル]` | ビューの描画結果、またはエディタ全体を PNG に保存する(§5.1) |
 | | `window.show [ウィンドウ名] [true\|false]` | ウィンドウを開いて前面に出す / 閉じる。引数なしで一覧 |
+| プレハブ | `prefab.list` | プレハブファイルの一覧(`prefab.instantiate` にそのまま渡せる Data 基準のパス) |
+| | `prefab.create <オブジェクト>` | 子階層ごとプレハブとして保存し、インスタンスにする(Hierarchy の Create Prefab) |
+| | `prefab.instantiate <パス> [親]` | プレハブを配置して選択する(Project からのドラッグ&ドロップ) |
+| | `prefab.apply` / `prefab.revert` / `prefab.unpack <インスタンス>` | Inspector の Apply / Revert / Unpack。子を指定してもルート単位で行う |
+| | `prefab.open <インスタンス\|*.prefab.json>` / `prefab.save` / `prefab.close [true\|false]` | プレハブ編集モードを開く / 保存する / 閉じる |
+| アニメーション | `animation.info <オブジェクト>` | Animator のクリップ・トラック・キー |
+| | `animation.channels <オブジェクト>` | キーを打てるトラック(チャンネル)の一覧 |
+| | `animation.createClip <オブジェクト> <名前>` | 新しいクリップを `Data/Animations/` に作って持たせる |
+| | `animation.addKey <オブジェクト> <トラック> <秒> [値]` / `animation.removeKey ...` | キーを打つ(値を省略すると今の値) / 消す |
+| | `animation.save <オブジェクト>` | クリップをファイルへ保存する(Save Clip) |
 | 選択 | `select <オブジェクト>` / `select none` | Hierarchy の選択を変える |
 | 編集 | `object.create <名前> [親]` | 空のオブジェクトを作る |
 | | `object.delete <オブジェクト>` | 子ごと削除する |
@@ -151,6 +161,25 @@ wait 60
 - 重さ(info / warning / error)は、今のログが重さを持たないので**文面から判定**している(「失敗」「error」等)。完全ではない。
 - Console は重さごとに色分け(警告は黄・エラーは赤)し、件数付きのチェックと文字列で絞り込める。
 
+### 5.3 エディタ機能のコマンド化(UI と同じ処理を呼ぶ)
+
+§3 の決まり 6 のとおり、UI のボタンにあった処理を共通の関数に移し、UI とコマンドの両方から呼ぶようにした。
+
+| 共通の処理 | UI 側 | コマンド |
+|---|---|---|
+| `Editor/PrefabEditing`(作成・配置・Apply・Revert・Unpack。Undo・選択の移し替え・ログまで) | Hierarchy の Create Prefab とドロップ、Inspector の Apply / Revert / Unpack | `prefab.*` |
+| `Editor/AnimationEditing`(クリップ作成・キーの追加と削除・チャンネル一覧) | Animation ウィンドウの Create / Add Key | `animation.*` |
+
+- プレハブの Revert / Unpack は、UI から行っても Undo できるようになった(以前は Undo を取っていなかった)。
+- アニメーションのキーはクリップ(シーンとは別のファイル)のメモリ上の変更なので、**シーンの Undo では戻らない**。`animation.save` で保存する。
+- `animation.createClip` と Animation ウィンドウの Create は、同じ名前のクリップがあると失敗する(以前は上書きしていた)。
+
+### 5.4 ログの重さ
+
+- `EditorConsole::AddLog(message, level)` / `EditorLog::Write(source, message, level)` で重さを明示して出せる。
+  CUI・プレハブ・アニメーションのログは明示している。
+- 重さを付けずに出した古いログ(`AddLog(message)`・`ImGuiManager::AddConsoleLog`・エンジンの `Logger::Log`)は、今までどおり文面から推測する。
+
 ## 6. これからの Step
 
 | Step | 内容 |
@@ -158,7 +187,8 @@ wait 60
 | 1(済) | コマンド層、名前付きパイプ、Console の入力欄、`kujata` CLI、`--run` / `--exit` |
 |  | 実装中に CUI で見つかって直した既存の不具合: 折りたたまれた親の子を選ぶと Hierarchy が選択を外す / Windows のメッセージを 1 フレーム 1 件しか処理せず入力が遅れる / 最初の編集の Undo ラベルが "Initial" のまま |
 | 2(済) | `view.screenshot`、`window.show`、`state.dump`、ログの JSON Lines 出力と Console の色分け・絞り込み、完了を待つコマンドの仕組み(`EditorCommandResult::poll`) |
-| 3 | ログに重さを明示して出す仕組み(今は文面から推測)。エディタ独自の機能のコマンド化: `prefab.open` / `prefab.apply` / `prefab.revert`、`animation.addKey` など。UI 側の処理をコマンドへ寄せる |
+| 3(済) | ログの重さの明示、プレハブ(`prefab.*`)とアニメーション(`animation.*`)のコマンド化。処理を `PrefabEditing` / `AnimationEditing` に移して UI と共通にした |
+|  | 残り: シーンの切り替え(Scenes ウィンドウ)・マテリアルの編集・UI 編集モードのコマンド化、古いログ(ホットリロード等)への重さの付与 |
 | 4 | 型情報: `SerializedFieldRegistry` に `Mode::DescribeSchema` を足し、`schema.get` でフィールドの型・範囲・説明を返す。Inspector のツールチップ・範囲チェックも同じ情報から出す |
 | 5 | MCP サーバー(`kujata` と同じパイプを使う)、コマンドパレット(Ctrl+P)、Undo の履歴ウィンドウ、CUI で変えたオブジェクトの強調表示 |
 | 6 | 固定 ID(今は `GenerateInstanceId()` が時刻と乱数で作るので差分がぶれる)と入力の記録・再生。決定論(determinism.md)と一緒に進める |

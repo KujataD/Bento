@@ -45,12 +45,15 @@ kujata undo
 kujata view.screenshot game                              # Game ビューを PNG に(Temp/Screenshots/)。editor でエディタ全体
 kujata state.dump state.json                            # 全オブジェクトの全フィールドを書き出す
 kujata log.tail 20 error                                # 最近のエラーだけ
+kujata prefab.instantiate Prefabs/Enemy.prefab.json     # プレハブを置く(prefab.list で一覧)
+kujata animation.addKey Door RotatorComponent/speed 1 0.5  # 1 秒の位置にキー(animation.save で保存)
 ```
 
 - オブジェクトは `親/子` のパスか instanceId で指定する。同じパスが複数あるとエラーになる(instanceId で指定する)
 - 変更系のコマンドは Undo できる(履歴のラベルは `[CUI] ...`)
 - 返事には毎回、そのコマンドの実行中に出たログと、エディタの状態(モード・シーン・選択・Undo の先頭)が付く
 - ログは Console(警告は黄・エラーは赤。上のチェックと入力欄で絞り込める)と、`KujataEngine/logs/editor_<日時>.jsonl`(1 行 1 件の JSON)の両方に出る
+- プレハブ(`prefab.*`)とアニメーション(`animation.*`)の操作は、Hierarchy・Inspector・Animation ウィンドウのボタンと同じ処理を呼ぶ。プレハブの Revert / Unpack は Undo できる。アニメーションのキーはシーンの Undo では戻らない(`animation.save` で保存)
 
 ### エディタのレイアウト
 

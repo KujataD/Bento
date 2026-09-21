@@ -60,10 +60,6 @@ void OnEngineLog(const std::string& message) {
 } // namespace
 
 EditorLogLevel ClassifyEditorLog(const std::string& message) {
-	// "> コマンド" はCUIが実行したコマンドの復唱なので、コマンドの文面(warning 等)で判定しない。
-	if (message.rfind("> ", 0) == 0) {
-		return EditorLogLevel::Info;
-	}
 	const std::string lower = ToLower(message);
 	if (ContainsAny(lower, {"error", "fail", "exception", "assert", "エラー", "失敗", "例外"})) {
 		return EditorLogLevel::Error;
@@ -111,7 +107,7 @@ bool ParseEditorLogLevel(const std::string& name, EditorLogLevel& level) {
 	return true;
 }
 
-void EditorLog::Write(const std::string& source, const std::string& message) {
+void EditorLog::Write(const std::string& source, const std::string& message, EditorLogLevel level) {
 	// Logger::Log は別スレッド(シェーダーのコンパイル等)から呼ばれることもあるので、書き込みは1本ずつにする。
 	static std::mutex mutex;
 	std::lock_guard<std::mutex> lock(mutex);
@@ -130,7 +126,7 @@ void EditorLog::Write(const std::string& source, const std::string& message) {
 
 	nlohmann::json line;
 	line["time"] = MakeTimestamp("{:%H:%M:%S}");
-	line["level"] = ToEditorLogLevelName(ClassifyEditorLog(message));
+	line["level"] = ToEditorLogLevelName(level);
 	line["source"] = source;
 	line["category"] = ExtractEditorLogCategory(message);
 	// ログに壊れたUTF-8が混ざっていても書き出しで例外にしない(置き換えて残す)。

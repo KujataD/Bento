@@ -1,4 +1,5 @@
 #include "AnimationWindow.h"
+#include "AnimationEditing.h"
 
 #ifdef USE_IMGUI
 #include "../../externals/imgui/imgui.h"
@@ -382,33 +383,8 @@ void AnimationWindow::GroupDragSelectedKeys(AnimationClipData& clip, float reque
 }
 
 void AnimationWindow::AddKeyAtTime(AnimatorComponent& animator, const std::string& trackPath, const std::vector<NamedChannel>& channels, float time) {
-	AnimationTrack& track = animator.GetClip().GetOrAddTrack(trackPath);
-
-	AnimationKeyframe key;
-	key.time = (std::max)(SnapTime(time), 0.0f);
-	float* channelValue = FindChannelValue(channels, trackPath);
-	if (channelValue) {
-		key.value = *channelValue;
-		if (track.additive) {
-			// 加算トラックのキー値は絶対値ではなく「基準値からの差分」で記録する。
-			// (絶対値で記録すると、Rec開始地点が原点以外の場合にその座標が二重加算される)
-			float baseValue = 0.0f;
-			if (animator.TryGetAdditiveBase(trackPath, baseValue)) {
-				key.value = *channelValue - baseValue;
-			} else {
-				// 基準未キャプチャ(プレビュー外)では差分が定まらないため、カーブの現在値を維持する。
-				key.value = track.curve.Evaluate(key.time);
-			}
-		}
-	} else {
-		key.value = track.curve.Evaluate(key.time);
-	}
-
-	int keyIndex = track.curve.AddKey(key);
-	// 追加キーと前後キーのタンジェントを滑らかに整える。
-	AnimationClipAsset::SetSmoothTangents(track.curve, keyIndex - 1);
-	AnimationClipAsset::SetSmoothTangents(track.curve, keyIndex);
-	AnimationClipAsset::SetSmoothTangents(track.curve, keyIndex + 1);
+	// キーを打つ処理は AnimationEditing にある(CUI の animation.addKey も同じものを呼ぶ)。ここはスナップだけ足す。
+	AnimationEditing::AddKey(animator, trackPath, SnapTime(time), FindChannelValue(channels, trackPath));
 }
 
 void AnimationWindow::DrawKeyPresetMenuItems(AnimationCurve& curve, int keyIndex) {
@@ -486,26 +462,13 @@ void AnimationWindow::DrawClipCreation(AnimatorComponent& animator) {
 	ImGui::InputText("Clip Name", newClipNameBuffer_.data(), newClipNameBuffer_.size());
 	ImGui::SameLine();
 	if (ImGui::Button("Create")) {
-		std::string clipName = newClipNameBuffer_.data();
-		if (clipName.empty()) {
-			clipName = "NewAnimation";
-		}
-
-		std::filesystem::path projectRoot = GetProjectDataRoot();
-		std::filesystem::path animationsDirectory = projectRoot / "Animations";
-		std::error_code errorCode;
-		std::filesystem::create_directories(animationsDirectory, errorCode);
-
-		std::filesystem::path clipPath = animationsDirectory / (clipName + ".anim.json");
+		// 作る処理は AnimationEditing にある(CUI の animation.createClip も同じものを呼ぶ)。
+		std::filesystem::path clipPath;
 		std::string message;
-		if (AnimationClipAsset::CreateDefaultFile(clipPath, message)) {
-			AssetDatabase::GetInstance().GetOrCreateAssetId(clipPath);
-			animator.SetClipPath(clipPath.generic_string());
-			statusMessage_ = "Created: " + clipPath.filename().generic_string();
+		if (AnimationEditing::CreateClip(animator, newClipNameBuffer_.data(), clipPath, message)) {
 			ImGui::CloseCurrentPopup();
-		} else {
-			statusMessage_ = message;
 		}
+		statusMessage_ = message;
 	}
 }
 

@@ -13,8 +13,9 @@ enum class EditorLogLevel {
 };
 
 /// <summary>
-/// ログの文面から重さを決める。今のログ出力(AddConsoleLog / Logger::Log)は重さを持たないので、
-/// 「失敗」「error」などの言葉で判定する(完全ではない。重さを明示して出す仕組みは今後)。
+/// ログの文面から重さを推測する。重さを指定せずに出したログ(AddLog(message) / Logger::Log)に使う。
+/// 「失敗」「error」などの言葉で判定するので完全ではない。**新しく書くログは重さを明示して出すこと**
+/// (EditorConsole::AddLog(message, level) / EditorLog::Write(source, message, level))。
 /// </summary>
 EditorLogLevel ClassifyEditorLog(const std::string& message);
 
@@ -34,7 +35,10 @@ bool ParseEditorLogLevel(const std::string& name, EditorLogLevel& level);
 class EditorLog {
 public:
 	/// <summary>sourceはログの出どころ("Console" = エディタのConsole、"Engine" = Logger::Log)。</summary>
-	static void Write(const std::string& source, const std::string& message);
+	static void Write(const std::string& source, const std::string& message, EditorLogLevel level);
+
+	/// <summary>重さを文面から推測して書く(重さを持たない古いログ用)。</summary>
+	static void Write(const std::string& source, const std::string& message) { Write(source, message, ClassifyEditorLog(message)); }
 
 	/// <summary>今回の起動で書いているファイル(まだ1件も書いていなければ空)。</summary>
 	static std::filesystem::path GetFilePath();

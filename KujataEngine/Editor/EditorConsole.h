@@ -20,7 +20,11 @@ public:
 
 	static EditorConsole* GetInstance();
 
-	void AddLog(const std::string& message);
+	/// <summary>重さを明示してログを出す。新しく書くログはこちらを使う。</summary>
+	void AddLog(const std::string& message, EditorLogLevel level);
+
+	/// <summary>重さを文面から推測してログを出す(古い呼び出し用。ClassifyEditorLog を参照)。</summary>
+	void AddLog(const std::string& message) { AddLog(message, ClassifyEditorLog(message)); }
 	void ClearLogs();
 	void Draw(bool* pOpen = nullptr);
 

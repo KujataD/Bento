@@ -1,4 +1,5 @@
 #include "InspectorWindow.h"
+#include "PrefabEditing.h"
 #include "EditorStyle.h"
 
 #include "../../externals/imgui/imgui.h"
@@ -188,30 +189,19 @@ void InspectorWindow::Draw(ProjectWindow& projectWindow, bool* pOpen) {
 			EditorApplication::GetInstance()->OpenPrefabEditMode(openRoot->GetPrefabAssetPath());
 		}
 		ImGui::SameLine();
+		// 処理(ログ・Undo・選択の移し替え)は PrefabEditing にある。CUI の prefab.* も同じものを呼ぶ。
 		if (ImGui::Button("Apply")) {
-			PrefabAsset::SaveResult result = PrefabAsset::ApplyPrefabInstance(*scene, *selected);
-			if (result.succeeded) {
-				EditorConsole::GetInstance()->AddLog("[Prefab] Applied: " + result.outputPath.string());
+			if (PrefabEditing::Apply(*scene, *selected).succeeded) {
 				projectWindow.Refresh();
-			} else {
-				EditorConsole::GetInstance()->AddLog("[Prefab] Apply failed: " + result.message);
 			}
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Revert")) {
-			PrefabAsset::InstantiateResult result = PrefabAsset::RevertPrefabInstance(*scene, *selected);
-			if (result.succeeded) {
-				EditorSelection::GetInstance()->SetSelectedGameObject(result.rootObject);
-				EditorConsole::GetInstance()->AddLog("[Prefab] Reverted.");
-			} else {
-				EditorConsole::GetInstance()->AddLog("[Prefab] Revert failed: " + result.message);
-			}
+			PrefabEditing::Revert(*scene, *selected, "Revert Prefab");
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Unpack")) {
-			if (PrefabAsset::UnpackPrefabInstance(*scene, *selected)) {
-				EditorConsole::GetInstance()->AddLog("[Prefab] Unpacked.");
-			}
+			PrefabEditing::Unpack(*scene, *selected, "Unpack Prefab");
 		}
 	}
 
