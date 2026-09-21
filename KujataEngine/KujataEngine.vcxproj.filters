@@ -201,6 +201,9 @@
     <ClCompile Include="Editor\Commands\PrefabCommands.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="Editor\Commands\MaterialCommands.cpp">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClCompile>
     <ClCompile Include="Editor\Commands\AnimationCommands.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>

@@ -127,6 +127,8 @@ wait 60
 | | `animation.createClip <オブジェクト> <名前>` | 新しいクリップを `Data/Animations/` に作って持たせる |
 | | `animation.addKey <オブジェクト> <トラック> <秒> [値]` / `animation.removeKey ...` | キーを打つ(値を省略すると今の値) / 消す |
 | | `animation.save <オブジェクト>` | クリップをファイルへ保存する(Save Clip) |
+| マテリアル | `material.list` / `material.create [名前]` | マテリアルの一覧(Data 基準のパス) / `Data/Materials/` に作る |
+| | `material.get <パス>` / `material.set <パス> <キー> <値>` | 全フィールド(キー名はファイルと同じ) / 1 つ書き換えて保存し、使っているオブジェクトへ反映する(Material の Inspector と同じ処理。Undo 不可) |
 | 選択 | `select <オブジェクト>` / `select none` | Hierarchy の選択を変える |
 | 編集 | `object.create <名前> [親]` | 空のオブジェクトを作る |
 | | `object.delete <オブジェクト>` | 子ごと削除する |
@@ -170,6 +172,7 @@ wait 60
 |---|---|---|
 | `Editor/PrefabEditing`(作成・配置・Apply・Revert・Unpack。Undo・選択の移し替え・ログまで) | Hierarchy の Create Prefab とドロップ、Inspector の Apply / Revert / Unpack | `prefab.*` |
 | `Editor/AnimationEditing`(クリップ作成・キーの追加と削除・チャンネル一覧) | Animation ウィンドウの Create / Add Key | `animation.*` |
+| `SaveMaterialAsset`(`Editor/MaterialInspector.h`。保存・シーンの使用箇所への反映・Inspector の表示の更新) | Material の Inspector での編集 | `material.set` |
 
 - プレハブの Revert / Unpack は、UI から行っても Undo できるようになった(以前は Undo を取っていなかった)。
 - アニメーションのキーはクリップ(シーンとは別のファイル)のメモリ上の変更なので、**シーンの Undo では戻らない**。`animation.save` で保存する。

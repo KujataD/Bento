@@ -178,6 +178,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Editor\Commands\SchemaCommands.cpp" />
     <ClCompile Include="Editor\Commands\ViewCommands.cpp" />
     <ClCompile Include="Editor\Commands\PrefabCommands.cpp" />
+    <ClCompile Include="Editor\Commands\MaterialCommands.cpp" />
     <ClCompile Include="Editor\Commands\AnimationCommands.cpp" />
     <ClCompile Include="Editor\PrefabEditing.cpp" />
     <ClCompile Include="Editor\AnimationEditing.cpp" />

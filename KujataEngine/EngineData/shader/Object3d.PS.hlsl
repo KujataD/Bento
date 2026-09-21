@@ -4,6 +4,8 @@ Texture2D<float32_t4> gTexture : register(t0);
 // エミッションマップ(自己発光の分布)。未指定のマテリアルには白1x1が入るので常に乗算してよい。
 Texture2D<float32_t4> gEmissiveTexture : register(t2);
 SamplerState gSampler : register(s0);
+// ぼかさずに読むサンプラー(ポイントサンプリング)。マテリアルの pointSampling で選ぶ。
+SamplerState gPointSampler : register(s1);
 
 struct Material
 {
@@ -18,6 +20,12 @@ struct Material
     float32_t bloomThreshold;    // この輝度以上のエミッションだけが滲む(0=全て)
     float32_t bloomSoftKnee;     // 閾値の柔らかさ(0=ハード)
     float32_t triplanarScale;    // >0でワールド座標貼り。1ワールドユニットあたりの繰り返し数(0でUV貼り)
+    // トゥーン(enableLighting == 8)。C++側 3d/GraphicsPipeline.h の MaterialData と並びを一致させること。
+    int32_t toonSteps;           // 明るさを何段に分けるか(2以上)
+    float32_t toonSmoothness;    // 段の境目のぼかし幅(明るさの単位。0=くっきり)
+    float32_t3 shadowColor;      // いちばん暗い段の色(元の色に掛ける)
+    int32_t flatShading;         // 1=面ごとに平らな陰(どの方式でも効く)
+    int32_t pointSampling;       // 1=テクスチャをぼかさずに読む(どの方式でも効く)
 };
 
 ConstantBuffer<Material> gMaterial : register(b0);
@@ -120,25 +128,61 @@ static const float32_t kTrailEdgeSoftness = 0.6f;
 //
 // 法線の絶対値を重みに3方向をブレンドする。斜め面では2〜3枚が混ざるが、
 // タイル可能なノイズなら混ざっても破綻しない。
+// マテリアルの pointSampling に応じて、ぼかす/ぼかさないサンプラーで読む。
+float32_t4 SampleTexture(Texture2D<float32_t4> tex, float32_t2 uv)
+{
+    return (gMaterial.pointSampling != 0) ? tex.Sample(gPointSampler, uv) : tex.Sample(gSampler, uv);
+}
+
 float32_t4 SampleTriplanar(float32_t3 worldPosition, float32_t3 normal, float32_t scale)
 {
     float32_t3 weight = abs(normalize(normal));
     weight /= max(weight.x + weight.y + weight.z, 1e-4f);
 
-    float32_t4 sampleX = gTexture.Sample(gSampler, worldPosition.zy * scale);
-    float32_t4 sampleY = gTexture.Sample(gSampler, worldPosition.xz * scale);
-    float32_t4 sampleZ = gTexture.Sample(gSampler, worldPosition.xy * scale);
+    float32_t4 sampleX = SampleTexture(gTexture, worldPosition.zy * scale);
+    float32_t4 sampleY = SampleTexture(gTexture, worldPosition.xz * scale);
+    float32_t4 sampleZ = SampleTexture(gTexture, worldPosition.xy * scale);
 
     return sampleX * weight.x + sampleY * weight.y + sampleZ * weight.z;
 }
 
+// トゥーン: 0..1 の明るさを toonSteps 段に丸める。戻り値も 0..1(0=いちばん暗い段、1=いちばん明るい段)。
+// 例: 4段なら 0 / 0.33 / 0.67 / 1 の4通り。toonSmoothness が 0 より大きければ、段の境目だけを滑らかにつなぐ。
+float32_t ToonStep(float32_t lightAmount)
+{
+    float32_t steps = (float32_t)max(gMaterial.toonSteps, 2);
+    float32_t scaled = saturate(lightAmount) * steps;
+    float32_t band = floor(scaled);
+    float32_t width = saturate(gMaterial.toonSmoothness * steps);
+    if (width > 0.0f)
+    {
+        band += smoothstep(1.0f - width, 1.0f, frac(scaled));
+    }
+    return min(band, steps - 1.0f) / (steps - 1.0f);
+}
+
+// 面ごとの法線(フラットシェーディング)。隣のピクセルとのワールド座標の差から面の向きを求めるので、
+// 頂点の法線がなめらかに補間されていても、三角形ごとに平らな陰になる。
+// 外積の向きは画面の向きで変わるので、カメラ側を向くようにそろえる(見えている面は必ずカメラ側を向く)。
+float32_t3 FlatNormal(float32_t3 worldPosition)
+{
+    float32_t3 normal = normalize(cross(ddx(worldPosition), ddy(worldPosition)));
+    float32_t3 toEye = gCamera.worldPosition - worldPosition;
+    return (dot(normal, toEye) < 0.0f) ? -normal : normal;
+}
+
 PixelShaderOutput main(VertexShaderOutput input)
 {
+    // フラットシェーディング: 以降のすべての方式が、頂点の法線の代わりに面の法線を使う。
+    if (gMaterial.flatShading != 0)
+    {
+        input.normal = FlatNormal(input.worldPosition);
+    }
     float32_t4 transformedUV = mul(float32_t4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
     // triplanarScaleが0のときは今までどおりメッシュのUVで貼る(スクロールや板ポリはこちら)。
     float32_t4 textureColor = (gMaterial.triplanarScale > 0.0f)
         ? SampleTriplanar(input.worldPosition, input.normal, gMaterial.triplanarScale)
-        : gTexture.Sample(gSampler, transformedUV.xy);
+        : SampleTexture(gTexture, transformedUV.xy);
     PixelShaderOutput output;
     // エミッションRTは既定で書き込みなし(黒)。Emissionチェック付きマテリアルだけが下で上書きする。
     output.emission = float32_t4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -366,6 +410,42 @@ PixelShaderOutput main(VertexShaderOutput input)
             output.color.rgb = gMaterial.color.rgb * textureColor.rgb;
             output.color.a = gMaterial.color.a * textureColor.a * profile;
         }
+        else if (gMaterial.enableLighting == 8)
+        { // トゥーン(セル調)。明るさを段に分け、暗い側は黒ではなく影の色(shadowColor)で塗る。
+            float32_t3 normal = normalize(input.normal);
+            float32_t3 albedo = gMaterial.color.rgb * textureColor.rgb;
+
+            // DirectionalLight: いちばん暗い段 = 元の色×影の色、いちばん明るい段 = 元の色×ライトの色。その間を段で分ける。
+            // ライトが影の色より暗い(強さ0など)ときに、光の当たる側が影より暗くならないよう、明るい段は影の色を下限にする。
+            float32_t lit = ToonStep(saturate(dot(normal, -normalize(gDirectionalLight.direction))));
+            float32_t3 shadow = albedo * gMaterial.shadowColor;
+            float32_t3 bright = max(albedo * gDirectionalLight.color.rgb * gDirectionalLight.intensity, shadow);
+            float32_t3 result = lerp(shadow, bright, lit);
+
+            // PointLights / SpotLights: 当たる量(角度×距離の減衰)を段に丸めて足す。
+            for (int32_t i = 0; i < pointLightCount; i++)
+            {
+                float32_t3 pointLightDirection = normalize(pointLights[i].position - input.worldPosition);
+                float32_t pointLightCos = saturate(dot(normal, pointLightDirection));
+                float32_t distance = length(pointLights[i].position - input.worldPosition);
+                float32_t factor = pow(saturate(-distance / pointLights[i].radius + 1.0f), pointLights[i].decay);
+                result += albedo * pointLights[i].color.rgb * pointLights[i].intensity * ToonStep(pointLightCos * factor);
+            }
+            for (int32_t s = 0; s < spotLightCount; s++)
+            {
+                float32_t3 spotLightDirection = normalize(spotLights[s].position - input.worldPosition);
+                float32_t spotLightCos = saturate(dot(normal, spotLightDirection));
+                float32_t3 spotLightDirectionOnSurface = normalize(input.worldPosition - spotLights[s].position);
+                float32_t cosAngle = dot(spotLightDirectionOnSurface, normalize(spotLights[s].direction));
+                float32_t falloffFactor = saturate((cosAngle - spotLights[s].cosAngle) / (spotLights[s].cosFalloffStart - spotLights[s].cosAngle));
+                float32_t distance = length(spotLights[s].position - input.worldPosition);
+                float32_t attenuationFactor = pow(saturate(-distance / spotLights[s].distance + 1.0f), spotLights[s].decay);
+                result += albedo * spotLights[s].color.rgb * spotLights[s].intensity * ToonStep(spotLightCos * attenuationFactor * falloffFactor);
+            }
+
+            output.color.rgb = result;
+            output.color.a = gMaterial.color.a * textureColor.a;
+        }
         else if (gMaterial.enableLighting == 6)
         { // バリア: 六角形20枚+五角形12枚のセルが浮かぶ半透明シェル
             // 球の法線はそのまま中心からの向きなので、UVを使わずにセルを求められる
@@ -430,7 +510,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     {
         // エミッションマップ(t2)を乗算する。**マップ未指定のマテリアルには白1x1が入る**ので、
         // ここに分岐は要らない(白=1倍=マップ無しと同じ)。黒い箇所は光らず、白い箇所だけが光る。
-        float32_t3 emissiveMask = gEmissiveTexture.Sample(gSampler, transformedUV.xy).rgb;
+        float32_t3 emissiveMask = SampleTexture(gEmissiveTexture, transformedUV.xy).rgb;
         float32_t3 emissive = gMaterial.emissiveColor * gMaterial.emissiveIntensity * emissiveMask;
         output.color.rgb += emissive;
 

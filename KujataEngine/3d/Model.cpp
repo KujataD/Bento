@@ -14,6 +14,31 @@
 
 namespace KujataEngine {
 
+namespace {
+
+// マテリアルのCB(Uploadヒープの生メモリ)へ、CB転送部の値をすべて書く。
+// **Mapした先は初期化されていない**ので、フィールドを足したらここにも足すこと(書き漏れると不定値になる)。
+void WriteMaterialConstants(MaterialData* destination, const MaterialData& source) {
+	destination->color = source.color;
+	destination->enableLighting = source.enableLighting;
+	destination->uvTransform = MakeIdentity();
+	destination->shininess = source.shininess;
+	destination->emissiveColor = source.emissiveColor;
+	destination->emissiveIntensity = source.emissiveIntensity;
+	destination->emissiveEnabled = source.emissiveEnabled;
+	destination->bloomIntensity = source.bloomIntensity;
+	destination->bloomThreshold = source.bloomThreshold;
+	destination->bloomSoftKnee = source.bloomSoftKnee;
+	destination->triplanarScale = source.triplanarScale;
+	destination->toonSteps = source.toonSteps;
+	destination->toonSmoothness = source.toonSmoothness;
+	destination->shadowColor = source.shadowColor;
+	destination->flatShading = source.flatShading;
+	destination->pointSampling = source.pointSampling;
+}
+
+} // namespace
+
 Model* Model::CreateFromOBJ(const std::string& objname, ShaderModel shaderModel) {
 	Model* model = new Model();
 	std::string resourcesRoot = (GetProjectDataRoot() / "Resources").generic_string();
@@ -297,16 +322,7 @@ Model* Model::CreateDynamic(uint32_t maxVertices, const std::string& textureFile
 
 	subMesh.materialResource = DirectXCommon::GetInstance()->CreateBufferResource((sizeof(MaterialData) + 0xff) & ~0xff);
 	subMesh.materialResource->Map(0, nullptr, reinterpret_cast<void**>(&subMesh.materialMap));
-	subMesh.materialMap->color = defaultMaterial.color;
-	subMesh.materialMap->enableLighting = defaultMaterial.enableLighting;
-	subMesh.materialMap->uvTransform = MakeIdentity();
-	subMesh.materialMap->shininess = defaultMaterial.shininess;
-	subMesh.materialMap->emissiveColor = defaultMaterial.emissiveColor;
-	subMesh.materialMap->emissiveIntensity = defaultMaterial.emissiveIntensity;
-	subMesh.materialMap->emissiveEnabled = defaultMaterial.emissiveEnabled;
-	subMesh.materialMap->bloomIntensity = defaultMaterial.bloomIntensity;
-	subMesh.materialMap->bloomThreshold = defaultMaterial.bloomThreshold;
-	subMesh.materialMap->bloomSoftKnee = defaultMaterial.bloomSoftKnee;
+	WriteMaterialConstants(subMesh.materialMap, defaultMaterial);
 	subMesh.textureIndex = defaultMaterial.textureIndex;
 
 	model->subMeshes_.push_back(std::move(subMesh));
@@ -593,17 +609,7 @@ void Model::AddSubMesh(const std::vector<VertexData>& vertices, const MaterialDa
 	// マテリアルCBuffer生成
 	subMesh.materialResource = DirectXCommon::GetInstance()->CreateBufferResource((sizeof(MaterialData) + 0xff) & ~0xff);
 	subMesh.materialResource->Map(0, nullptr, reinterpret_cast<void**>(&subMesh.materialMap));
-	subMesh.materialMap->color = material.color;
-	subMesh.materialMap->enableLighting = material.enableLighting;
-	subMesh.materialMap->uvTransform = MakeIdentity();
-	subMesh.materialMap->shininess = material.shininess;
-	// Map先はUploadヒープの生メモリなのでCB転送部は必ず明示的に初期化する。
-	subMesh.materialMap->emissiveColor = material.emissiveColor;
-	subMesh.materialMap->emissiveIntensity = material.emissiveIntensity;
-	subMesh.materialMap->emissiveEnabled = material.emissiveEnabled;
-	subMesh.materialMap->bloomIntensity = material.bloomIntensity;
-	subMesh.materialMap->bloomThreshold = material.bloomThreshold;
-	subMesh.materialMap->bloomSoftKnee = material.bloomSoftKnee;
+	WriteMaterialConstants(subMesh.materialMap, material);
 	subMesh.textureIndex = material.textureIndex;
 
 	// raycast/preview用の統合頂点へ追記する。

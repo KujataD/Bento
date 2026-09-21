@@ -48,6 +48,7 @@ kujata log.tail 20 error                                # 最近のエラーだ�
 kujata prefab.instantiate Prefabs/Enemy.prefab.json     # プレハブを置く(prefab.list で一覧)
 kujata animation.addKey Door RotatorComponent/speed 1 0.5  # 1 秒の位置にキー(animation.save で保存)
 kujata schema.get RigidbodyComponent                    # フィールドの型・範囲・説明
+kujata material.set Materials/Toon.material.json shaderModel 8  # マテリアルを書き換えて保存(material.list で一覧)
 ```
 
 - オブジェクトは `親/子` のパスか instanceId で指定する。同じパスが複数あるとエラーになる(instanceId で指定する)
@@ -66,6 +67,19 @@ kujata schema.get RigidbodyComponent                    # フィールドの型�
 
 - 配色はセージグリーンで統一している(`KujataEngine/Editor/EditorStyle.cpp`)。描画先が sRGB なので、書いた値より画面では明るく出る
 - プレハブ(Hierarchy のインスタンス名・Project のプレハブファイル・Inspector の表示)は原色の緑の文字で出る(`EditorStyle::PrefabTextColor()`)
+
+### トゥーン・ローポリ調のマテリアル
+
+Project でマテリアルを選ぶと Inspector に出る。CUI では `material.set <パス> <キー> <値>`(キー名は括弧内)。
+
+- **Shader Model を Toon(`shaderModel` 8)** にすると、明るさを段に分けて塗る(セル調)
+  - `Toon Steps`(`toonSteps`): 何段に分けるか(いちばん暗い段と明るい段を含む。4 なら 4 色)
+  - `Toon Smoothness`(`toonSmoothness`): 段の境目のぼかし幅。0 でくっきり
+  - `Shadow Color`(`shadowColor`): いちばん暗い段の色(元の色に掛ける)。紺などにすると影がやわらかく見える。ライトが暗くても、光の当たる側がこれより暗くなることはない
+- どの Shader Model でも使えるもの
+  - `Flat Shading`(`flatShading`): 面ごとに平らな陰にする(ローポリの角をはっきり見せる)
+  - `Point Sampling`(`pointSampling`): テクスチャをぼかさずに読む(粗いテクスチャをドットのまま見せる)
+- 落ち影(物が地面に落とす影)はない。段と影の色は、物体の光が当たらない側(陰)にかかる
 
 ## 新しいゲームを作る
 

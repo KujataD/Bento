@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <d3d12.h>
 #include <dxcapi.h>
 #include <string>
@@ -45,10 +46,24 @@ struct MaterialData {
 	// **プリミティブのUVは面ごとに0..1固定**で、Transformで引き伸ばすと面ごとに違う伸び方をする。
 	// これを使うと面の実寸に応じて敷き詰められ、どのオブジェクトでも密度が揃う。
 	float triplanarScale = 0.0f;
+	// トゥーン(ShaderModel::kToon)。明るさを toonSteps 段に丸め、いちばん暗い段を shadowColor で塗る。
+	// toonSmoothness は段の境目のぼかし幅(0=くっきり)。offset 136 / 140 / 144(float3は16B境界から始まる)。
+	int32_t toonSteps = 4;
+	float toonSmoothness = 0.0f;
+	Vector3 shadowColor = {0.22f, 0.24f, 0.42f};
+	// 1なら面ごとに平らな陰にする(頂点の法線を使わず、画面上の位置の変化から面の向きを求める)。
+	// どのShaderModelでも効く。ローポリの角をはっきり見せたいときに使う。
+	int32_t flatShading = 0;
+	// 1ならテクスチャをぼかさずに読む(ポイントサンプリング。s1)。粗いテクスチャをドットのまま見せる。
+	int32_t pointSampling = 0;
 	// --- ここまでCB転送部 ---
 	std::string textureFilePath;
 	uint32_t textureIndex;
 };
+// HLSL の Material と並びがずれていないかを確かめる(ずれると値が別のフィールドに入って見た目だけが壊れる)。
+static_assert(offsetof(MaterialData, triplanarScale) == 132);
+static_assert(offsetof(MaterialData, shadowColor) == 144);
+static_assert(offsetof(MaterialData, pointSampling) == 160);
 
 struct Node {
 	Matrix4x4 localMatrix = {{{1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f}}};
@@ -119,6 +134,9 @@ enum class ShaderModel {
 	// トレイル(TrailRendererComponentの帯)。UVのu(先頭0→末尾1)に沿って薄くなり、
 	// 幅方向(v)の縁もぼかす。末尾が自然に消えるので、帯の切れ目が線として見えない。
 	kTrail,
+	// トゥーン(セル調)。明るさを段に分け、影の側を影の色で塗る(黒くしない)。
+	// 段の数・境目のぼかし・影の色はマテリアルで決める。
+	kToon,
 };
 
 /// <summary>

@@ -2,6 +2,7 @@
 
 #include "../../externals/imgui/imgui.h"
 #include "../../externals/imsearch/imsearch.h"
+#include "../3d/GraphicsPipeline.h"
 #include "../assets/MaterialAsset.h"
 #include "../scene/Component.h"
 #include "../scene/GameObject.h"
@@ -94,12 +95,10 @@ bool LoadMaterialInspectorState(const std::filesystem::path& materialPath, Mater
 
 bool SaveMaterialInspectorState(MaterialInspectorState& state) {
 	std::string message;
-	if (!MaterialAsset::Save(state.materialPath, state.material, message)) {
+	if (!SaveMaterialAsset(state.materialPath, state.material, message)) {
 		state.errorMessage = message;
 		return false;
 	}
-
-	AssetDatabase::GetInstance().GetOrCreateAssetId(state.materialPath);
 	state.errorMessage.clear();
 	return true;
 }
@@ -305,6 +304,23 @@ void RefreshMaterialUsers(const std::filesystem::path& materialPath) {
 
 } // namespace
 
+bool SaveMaterialAsset(const std::filesystem::path& materialPath, const MaterialAssetData& material, std::string& message) {
+	const std::filesystem::path normalizedPath = NormalizeEditorPath(materialPath);
+	if (!MaterialAsset::Save(normalizedPath, material, message)) {
+		return false;
+	}
+	AssetDatabase::GetInstance().GetOrCreateAssetId(normalizedPath);
+	RefreshMaterialUsers(normalizedPath);
+
+	// CUI から書き換えたマテリアルを Inspector で開いていたら、表示も新しい値にそろえる。
+	MaterialInspectorState& state = GetMaterialInspectorState();
+	if (state.loaded && state.materialPath == normalizedPath && &state.material != &material) {
+		state.material = material;
+		FillMaterialInspectorBuffers(state);
+	}
+	return true;
+}
+
 void DrawMaterialAssetInspector(ProjectWindow& projectWindow) {
 	EditorSelection* selection = EditorSelection::GetInstance();
 	std::filesystem::path materialPath = selection->GetSelectedAssetPath();
@@ -367,7 +383,7 @@ void DrawMaterialAssetInspector(ProjectWindow& projectWindow) {
 	}
 
 	// シェーダー方式の選択(ShaderModel enumの順序に一致させる)。
-	const char* shaderItems[] = {"None (Unlit)", "Lambert", "Half Lambert", "Phong", "Blinn-Phong", "Shockwave (Ring)", "Barrier (Hex/Pentagon)", "Trail (Ribbon)"};
+	const char* shaderItems[] = {"None (Unlit)", "Lambert", "Half Lambert", "Phong", "Blinn-Phong", "Shockwave (Ring)", "Barrier (Hex/Pentagon)", "Trail (Ribbon)", "Toon"};
 	int shaderIndex = state.material.shaderModel;
 	if (shaderIndex < 0 || shaderIndex >= static_cast<int>(IM_ARRAYSIZE(shaderItems))) {
 		shaderIndex = 0;
@@ -375,6 +391,45 @@ void DrawMaterialAssetInspector(ProjectWindow& projectWindow) {
 	if (ImGui::Combo("Shader Model", &shaderIndex, shaderItems, IM_ARRAYSIZE(shaderItems))) {
 		state.material.shaderModel = shaderIndex;
 		changed = true;
+	}
+
+	// トゥーンの段と影の色。Toon を選んだときだけ効くので、そのときだけ出す。
+	if (state.material.shaderModel == static_cast<int>(ShaderModel::kToon)) {
+		ImGui::Indent();
+		if (ImGui::SliderInt("Toon Steps", &state.material.toonSteps, 2, 8)) {
+			changed = true;
+		}
+		if (ImGui::IsItemHovered()) {
+			ImGui::SetTooltip("明るさを何段に分けるか(いちばん暗い段と、いちばん明るい段を含む)。");
+		}
+		if (ImGui::SliderFloat("Toon Smoothness", &state.material.toonSmoothness, 0.0f, 0.5f)) {
+			changed = true;
+		}
+		if (ImGui::IsItemHovered()) {
+			ImGui::SetTooltip("段の境目のぼかし幅。0でくっきり分かれる。");
+		}
+		if (ImGui::ColorEdit3("Shadow Color", &state.material.shadowColor.x)) {
+			changed = true;
+		}
+		if (ImGui::IsItemHovered()) {
+			ImGui::SetTooltip("影の側の色(元の色に掛ける)。紺などにすると影がやわらかく見える。");
+		}
+		ImGui::Unindent();
+	}
+
+	// ローポリ調。どのシェーダー方式でも効く。
+	if (ImGui::Checkbox("Flat Shading", &state.material.flatShading)) {
+		changed = true;
+	}
+	if (ImGui::IsItemHovered()) {
+		ImGui::SetTooltip("面ごとに平らな陰にする(ローポリの角をはっきり見せる)。");
+	}
+	ImGui::SameLine();
+	if (ImGui::Checkbox("Point Sampling", &state.material.pointSampling)) {
+		changed = true;
+	}
+	if (ImGui::IsItemHovered()) {
+		ImGui::SetTooltip("テクスチャをぼかさずに読む(粗いテクスチャをドットのまま見せる)。");
 	}
 
 	// 合成方法。加算は光・炎・魔法のように「重ねるほど明るくなる」表現に使う。
@@ -429,16 +484,12 @@ void DrawMaterialAssetInspector(ProjectWindow& projectWindow) {
 	ImGui::TextDisabled("(Emissiveは上のEmissionをONにしないと効きません)");
 
 	if (changed) {
-		if (SaveMaterialInspectorState(state)) {
-			RefreshMaterialUsers(state.materialPath);
-		}
+		SaveMaterialInspectorState(state);
 	}
 
 	if (ImGui::Button("Save")) {
 		ApplyMaterialInspectorBuffers(state);
-		if (SaveMaterialInspectorState(state)) {
-			RefreshMaterialUsers(state.materialPath);
-		}
+		SaveMaterialInspectorState(state);
 	}
 
 	AssetDatabase& assetDatabase = AssetDatabase::GetInstance();

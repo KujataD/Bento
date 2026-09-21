@@ -49,7 +49,7 @@ struct MaterialTexture {
 struct MaterialAssetData {
 	std::string name = "New Material";
 	Vector4 baseColor = {1.0f, 1.0f, 1.0f, 1.0f};
-	// シェーダー方式(ShaderModel enum値)。0=None(Unlit/ライティングなし)..4=Blinn-Phong。
+	// シェーダー方式(ShaderModel enum値)。0=None(Unlit/ライティングなし)..4=Blinn-Phong、8=Toon。
 	// 既定はBlinn-Phong(4)。UI等でライティングを無効にしたい場合は0を選ぶ。
 	int shaderModel = 4;
 	// 合成方法(KujataEngine::BlendMode の値)。既定は1=kNormal(通常のαブレンド)。
@@ -73,6 +73,15 @@ struct MaterialAssetData {
 	Vector2 uvOffset = {0.0f, 0.0f};
 	Vector2 uvScale = {1.0f, 1.0f};
 	float uvRotation = 0.0f; // ラジアン
+	// トゥーン(shaderModel = 8 = Toon のときだけ効く)。明るさを toonSteps 段に分け、
+	// いちばん暗い段を shadowColor で塗る(黒くしない)。toonSmoothness は段の境目のぼかし幅(0=くっきり)。
+	int toonSteps = 4;
+	float toonSmoothness = 0.0f;
+	Vector3 shadowColor = {0.22f, 0.24f, 0.42f};
+	// 面ごとに平らな陰にする(ローポリの角をはっきり見せる)。どのシェーダー方式でも効く。
+	bool flatShading = false;
+	// テクスチャをぼかさずに読む(粗いテクスチャをドットのまま見せる)。どのシェーダー方式でも効く。
+	bool pointSampling = false;
 	std::vector<MaterialTexture> textures;
 };
 

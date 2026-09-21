@@ -516,6 +516,21 @@ MaterialAssetData MaterialAsset::ReadJsonObject(const nlohmann::json& json, cons
 		material.uvRotation = json.at("uvRotation").get<float>();
 	}
 
+	// トゥーン・ローポリ調(キーが無い旧Material JSONは既定値。flat/point は OFF なので見た目は変わらない)。
+	if (json.contains("toonSteps") && json.at("toonSteps").is_number_integer()) {
+		material.toonSteps = json.at("toonSteps").get<int>();
+	}
+	if (json.contains("toonSmoothness") && json.at("toonSmoothness").is_number()) {
+		material.toonSmoothness = json.at("toonSmoothness").get<float>();
+	}
+	material.shadowColor = ReadVector3(json, "shadowColor", material.shadowColor);
+	if (json.contains("flatShading") && json.at("flatShading").is_boolean()) {
+		material.flatShading = json.at("flatShading").get<bool>();
+	}
+	if (json.contains("pointSampling") && json.at("pointSampling").is_boolean()) {
+		material.pointSampling = json.at("pointSampling").get<bool>();
+	}
+
 	bool readNewTextures = ReadTexturesObject(json, material);
 	if (!readNewTextures) {
 		std::string legacyAssetId = ReadString(json, "textureAssetId", "");
@@ -545,6 +560,11 @@ void MaterialAsset::WriteJsonObject(nlohmann::json& json, const MaterialAssetDat
 	json["uvOffset"] = {material.uvOffset.x, material.uvOffset.y};
 	json["uvScale"] = {material.uvScale.x, material.uvScale.y};
 	json["uvRotation"] = material.uvRotation;
+	json["toonSteps"] = material.toonSteps;
+	json["toonSmoothness"] = material.toonSmoothness;
+	json["shadowColor"] = {material.shadowColor.x, material.shadowColor.y, material.shadowColor.z};
+	json["flatShading"] = material.flatShading;
+	json["pointSampling"] = material.pointSampling;
 
 	nlohmann::json texturesJson = nlohmann::json::object();
 	for (MaterialTextureSlot slot : GetKnownTextureSlots()) {

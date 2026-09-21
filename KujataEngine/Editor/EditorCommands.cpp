@@ -10,6 +10,7 @@ void RegisterSchemaCommands(EditorCommandRegistry& registry);
 void RegisterViewCommands(EditorCommandRegistry& registry);
 void RegisterPrefabCommands(EditorCommandRegistry& registry);
 void RegisterAnimationCommands(EditorCommandRegistry& registry);
+void RegisterMaterialCommands(EditorCommandRegistry& registry);
 
 void RegisterBuiltinEditorCommands() {
 	EditorCommandRegistry& registry = EditorCommandRegistry::GetInstance();
@@ -19,6 +20,7 @@ void RegisterBuiltinEditorCommands() {
 	RegisterViewCommands(registry);
 	RegisterPrefabCommands(registry);
 	RegisterAnimationCommands(registry);
+	RegisterMaterialCommands(registry);
 }
 
 } // namespace KujataEngine
