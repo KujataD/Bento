@@ -11,15 +11,17 @@ public:
 	// drawToolbarContentで注入する(状態はImGuiManager側が持つ)。
 	void Draw(const std::function<void()>& drawMenuBarContent, const std::function<void()>& drawToolbarContent);
 
-	// 次のDrawで初期Dockレイアウトを組み直させる（再初期化時に使う）。
-	void ResetLayout() { dockLayoutInitialized_ = false; }
+	// 次のDrawで初期Dockレイアウトを組み直させる(WindowメニューのReset Layout)。
+	void ResetLayout() { layoutResetRequested_ = true; }
 
 private:
 	// ImGuiID(=unsigned int)。ヘッダにimguiを持ち込まないため素の型で受ける。
 	void SetupInitialLayout(unsigned int dockspaceId);
 
-	// DockBuilderによる初期配置は1回だけ行う。毎フレーム実行するとユーザーが動かしたDock配置を上書きしてしまう。
-	bool dockLayoutInitialized_ = false;
+	// imgui.iniに保存済みの配置があるかを、起動後の最初のDrawで1回だけ調べたか。
+	bool savedLayoutChecked_ = false;
+	// 次のDrawで初期配置を組み直すか。保存済みの配置が無いときとReset Layoutのときだけtrueになる。
+	bool layoutResetRequested_ = false;
 };
 
 } // namespace KujataEngine

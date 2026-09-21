@@ -25,6 +25,11 @@ exe と GameModule.dll は同じ構成(Debug/Release)でビルドすること。
 
 - クリックでフォーカスしてから: WASD 移動 / QE 上下 / 右クリックホールド+マウスで視点
 
+### エディタのレイアウト
+
+- ウィンドウのドッキング配置・位置・大きさと、各ウィンドウを開いているか閉じているか(Window メニュー)は `KujataEngine/imgui.ini` に保存され、次回起動時に戻る
+- 初期配置に戻すときは Window → Reset Layout。`imgui.ini` を消して起動しても初期配置になる
+
 ### エディタの見た目
 
 - 配色はセージグリーンで統一している(`KujataEngine/Editor/EditorStyle.cpp`)。描画先が sRGB なので、書いた値より画面では明るく出る

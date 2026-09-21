@@ -66,9 +66,18 @@ private:
 	// Unity風のシーン一覧・切替(ChangeScene)・新規作成を行うウィンドウ。
 	void DrawSceneListWindow();
 
+	/// <summary>
+	/// ウィンドウの表示状態をimgui.iniへ読み書きするハンドラを登録する。最初のNewFrameより前に呼ぶこと。
+	/// </summary>
+	void RegisterWindowVisibilitySettings();
+
 private:
 	EditorDockSpace dockSpace_;
 	EditorWindowVisibility windowVisibility_;
+	// 最後にimgui.iniへ書いた(または読んだ)表示状態。変わったらiniを保存させる。
+	EditorWindowVisibility savedWindowVisibility_;
+	// io.IniFilenameはポインタを持つだけなので、文字列の実体をここで保持する。
+	std::string iniFilePath_;
 	AnimationWindow animationWindow_;
 	HierarchyWindow hierarchyWindow_;
 	InspectorWindow inspectorWindow_;

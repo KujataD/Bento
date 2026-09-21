@@ -1,4 +1,5 @@
 #include "ImGuiManager.h"
+#include "../../externals/imgui/imgui_internal.h"
 #include "../../externals/ImGuizmo-1.9/src/ImGuizmo.h"
 #include "../../externals/imsearch/imsearch.h"
 #include "EditorApplication.h"
@@ -17,6 +18,7 @@
 #include "../scene/GameObject.h"
 #include "../scene/Scene.h"
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -46,6 +48,63 @@ void FreeImGuiSrvDescriptor(ImGui_ImplDX12_InitInfo*, D3D12_CPU_DESCRIPTOR_HANDL
 	// 現状はSRVヒープをフレーム中に再利用しないため解放処理は不要。
 }
 
+// ウィンドウの表示状態をimgui.iniに書くときの名前と、EditorWindowVisibilityのメンバの対応。
+// 名前はiniのキーになるので変えないこと(変えると保存済みの状態が読めなくなる)。
+struct WindowVisibilityEntry {
+	const char* name;
+	bool EditorWindowVisibility::* flag;
+};
+
+constexpr WindowVisibilityEntry kWindowVisibilityEntries[] = {
+    {"Scene", &EditorWindowVisibility::scene},
+    {"Game", &EditorWindowVisibility::game},
+    {"Hierarchy", &EditorWindowVisibility::hierarchy},
+    {"Inspector", &EditorWindowVisibility::inspector},
+    {"Project", &EditorWindowVisibility::project},
+    {"Console", &EditorWindowVisibility::console},
+    {"Performance", &EditorWindowVisibility::performance},
+    {"Animation", &EditorWindowVisibility::animation},
+    {"Scenes", &EditorWindowVisibility::scenes},
+    {"Rendering", &EditorWindowVisibility::rendering},
+};
+
+constexpr const char* kWindowVisibilitySettingsType = "KujataEditor";
+constexpr const char* kWindowVisibilitySettingsEntry = "Windows";
+
+// iniの [KujataEditor][Windows] の見出しに来たとき、書き込み先(EditorWindowVisibility)を返す。
+void* ReadWindowVisibilityOpen(ImGuiContext*, ImGuiSettingsHandler* handler, const char* name) {
+	if (std::strcmp(name, kWindowVisibilitySettingsEntry) != 0) {
+		return nullptr;
+	}
+	return handler->UserData;
+}
+
+// "Scene=1" の形の1行を読む。知らないキーは無視する(ウィンドウを減らしても古いiniで落ちないように)。
+void ReadWindowVisibilityLine(ImGuiContext*, ImGuiSettingsHandler*, void* entry, const char* line) {
+	EditorWindowVisibility* visibility = static_cast<EditorWindowVisibility*>(entry);
+	const char* separator = std::strchr(line, '=');
+	if (!visibility || !separator) {
+		return;
+	}
+	const std::string key(line, separator);
+	const bool value = std::atoi(separator + 1) != 0;
+	for (const WindowVisibilityEntry& item : kWindowVisibilityEntries) {
+		if (key == item.name) {
+			visibility->*item.flag = value;
+			return;
+		}
+	}
+}
+
+void WriteWindowVisibility(ImGuiContext*, ImGuiSettingsHandler* handler, ImGuiTextBuffer* outBuffer) {
+	const EditorWindowVisibility* visibility = static_cast<const EditorWindowVisibility*>(handler->UserData);
+	outBuffer->appendf("[%s][%s]\n", handler->TypeName, kWindowVisibilitySettingsEntry);
+	for (const WindowVisibilityEntry& item : kWindowVisibilityEntries) {
+		outBuffer->appendf("%s=%d\n", item.name, (visibility->*item.flag) ? 1 : 0);
+	}
+	outBuffer->append("\n");
+}
+
 } // namespace
 
 ImGuiManager* ImGuiManager::GetInstance() {
@@ -68,6 +127,11 @@ void ImGuiManager::Initialize() {
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	// キーボード操作を有効化して、エディタUIとして最低限扱いやすくする。
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	// レイアウト(Dock配置・ウィンドウの位置と表示状態)はエンジンのフォルダのimgui.iniに保存する。
+	// 既定の相対パスのままだと、起動したときのカレントフォルダごとに別のiniができて配置が戻らない。
+	iniFilePath_ = (GetEngineRoot() / "imgui.ini").string();
+	io.IniFilename = iniFilePath_.c_str();
+	RegisterWindowVisibilitySettings();
 
 	// フォントを既定より少し大きく、きれいなサンサリフ(Segoe UI)にする。
 	// 日本語グリフは存在すれば別フォントからマージする。無ければImGui既定フォントにフォールバック。
@@ -114,8 +178,7 @@ void ImGuiManager::Initialize() {
 	initInfo.SrvDescriptorFreeFn = FreeImGuiSrvDescriptor;
 	ImGui_ImplDX12_Init(&initInfo);
 
-	// 初期レイアウトはImGui初期化後、最初のEditorDockSpace::Drawで構築する。
-	dockSpace_.ResetLayout();
+	// Dock配置はimgui.iniから復元する。保存が無いときだけ、最初のEditorDockSpace::Drawで初期配置を組む。
 	ClearConsoleLogs();
 	AddConsoleLog("Console initialized.");
 #endif // USE_IMGUI
@@ -189,6 +252,19 @@ void ImGuiManager::ExportCurrentSceneJson() {
 	AddConsoleLog("[Editor] Scene JSON export failed: " + exportResult.message);
 }
 
+void ImGuiManager::RegisterWindowVisibilitySettings() {
+#ifdef USE_IMGUI
+	ImGuiSettingsHandler handler;
+	handler.TypeName = kWindowVisibilitySettingsType;
+	handler.TypeHash = ImHashStr(kWindowVisibilitySettingsType);
+	handler.ReadOpenFn = ReadWindowVisibilityOpen;
+	handler.ReadLineFn = ReadWindowVisibilityLine;
+	handler.WriteAllFn = WriteWindowVisibility;
+	handler.UserData = &windowVisibility_;
+	ImGui::AddSettingsHandler(&handler);
+#endif // USE_IMGUI
+}
+
 void ImGuiManager::DrawEditor() {
 #ifdef USE_IMGUI
 	// Editor UIを構成する各ウィンドウを毎フレーム描画する。
@@ -236,6 +312,15 @@ void ImGuiManager::DrawEditor() {
 	}
 	if (windowVisibility_.rendering) {
 		renderingWindow_.Draw(&windowVisibility_.rendering);
+	}
+
+	// 表示状態が変わったら(Windowメニュー・閉じるボタン)その場でiniへ書く。
+	// ImGuiはウィンドウの移動などでしか保存せず、しかも5秒おきにまとめて書くので、
+	// 知らせないと表示状態だけ変えた分が残らず、直後に落ちた(止めた)ときも失われる。
+	// 起動直後の1回はiniから読んだ値との差分で保存が走るが、同じ内容を書くだけなので害はない。
+	if (windowVisibility_ != savedWindowVisibility_) {
+		savedWindowVisibility_ = windowVisibility_;
+		ImGui::SaveIniSettingsToDisk(ImGui::GetIO().IniFilename);
 	}
 #endif // USE_IMGUI
 }

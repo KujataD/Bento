@@ -50,11 +50,24 @@ void EditorDockSpace::Draw(const std::function<void()>& drawMenuBarContent, cons
 
 	// DockSpaceのIDは毎フレーム同じ値にする必要がある。IDが変わるとドッキング状態を維持できない。
 	ImGuiID dockspaceId = ImGui::GetID("KujataEditorMainDockSpace");
+
+	// **起動後の最初のフレームで、imgui.iniに保存済みの配置があるかを見る。**
+	// iniは最初のNewFrameで読み込まれ、保存されていたDockノードはこの時点で復元済み。
+	// ノードがあればそれを使い、無いとき(初回起動・iniを消したとき)だけ初期配置を組む。
+	// DockSpace()を呼ぶとノードが作られてしまうので、判定はその前に行うこと。
+	if (!savedLayoutChecked_) {
+		savedLayoutChecked_ = true;
+		if (!ImGui::DockBuilderGetNode(dockspaceId)) {
+			layoutResetRequested_ = true;
+		}
+	}
+
 	ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_None;
 	ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), dockspaceFlags);
 
-	// DockBuilderによる初期配置は初回だけ。以降はユーザーがドラッグした配置を尊重する。
-	if (!dockLayoutInitialized_) {
+	// 初期配置を組むのは、保存済みの配置が無いときと、Reset Layoutが押されたときだけ。
+	// 毎フレーム組むとユーザーがドラッグした配置を上書きしてしまう。
+	if (layoutResetRequested_) {
 		SetupInitialLayout(dockspaceId);
 	}
 
@@ -100,8 +113,8 @@ void EditorDockSpace::SetupInitialLayout(unsigned int dockspaceId) {
 	ImGui::DockBuilderDockWindow("Game", gameNode);
 	ImGui::DockBuilderFinish(dockspaceId);
 
-	// ここをtrueにして、次フレーム以降は初期配置を作り直さない。
-	dockLayoutInitialized_ = true;
+	// 次フレーム以降は初期配置を作り直さない。
+	layoutResetRequested_ = false;
 #endif // USE_IMGUI
 }
 

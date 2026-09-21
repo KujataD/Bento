@@ -5,6 +5,7 @@ namespace KujataEngine {
 /// <summary>
 /// Windowメニューでトグルする各エディタウィンドウの表示状態。
 /// 各ウィンドウのBeginにp_openとして渡し、閉じるボタン[x]とも連動させる。
+/// imgui.iniの [KujataEditor][Windows] に保存され、次回起動時に復元される(ImGuiManager参照)。
 /// </summary>
 struct EditorWindowVisibility {
 	bool scene = true;
@@ -17,6 +18,8 @@ struct EditorWindowVisibility {
 	bool animation = true;
 	bool scenes = false;
 	bool rendering = false;
+
+	bool operator==(const EditorWindowVisibility&) const = default;
 };
 
 } // namespace KujataEngine
