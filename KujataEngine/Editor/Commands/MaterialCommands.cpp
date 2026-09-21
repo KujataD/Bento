@@ -1,13 +1,16 @@
-// エディタの CUI のコマンド: マテリアル(保存と反映は SaveMaterialAsset。Material の Inspector と同じもの)。
+// エディタの CUI のコマンド: マテリアルと、マテリアルで選ぶ自作シェーダー
+// (保存と反映は SaveMaterialAsset、ひな形は CreateCustomShaderFile。どちらも Material の Inspector と同じもの)。
 // 設計と一覧は .claude/editor-automation.md。共通の関数は EditorCommandUtil にある。
 #include "EditorCommandUtil.h"
 #include "../AssetDatabase.h"
 #include "../MaterialInspector.h"
+#include "../../3d/GraphicsPipeline.h"
 #include "../../assets/MaterialAsset.h"
 #include "../../base/ProjectPath.h"
 #include <filesystem>
 #include <string>
 #include <system_error>
+#include <vector>
 
 namespace KujataEngine {
 
@@ -125,7 +128,7 @@ EditorCommandResult CommandMaterialSet(const EditorCommandArgs& args) {
 	}
 	const json before = fields[key];
 	const bool sameKind = (before.is_number() && value.is_number()) || (before.is_boolean() && value.is_boolean()) ||
-	                      (before.is_array() && value.is_array() && value.size() == before.size());
+	                      (before.is_string() && value.is_string()) || (before.is_array() && value.is_array() && value.size() == before.size());
 	if (!sameKind) {
 		return EditorCommandResult::Failure(key + " は " + before.dump() + " と同じ形の値で指定してください。");
 	}
@@ -146,6 +149,48 @@ EditorCommandResult CommandMaterialSet(const EditorCommandArgs& args) {
 	return EditorCommandResult::Success(result);
 }
 
+// 自作シェーダーの一覧: Data 配下の .hlsl と、登録済み(どれかのマテリアルが使った)もののコンパイルの状態。
+json DescribeShaders() {
+	json shaders = json::array();
+	const std::vector<CustomShaderInfo> infos = GraphicsPipeline::GetInstance()->GetCustomShaderInfos();
+	std::error_code errorCode;
+	for (const std::string& file : ListCustomShaderFiles()) {
+		json entry;
+		entry["path"] = file;
+		entry["loaded"] = false;
+		const std::filesystem::path absolutePath = GetProjectDataRoot() / file;
+		for (const CustomShaderInfo& info : infos) {
+			if (std::filesystem::equivalent(info.path, absolutePath, errorCode)) {
+				entry["loaded"] = true;
+				entry["usable"] = info.usable;
+				entry["vertexShader"] = info.hasVertexShader ? "VSMain" : "標準";
+				entry["error"] = info.error;
+			}
+		}
+		shaders.push_back(entry);
+	}
+	return shaders;
+}
+
+EditorCommandResult CommandShaderList(const EditorCommandArgs&) { return EditorCommandResult::Success(DescribeShaders()); }
+
+EditorCommandResult CommandShaderCreate(const EditorCommandArgs& args) {
+	std::string relativePath;
+	std::string message;
+	if (!CreateCustomShaderFile(args.Count() > 0 ? args.Get(0) : "NewShader", relativePath, message)) {
+		return EditorCommandResult::Failure(message);
+	}
+	json result;
+	result["path"] = relativePath;
+	result["hint"] = "material.set <マテリアル> shaderPath \"" + relativePath + "\" で使う";
+	return EditorCommandResult::Success(result);
+}
+
+EditorCommandResult CommandShaderReload(const EditorCommandArgs&) {
+	GraphicsPipeline::GetInstance()->ReloadChangedCustomShaders(true);
+	return EditorCommandResult::Success(DescribeShaders());
+}
+
 } // namespace
 
 void RegisterMaterialCommands(EditorCommandRegistry& registry) {
@@ -155,6 +200,9 @@ void RegisterMaterialCommands(EditorCommandRegistry& registry) {
 	registry.Register("material.set", "material.set <マテリアルのパス> <キー> <値>",
 	                  "マテリアルのフィールドを書き換えて保存し、使っているオブジェクトへ反映する(Undo 不可。例: material.set Materials/Toon.material.json shaderModel 8)",
 	                  CommandMaterialSet);
+	registry.Register("shader.list", "shader.list", "自作シェーダー(Data 配下の .hlsl)の一覧と、コンパイルの成否・エラー", CommandShaderList);
+	registry.Register("shader.create", "shader.create [名前]", "自作シェーダーのひな形を Data/Shaders/<名前>.hlsl に作る(Material の Inspector の New と同じ)", CommandShaderCreate);
+	registry.Register("shader.reload", "shader.reload", "自作シェーダーをすべてコンパイルし直す(保存すれば自動でも読み直す)", CommandShaderReload);
 }
 
 } // namespace KujataEngine

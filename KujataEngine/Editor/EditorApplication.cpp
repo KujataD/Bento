@@ -1,5 +1,6 @@
 #include "EditorApplication.h"
 #include "EditorCommandServer.h"
+#include "EditorConsole.h"
 #include "EditorScreenshot.h"
 #include "ImGuiManager.h"
 #include "AssetDatabase.h"
@@ -20,6 +21,7 @@
 #include "SceneJsonImporter.h"
 #include "../3d/Camera.h"
 #include "../3d/DirectionalLight.h"
+#include "../3d/GraphicsPipeline.h"
 #include "../3d/LineRenderer.h"
 #include "../3d/Model.h"
 #include "../3d/PointLight.h"
@@ -183,6 +185,8 @@ void EditorApplication::Update() {
 	ProcessPendingSceneChange();
 
 #ifdef USE_IMGUI
+	// エンジン側(Logger::Log)の警告・エラーを Console へ移す(別スレッドから出たものもここでメインスレッドへ)。
+	EditorConsole::GetInstance()->FlushEngineLogs();
 	// CUIのコマンドはここ(フレームの頭・描画の前)でだけ実行する。人間のUI操作と同じ処理を通す。
 	EditorCommandServer::GetInstance().ProcessFrame();
 #endif // USE_IMGUI
@@ -192,6 +196,17 @@ void EditorApplication::Update() {
 	{
 		FrameProfiler::Scope profile(FrameProfiler::kEditorUI);
 		ImGuiManager::GetInstance()->DrawEditor();
+	}
+#endif // USE_IMGUI
+
+#ifdef USE_IMGUI
+	// 自作シェーダーの .hlsl が保存されていたら読み直す(ファイルの時刻を見るだけなので、数フレームおきにする)。
+	// 古いPSOを消すのでGPUの完了を待つ。描画コマンドを積む前のここで行う。
+	{
+		static uint32_t shaderCheckFrame = 0;
+		if (++shaderCheckFrame % 30 == 0) {
+			GraphicsPipeline::GetInstance()->ReloadChangedCustomShaders();
+		}
 	}
 #endif // USE_IMGUI
 

@@ -54,7 +54,7 @@ kujata material.set Materials/Toon.material.json shaderModel 8  # マテリア�
 - オブジェクトは `親/子` のパスか instanceId で指定する。同じパスが複数あるとエラーになる(instanceId で指定する)
 - 変更系のコマンドは Undo できる(履歴のラベルは `[CUI] ...`)
 - 返事には毎回、そのコマンドの実行中に出たログと、エディタの状態(モード・シーン・選択・Undo の先頭)が付く
-- ログは Console(警告は黄・エラーは赤。上のチェックと入力欄で絞り込める)と、`KujataEngine/logs/editor_<日時>.jsonl`(1 行 1 件の JSON)の両方に出る
+- ログは Console(警告は黄・エラーは赤。上のチェックと入力欄で絞り込める)と、`KujataEngine/logs/editor_<日時>.jsonl`(1 行 1 件の JSON)の両方に出る。エンジン側のログ(シェーダーのコンパイルなど)は、警告とエラーだけが Console にも出る
 - プレハブ(`prefab.*`)とアニメーション(`animation.*`)の操作は、Hierarchy・Inspector・Animation ウィンドウのボタンと同じ処理を呼ぶ。プレハブの Revert / Unpack は Undo できる。アニメーションのキーはシーンの Undo では戻らない(`animation.save` で保存)
 
 ### エディタのレイアウト
@@ -90,6 +90,22 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - フォグ・ブルームも低い解像度のままかかる(1 ドットの中で色が変わらない)
 - 1280×720 を割り切れる値(2 / 4 / 5 / 8 / 10 / 16 / 20)にすると、ドットの大きさがそろう
 - Scene ビューはドットにしない(編集しやすさのため)
+
+### 自作シェーダー
+
+マテリアルごとに、自分で書いたシェーダー(`.hlsl`)で描ける。泡・海・雷雲など、標準のシェーダーでは出せない見た目に使う。
+
+1. Material の Inspector の **Custom Shader** で **New** を押す(または `kujata shader.create 名前`)。`Data/Shaders/<名前>.hlsl` にひな形ができて、そのマテリアルで使われる
+2. `.hlsl` を書き換えて保存する。エディタが自動で読み直す(手動なら Reload / `kujata shader.reload`)
+3. **Param 0〜3**(`shaderParams`。float4 × 4)で、揺れの強さなどの値を渡す(シェーダー側は `gShaderParams.params[0..3]`)
+
+- 1 ファイルに `PSMain`(色を決める。必須)と `VSMain`(頂点を動かす。省略すると標準の処理)を書く。使える値と関数は `KujataEngine/EngineData/shader/Object3dCustom.hlsli` の先頭に書いてある(時間 `gShaderParams.time`、`ToonStep`、影の色など)
+- 書き間違えて保存しても止まらない。エラーは Console と Inspector に出て、そのあいだは直前に成功した版(無ければ標準)で描く
+- `kujata shader.list` で一覧とコンパイルの成否が分かる
+
+### 半透明の描く順番
+
+深度を書かないマテリアル(Depth Write を切った半透明・加算)とパーティクルは、不透明物をすべて描いた後に、カメラから遠い順に描く。シーンの並び順を気にしなくてよい。
 
 ## 新しいゲームを作る
 

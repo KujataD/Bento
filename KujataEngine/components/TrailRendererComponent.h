@@ -41,6 +41,9 @@ public:
 	void Update() override;
 	void Draw() override;
 
+	/// <summary>深度を書かないマテリアル(半透明・加算)なら true。Scene が不透明物の後に遠い順で描く。</summary>
+	bool IsTransparentDraw() const override { return transparent_; }
+
 	void DrawInspector() override;
 	void WriteJson(nlohmann::json& json) const override;
 	void ReadJson(const nlohmann::json& json) override;
@@ -103,6 +106,8 @@ private:
 	std::vector<VertexData> vertices_;
 	// マテリアルの読み直しが必要か。
 	bool materialDirty_ = true;
+	// 今のマテリアルが深度を書かないか(IsTransparentDraw)。ApplyMaterialで決まる。
+	bool transparent_ = false;
 };
 
 } // namespace KujataEngine

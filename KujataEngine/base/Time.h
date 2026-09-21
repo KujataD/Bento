@@ -31,10 +31,17 @@ public:
 	static void SetTimeScale(float scale) { GetInstance()->timeScale_ = (scale < 0.0f) ? 0.0f : scale; }
 	static float GetTimeScale() { return GetInstance()->timeScale_; }
 
+	/// <summary>
+	/// 起動してからの実時間(秒)。時間スケールも一時停止も関係なく進む。
+	/// **見た目だけの時間**(シェーダーの波・揺れなど)に使う。ゲームの判定に使うと、止めても進んでしまう。
+	/// </summary>
+	static float GetRealTimeSinceStartup() { return GetInstance()->RealTimeSinceStartup(); }
+
 	void Init();
 	void Update();
 	float DeltaTime() const { return dt_ * timeScale_; }
 	float UnscaledDeltaTime() const { return dt_; }
+	float RealTimeSinceStartup() const;
 
 private:
 	Time() = default;
@@ -55,5 +62,8 @@ private:
 
 	// 開始時刻を取得
 	LARGE_INTEGER prevTime_;
+
+	// 起動した時刻(RealTimeSinceStartupの起点)
+	LARGE_INTEGER startTime_;
 
 };

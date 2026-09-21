@@ -21,6 +21,15 @@ namespace KujataEngine {
 enum FillMode { kFillModeSolid, kFillModeWireframe };
 
 /// <summary>
+/// 自作シェーダー用の定数(b5)。HLSL側 Object3d.hlsli の ShaderParams と並びを一致させること。
+/// </summary>
+struct ShaderParamsData {
+	Vector4 params[4] = {};  // マテリアルの Shader Params(意味は各シェーダーが決める)
+	float time = 0.0f;       // 起動からの秒数(描くたびに書く)
+	float padding[3] = {};
+};
+
+/// <summary>
 /// 3Dモデル
 /// </summary>
 class KUJATA_API Model {
@@ -110,6 +119,24 @@ public:
 	/// 深度バッファへ書き込むか。半透明/加算はfalseにする(深度テストは行うので不透明物には隠される)。
 	void SetDepthWrite(bool depthWrite) { depthWrite_ = depthWrite; }
 	bool IsDepthWrite() const { return depthWrite_; }
+
+	/// <summary>
+	/// 自作シェーダー(GraphicsPipeline::AcquireCustomShader の番号)で描く。0で標準のシェーダーに戻す。
+	/// 自作シェーダーが描けない状態(コンパイル失敗など)のときは、標準のシェーダーで描く。
+	/// </summary>
+	void SetCustomShader(uint32_t shaderId) { customShaderId_ = shaderId; }
+	uint32_t GetCustomShader() const { return customShaderId_; }
+
+	/// <summary>自作シェーダーへ渡すパラメータ(float4×4)を全サブメッシュへ設定する。</summary>
+	void SetShaderParams(const Vector4 (&params)[4]) {
+		for (SubMesh& subMesh : subMeshes_) {
+			if (subMesh.shaderParamsMap) {
+				for (int i = 0; i < 4; ++i) {
+					subMesh.shaderParamsMap->params[i] = params[i];
+				}
+			}
+		}
+	}
 	void SetTexture(uint32_t textureIndex) {
 		for (SubMesh& subMesh : subMeshes_) {
 			subMesh.textureIndex = textureIndex;
@@ -216,7 +243,13 @@ private:
 		uint32_t textureIndex = 0;
 		// エミッションマップ(t2)。既定0はTextureManagerの未使用枠なので、Draw時に白へフォールバックする。
 		uint32_t emissiveTextureIndex = 0;
+		// 自作シェーダー用の定数(b5)。Uploadヒープを張りっぱなしにする。
+		Microsoft::WRL::ComPtr<ID3D12Resource> shaderParamsResource;
+		ShaderParamsData* shaderParamsMap = nullptr;
 	};
+
+	// サブメッシュの自作シェーダー用の定数バッファを作る(中身は0)。
+	static void CreateShaderParamsBuffer(SubMesh& subMesh);
 
 	std::vector<SubMesh> subMeshes_;
 	// 全サブメッシュを統合した頂点(GetVertices用)。
@@ -233,6 +266,8 @@ private:
 	BlendMode blendMode_ = BlendMode::kNormal;
 	bool doubleSided_ = false;
 	bool depthWrite_ = true;
+	// 自作シェーダーの番号(0=標準のシェーダー)。
+	uint32_t customShaderId_ = 0;
 };
 
 } // namespace KujataEngine

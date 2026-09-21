@@ -25,6 +25,12 @@ public:
 
 	/// <summary>重さを文面から推測してログを出す(古い呼び出し用。ClassifyEditorLog を参照)。</summary>
 	void AddLog(const std::string& message) { AddLog(message, ClassifyEditorLog(message)); }
+
+	/// <summary>
+	/// エンジン側(Logger::Log)の警告・エラーを Console へ移す(ファイルへは Logger::Log の時点で書いてある)。
+	/// メインスレッドで呼ぶこと。毎フレームと、CUI のコマンドの終わり(EndCapture)で呼ばれる。
+	/// </summary>
+	void FlushEngineLogs();
 	void ClearLogs();
 	void Draw(bool* pOpen = nullptr);
 
@@ -38,6 +44,9 @@ public:
 
 private:
 	EditorConsole() = default;
+
+	// Console の一覧に足す(ファイルへは書かない)。
+	void AddEntry(const std::string& message, EditorLogLevel level);
 	~EditorConsole() = default;
 	EditorConsole(const EditorConsole&) = delete;
 	EditorConsole& operator=(const EditorConsole&) = delete;

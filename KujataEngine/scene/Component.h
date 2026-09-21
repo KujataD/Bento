@@ -38,6 +38,12 @@ public:
 	virtual void Draw() {}
 
 	/// <summary>
+	/// 深度を書かない描画(半透明・加算)をするか。true のコンポーネントは、Scene が不透明物をすべて描いた後に、
+	/// カメラから遠い順に Draw を呼ぶ(シーンの並び順に関係なく、奥の物が透けて見えるように)。
+	/// </summary>
+	virtual bool IsTransparentDraw() const { return false; }
+
+	/// <summary>
 	/// Inspector表示用のComponent名を取得
 	/// </summary>
 	virtual const char* GetTypeName() const { return "Component"; }

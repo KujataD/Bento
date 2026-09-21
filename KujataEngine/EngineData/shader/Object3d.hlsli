@@ -1,3 +1,6 @@
+#ifndef KUJATA_OBJECT3D_HLSLI
+#define KUJATA_OBJECT3D_HLSLI
+
 struct VertexShaderOutput
 {
     float32_t4 position : SV_POSITION;
@@ -26,3 +29,14 @@ struct Camera
 {
     float32_t3 worldPosition;
 };
+
+// マテリアルごとの自由なパラメータ(自作シェーダー用)と時間。頂点・ピクセルの両方から読める。
+// C++側 3d/Model.h の ShaderParamsData と並びを一致させること。
+struct ShaderParams
+{
+    float32_t4 params[4]; // マテリアルの Shader Params(意味は各シェーダーが決める)
+    float32_t time;       // 起動からの秒数(見た目用。一時停止や時間スケールでは止まらない)
+};
+ConstantBuffer<ShaderParams> gShaderParams : register(b5);
+
+#endif // KUJATA_OBJECT3D_HLSLI

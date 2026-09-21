@@ -461,6 +461,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <None Include="EngineData\shader\BloomUpsample.PS.hlsl" />
     <None Include="EngineData\shader\Tonemap.PS.hlsl" />
     <None Include="EngineData\shader\Fog.PS.hlsl" />
+    <None Include="EngineData\shader\Object3dPixel.hlsli" />
+    <None Include="EngineData\shader\Object3dVertex.hlsli" />
+    <None Include="EngineData\shader\Object3dCustom.hlsli" />
     <None Include="shader\Object3d.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

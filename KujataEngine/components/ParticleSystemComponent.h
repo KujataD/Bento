@@ -36,6 +36,9 @@ public:
 	void Update() override;
 	void Draw() override;
 
+	/// <summary>パーティクルは深度を書かない(PipelineType::kParticle)ので、不透明物の後に遠い順で描く。</summary>
+	bool IsTransparentDraw() const override { return true; }
+
 	/// <summary>描画に使うカメラ。シーン側が毎フレーム配る(ModelRenderer/Trailと同じ流儀)。</summary>
 	void SetCamera(const Camera* camera) { camera_ = camera; }
 

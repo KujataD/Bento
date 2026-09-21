@@ -5,9 +5,122 @@
 #include "../base/StringUtil.h"
 #include "../base/WinApp.h"
 #include <cassert>
+#include <cctype>
 #include <format>
+#include <fstream>
+#include <regex>
+#include <sstream>
+#include <system_error>
 
 namespace KujataEngine {
+
+namespace {
+
+// Object3d系の頂点の並び(VertexData と一致させる)。PSOの設定から指すので、関数を抜けても消えない場所に置く。
+const D3D12_INPUT_ELEMENT_DESC kObject3dInputElements[] = {
+    {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+    {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+    {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+};
+
+// Object3d系のPSOの種類(自作シェーダーもこの5種類ぶん作れる)。
+bool IsObject3dPipelineType(PipelineType pipelineType) {
+	return pipelineType == PipelineType::kObject3d || pipelineType == PipelineType::kObject3dWireframe || pipelineType == PipelineType::kObject3dDoubleSided ||
+	       pipelineType == PipelineType::kObject3dNoDepthWrite || pipelineType == PipelineType::kObject3dDoubleSidedNoDepthWrite;
+}
+
+// 合成方法ごとのブレンド設定。
+D3D12_BLEND_DESC MakeBlendDesc(BlendMode blendMode) {
+	D3D12_BLEND_DESC blendDesc{};
+	auto& renderTarget = blendDesc.RenderTarget[0];
+
+	// 共通初期化部
+	renderTarget.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	renderTarget.BlendEnable = TRUE;
+
+	renderTarget.SrcBlend = D3D12_BLEND_ONE;
+	renderTarget.DestBlend = D3D12_BLEND_ZERO;
+	renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
+
+	renderTarget.SrcBlendAlpha = D3D12_BLEND_ONE;
+	// **アルファはsource-overで合成する**(dstA = srcA + dstA*(1-srcA))。
+	// ZEROにすると dstA = srcA となり、描いた側のαでレンダーターゲットのαが上書きされる。
+	// α=0の全画面UIを1枚重ねただけでRT全体が透明になり、
+	// RTをαブレンドで表示するエディタのGame/Sceneビューが真っ黒になる
+	// (バックバッファ直描きのゲーム単体ビルドではαが無視されるため表面化しない)。
+	renderTarget.DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
+	renderTarget.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+
+	switch (blendMode) {
+	case BlendMode::kNone:
+		renderTarget.BlendEnable = FALSE;
+		break;
+
+	case BlendMode::kNormal:
+		renderTarget.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
+		renderTarget.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+		break;
+
+	case BlendMode::kAdd:
+		renderTarget.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
+		renderTarget.DestBlend = D3D12_BLEND_ONE;
+		break;
+
+	case BlendMode::kMultiply:
+		renderTarget.SrcBlend = D3D12_BLEND_ZERO;
+		renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
+		renderTarget.DestBlend = D3D12_BLEND_SRC_COLOR;
+		break;
+
+	case BlendMode::kExclusion:
+		renderTarget.SrcBlend = D3D12_BLEND_INV_DEST_COLOR;
+		renderTarget.DestBlend = D3D12_BLEND_INV_SRC_COLOR;
+		renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
+		break;
+
+	case BlendMode::kScreen:
+		renderTarget.SrcBlend = D3D12_BLEND_INV_DEST_COLOR;
+		renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
+		renderTarget.DestBlend = D3D12_BLEND_ONE;
+		break;
+
+	case BlendMode::kPremultipliedAlpha:
+		// 色があらかじめαを掛けてある前提。フチが暗くならない。
+		renderTarget.SrcBlend = D3D12_BLEND_ONE;
+		renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
+		renderTarget.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+		break;
+
+	case BlendMode::kSubtract:
+		renderTarget.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+		renderTarget.BlendOp = D3D12_BLEND_OP_REV_SUBTRACT;
+		renderTarget.DestBlend = D3D12_BLEND_ONE;
+		break;
+
+	default:
+		break;
+	}
+	return blendDesc;
+}
+
+// 自作シェーダーを探す鍵。同じファイルを別の書き方で指しても同じ番号になるよう、正規化して小文字にそろえる。
+std::string MakeShaderKey(const std::filesystem::path& path) {
+	std::error_code errorCode;
+	std::filesystem::path normalized = std::filesystem::weakly_canonical(path, errorCode);
+	if (errorCode) {
+		normalized = path.lexically_normal();
+	}
+	std::string key = normalized.generic_string();
+	for (char& character : key) {
+		character = static_cast<char>(std::tolower(static_cast<unsigned char>(character)));
+	}
+	return key;
+}
+
+} // namespace
+
 
 GraphicsPipeline* GraphicsPipeline::GetInstance() {
 	static GraphicsPipeline instance;
@@ -48,71 +161,103 @@ IDxcBlob* GraphicsPipeline::CompileShader(const std::wstring& filePath, const wc
 	// 呼び出し側は "shader/xxx.hlsl" のようなEngineData相対パスで渡してくるため、
 	// カレントディレクトリに依存せずEngineData配下から解決する(ソリューション実行/exe単体実行の両対応)。
 	// シェーダーはエンジンの持ち物なので、どのプロジェクトを開いても同じものを使う。
-	std::wstring resolvedPath = (GetEngineDataRoot() / filePath).wstring();
+	// エンジンのシェーダーは壊れていたら先へ進めないので、警告も含めて何か出たら止める。
+	std::string errors;
+	IDxcBlob* shaderBlob = TryCompileShader(GetEngineDataRoot() / filePath, L"main", profile, nullptr, errors);
+	if (!shaderBlob || !errors.empty()) {
+		Logger::Log(errors);
+		// 警告·エラーダメゼッタイ
+		assert(false);
+	}
+	return shaderBlob;
+}
+
+IDxcBlob* GraphicsPipeline::TryCompileShader(const std::filesystem::path& absolutePath, const wchar_t* entryPoint, const wchar_t* profile, const wchar_t* define,
+                                             std::string& errors) {
+	errors.clear();
+	const std::wstring resolvedPath = absolutePath.wstring();
 
 	// シェーダーコンパイルする旨をログに出す
-	OutputDebugStringW(std::format(L"Begin CompileShader, path: {}, profile: {}\n", resolvedPath, profile).c_str());
+	OutputDebugStringW(std::format(L"Begin CompileShader, path: {}, entry: {}, profile: {}\n", resolvedPath, entryPoint, profile).c_str());
 
 	// hlslファイルを読む
 	IDxcBlobEncoding* shaderSource = nullptr;
 	HRESULT hr = dxcUtils_->LoadFile(resolvedPath.c_str(), nullptr, &shaderSource);
-	assert(SUCCEEDED(hr));
+	if (FAILED(hr) || !shaderSource) {
+		errors = "ファイルを開けません: " + absolutePath.generic_string();
+		return nullptr;
+	}
 
-	// 読み込んだファイルの内容 
+	// 読み込んだファイルの内容
 	DxcBuffer shaderSourceBuffer;
 	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
 	shaderSourceBuffer.Size = shaderSource->GetBufferSize();
 	shaderSourceBuffer.Encoding = DXC_CP_UTF8;
 
+	// エンジンのシェーダーフォルダを include の探し先に足す(Data 配下の自作シェーダーが "Object3dCustom.hlsli" を読めるように)。
+	const std::wstring engineShaderDirectory = (GetEngineDataRoot() / "shader").wstring();
+
 	// コンパイルオプション
-	LPCWSTR arguments[] = {
+	std::vector<LPCWSTR> arguments = {
 	    resolvedPath.c_str(), // コンパイル対象のhlslファイル名
 	    L"-E",
-	    L"main", // エントリーポイントの指定
+	    entryPoint, // エントリーポイントの指定
 	    L"-T",
 	    profile, // ShaderProfileの設定
+	    L"-I",
+	    engineShaderDirectory.c_str(),
 	    L"-Zi",
 	    L"-Qembed_debug", // デバッグ用の情報を埋め込む
 	    L"-Od",           // 最適化を外しておく
 	    L"-Zpr",          // メモリレイアウトは行優先
 	};
+	if (define) {
+		arguments.push_back(L"-D");
+		arguments.push_back(define);
+	}
 
 	// 実際にShaderをコンパイルする
 	IDxcResult* shaderResult = nullptr;
 	hr = dxcCompiler_->Compile(
-	    &shaderSourceBuffer,        // 読み込んだファイル
-	    arguments,                  // コンパイルオプション
-	    _countof(arguments),        // コンパイルオプションの数
-	    includeHandler_,            // includeが含まれた諸々
-	    IID_PPV_ARGS(&shaderResult) // コンパイル結果
+	    &shaderSourceBuffer,                   // 読み込んだファイル
+	    arguments.data(),                      // コンパイルオプション
+	    static_cast<UINT32>(arguments.size()), // コンパイルオプションの数
+	    includeHandler_,                       // includeが含まれた諸々
+	    IID_PPV_ARGS(&shaderResult)            // コンパイル結果
 	);
-
-	// コンパイルエラーではなくdxcが起動できないなど致命的な状況
-	assert(SUCCEEDED(hr));
-
-	// 3. 警告·エラーがでていないか確認する
-
-	// 警告·エラーが出てたらログに出して止める
-	IDxcBlobUtf8* shaderError = nullptr;
-	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
-	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
-		Logger::Log(shaderError->GetStringPointer());
-		// 警告·エラーダメゼッタイ
-		assert(false);
+	shaderSource->Release();
+	if (FAILED(hr) || !shaderResult) {
+		// コンパイルエラーではなくdxcが起動できないなど致命的な状況
+		errors = "シェーダーコンパイラを動かせません: " + absolutePath.generic_string();
+		return nullptr;
 	}
 
-	// 4. Compile結果を受け取って返す
+	// 警告·エラーの文面(警告だけでもここに入る)
+	IDxcBlobUtf8* shaderError = nullptr;
+	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
+	if (shaderError) {
+		if (shaderError->GetStringLength() != 0) {
+			errors = shaderError->GetStringPointer();
+		}
+		shaderError->Release();
+	}
 
-	// コンパイル結果から実行用のバイナリ部分を取得
+	HRESULT status = S_OK;
+	shaderResult->GetStatus(&status);
 	IDxcBlob* shaderBlob = nullptr;
-	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
-	assert(SUCCEEDED(hr));
-	// 成功したログを出す
-	Logger::Log(StringUtil::ToString(std::format(L"Compile Succeeded, path: {}, profile: {}\n", resolvedPath, profile)));
-	// もう使わないリソースを解放
-	shaderSource->Release();
+	if (SUCCEEDED(status)) {
+		// コンパイル結果から実行用のバイナリ部分を取得
+		shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
+	}
 	shaderResult->Release();
-	// 実行用のバイナリを返却
+	if (!shaderBlob) {
+		if (errors.empty()) {
+			errors = "コンパイルに失敗しました: " + absolutePath.generic_string();
+		}
+		return nullptr;
+	}
+	// 成功したログを出す
+	Logger::Log(StringUtil::ToString(std::format(L"Compile Succeeded, path: {}, entry: {}, profile: {}\n", resolvedPath, entryPoint, profile)));
 	return shaderBlob;
 }
 
@@ -126,7 +271,7 @@ void GraphicsPipeline::CreateObject3dRootSignature() {
 
 	// RootParameter作成
 	// b0 Material
-	D3D12_ROOT_PARAMETER rootParameters[8] = {};
+	D3D12_ROOT_PARAMETER rootParameters[9] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // CBVを使う b0のbに対応する bはConstantBuffer
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
 	rootParameters[0].Descriptor.ShaderRegister = 0;                    // レジスタ番号0とバインド b0の0に対応する。もしb11と紐づけたいなら11となる。
@@ -181,6 +326,11 @@ void GraphicsPipeline::CreateObject3dRootSignature() {
 	rootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[7].DescriptorTable.pDescriptorRanges = emissiveMapRange;
 	rootParameters[7].DescriptorTable.NumDescriptorRanges = _countof(emissiveMapRange);
+
+	// b5 シェーダーパラメータ(マテリアルの Shader Params と時間)。自作シェーダーが頂点・ピクセルの両方から読む。
+	rootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	rootParameters[8].Descriptor.ShaderRegister = 5;
 
 	descriptionRootSignature.pParameters = rootParameters;             // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters); // 配列の長さ
@@ -332,205 +482,74 @@ void GraphicsPipeline::CreateLineRootSignature() {
 	}
 }
 
-void GraphicsPipeline::CreateObject3dPipelineStateObject() {
-	ID3D12Device* device = DirectXCommon::GetInstance()->GetDevice();
+D3D12_GRAPHICS_PIPELINE_STATE_DESC GraphicsPipeline::MakeObject3dPipelineDesc(PipelineType pipelineType, BlendMode blendMode, D3D12_SHADER_BYTECODE vertexShader,
+                                                                              D3D12_SHADER_BYTECODE pixelShader) const {
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC desc{};
+	desc.pRootSignature = rootSignature_[static_cast<int32_t>(pipelineType)].Get();
+	desc.InputLayout = {kObject3dInputElements, _countof(kObject3dInputElements)};
+	desc.BlendState = MakeBlendDesc(blendMode);
+	desc.VS = vertexShader;
+	desc.PS = pixelShader;
 
-	// シェーダーをコンパイルする
-	IDxcBlob* vertexShaderBlob = CompileShader(L"shader/Object3D.VS.hlsl", L"vs_6_0");
-	assert(vertexShaderBlob != nullptr);
-
-	IDxcBlob* pixelShaderBlob = CompileShader(L"shader/Object3D.PS.hlsl", L"ps_6_0");
-	assert(pixelShaderBlob != nullptr);
-
-	// 2. InputLayoutの設定
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
-	inputElementDescs[0].SemanticName = "POSITION";
-	inputElementDescs[0].SemanticIndex = 0;
-	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-
-	inputElementDescs[1].SemanticName = "TEXCOORD";
-	inputElementDescs[1].SemanticIndex = 0;
-	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
-	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-
-	inputElementDescs[2].SemanticName = "NORMAL";
-	inputElementDescs[2].SemanticIndex = 0;
-	inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
-	inputLayoutDesc.pInputElementDescs = inputElementDescs;
-	inputLayoutDesc.NumElements = _countof(inputElementDescs);
-
-	// 3. BlendStateの設定（すべての色要素を書き込む）
-	D3D12_BLEND_DESC blendDesc{};
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-
-	// 4. RasterizerStateの設定
+	// ラスタライザ: 通常は裏面(時計回り)を描かない。両面は裏も描く。ワイヤーは線で描き、far範囲外の頂点は描かない。
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;  // 裏面（時計回り）を表示しない
-	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID; // 三角形の中を塗りつぶす
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	if (pipelineType == PipelineType::kObject3dDoubleSided || pipelineType == PipelineType::kObject3dDoubleSidedNoDepthWrite) {
+		rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	}
+	if (pipelineType == PipelineType::kObject3dWireframe) {
+		rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+		rasterizerDesc.FillMode = D3D12_FILL_MODE_WIREFRAME;
+		rasterizerDesc.DepthClipEnable = true;
+	}
+	desc.RasterizerState = rasterizerDesc;
 
-	// 7. DepthStencilStateの設定
+	// 深度: テストは常に行う。深度書き込みOFF版(半透明・加算用)は書かない(不透明物には正しく隠される)。
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
 	depthStencilDesc.DepthEnable = true;
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	if (pipelineType == PipelineType::kObject3dNoDepthWrite || pipelineType == PipelineType::kObject3dDoubleSidedNoDepthWrite) {
+		depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	}
+	desc.DepthStencilState = depthStencilDesc;
 
-	// PSOの生成
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
-	graphicsPipelineStateDesc.pRootSignature = rootSignature_[static_cast<int32_t>(PipelineType::kObject3d)].Get();
-	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;
-	graphicsPipelineStateDesc.BlendState = blendDesc;
-	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;
-	graphicsPipelineStateDesc.VS = {vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize()};
-	graphicsPipelineStateDesc.PS = {pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize()};
-	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
-	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	graphicsPipelineStateDesc.NumRenderTargets = 2;
-	graphicsPipelineStateDesc.RTVFormats[0] = DirectXCommon::kSceneColorFormat;
-	graphicsPipelineStateDesc.RTVFormats[1] = DirectXCommon::kSceneEmissionFormat;
-	graphicsPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	graphicsPipelineStateDesc.SampleDesc.Count = 1;
-	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+	desc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	desc.NumRenderTargets = 2;
+	desc.RTVFormats[0] = DirectXCommon::kSceneColorFormat;
+	desc.RTVFormats[1] = DirectXCommon::kSceneEmissionFormat;
+	desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	desc.SampleDesc.Count = 1;
+	desc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+	return desc;
+}
 
-	// --- ワイヤーフレーム ---
-	// 4. RasterizerStateの設定
-	D3D12_RASTERIZER_DESC rasterizerDescWireframe{};
-	rasterizerDescWireframe.CullMode = D3D12_CULL_MODE_NONE;      // 裏面は表示する
-	rasterizerDescWireframe.FillMode = D3D12_FILL_MODE_WIREFRAME; // ワイヤーフレーム表示
-	rasterizerDescWireframe.DepthClipEnable = true;               // far範囲外の頂点は描画しない
+void GraphicsPipeline::CreateObject3dPipelineStateObject() {
+	ID3D12Device* device = DirectXCommon::GetInstance()->GetDevice();
 
-	D3D12_DEPTH_STENCIL_DESC depthStencilDescWireframe{};
-	depthStencilDescWireframe.DepthEnable = true;
-	depthStencilDescWireframe.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	depthStencilDescWireframe.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	// シェーダーをコンパイルする。頂点シェーダーは、VSMain を持たない自作シェーダーも使うので残しておく。
+	IDxcBlob* vertexShaderBlob = CompileShader(L"shader/Object3D.VS.hlsl", L"vs_6_0");
+	assert(vertexShaderBlob != nullptr);
+	defaultVertexShader_.Attach(vertexShaderBlob);
 
-	// PSOの生成
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDescWireframe{};
-	graphicsPipelineStateDescWireframe.pRootSignature = rootSignature_[static_cast<int32_t>(PipelineType::kObject3dWireframe)].Get();
-	graphicsPipelineStateDescWireframe.InputLayout = inputLayoutDesc;
-	graphicsPipelineStateDescWireframe.BlendState = blendDesc;
-	graphicsPipelineStateDescWireframe.RasterizerState = rasterizerDescWireframe;
-	graphicsPipelineStateDescWireframe.VS = {vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize()};
-	graphicsPipelineStateDescWireframe.PS = {pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize()};
-	graphicsPipelineStateDescWireframe.DepthStencilState = depthStencilDescWireframe;
-	graphicsPipelineStateDescWireframe.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	graphicsPipelineStateDescWireframe.NumRenderTargets = 2;
-	graphicsPipelineStateDescWireframe.RTVFormats[0] = DirectXCommon::kSceneColorFormat;
-	graphicsPipelineStateDescWireframe.RTVFormats[1] = DirectXCommon::kSceneEmissionFormat;
-	graphicsPipelineStateDescWireframe.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	graphicsPipelineStateDescWireframe.SampleDesc.Count = 1;
-	graphicsPipelineStateDescWireframe.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+	IDxcBlob* pixelShaderBlob = CompileShader(L"shader/Object3D.PS.hlsl", L"ps_6_0");
+	assert(pixelShaderBlob != nullptr);
 
-	for (int32_t i = 0; i < static_cast<int32_t>(BlendMode::kCountOfBlendMode); i++) {
-		D3D12_BLEND_DESC blendDesc{};
-		auto& renderTarget = blendDesc.RenderTarget[0];
+	const D3D12_SHADER_BYTECODE vertexShader = {vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize()};
+	const D3D12_SHADER_BYTECODE pixelShader = {pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize()};
 
-		// 共通初期化部
-		renderTarget.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-		renderTarget.BlendEnable = TRUE;
-
-		renderTarget.SrcBlend = D3D12_BLEND_ONE;
-		renderTarget.DestBlend = D3D12_BLEND_ZERO;
-		renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
-
-		renderTarget.SrcBlendAlpha = D3D12_BLEND_ONE;
-		// **アルファはsource-overで合成する**(dstA = srcA + dstA*(1-srcA))。
-		// ZEROにすると dstA = srcA となり、描いた側のαでレンダーターゲットのαが上書きされる。
-		// α=0の全画面UIを1枚重ねただけでRT全体が透明になり、
-		// RTをαブレンドで表示するエディタのGame/Sceneビューが真っ黒になる
-		// (バックバッファ直描きのゲーム単体ビルドではαが無視されるため表面化しない)。
-		renderTarget.DestBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
-		renderTarget.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-
-		switch (static_cast<BlendMode>(i)) {
-		case BlendMode::kNone:
-			renderTarget.BlendEnable = FALSE;
-			break;
-
-		case BlendMode::kNormal:
-			renderTarget.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-			renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
-			renderTarget.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-			break;
-
-		case BlendMode::kAdd:
-			renderTarget.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-			renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
-			renderTarget.DestBlend = D3D12_BLEND_ONE;
-			break;
-
-		case BlendMode::kMultiply:
-			renderTarget.SrcBlend = D3D12_BLEND_ZERO;
-			renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
-			renderTarget.DestBlend = D3D12_BLEND_SRC_COLOR;
-			break;
-
-		case BlendMode::kExclusion:
-			renderTarget.SrcBlend = D3D12_BLEND_INV_DEST_COLOR;
-			renderTarget.DestBlend = D3D12_BLEND_INV_SRC_COLOR;
-			renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
-			break;
-
-		case BlendMode::kScreen:
-			renderTarget.SrcBlend = D3D12_BLEND_INV_DEST_COLOR;
-			renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
-			renderTarget.DestBlend = D3D12_BLEND_ONE;
-			break;
-
-		case BlendMode::kPremultipliedAlpha:
-			// 色があらかじめαを掛けてある前提。フチが暗くならない。
-			renderTarget.SrcBlend = D3D12_BLEND_ONE;
-			renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
-			renderTarget.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-			break;
-
-		case BlendMode::kSubtract:
-			renderTarget.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-			renderTarget.BlendOp = D3D12_BLEND_OP_REV_SUBTRACT;
-			renderTarget.DestBlend = D3D12_BLEND_ONE;
-			break;
-
-		default:
-			break;
+	// 種類(通常・ワイヤー・両面・深度書き込みOFF・両面+深度書き込みOFF)× 合成方法 のPSOを全部作る。
+	const PipelineType object3dTypes[] = {PipelineType::kObject3d, PipelineType::kObject3dWireframe, PipelineType::kObject3dDoubleSided,
+	                                      PipelineType::kObject3dNoDepthWrite, PipelineType::kObject3dDoubleSidedNoDepthWrite};
+	for (PipelineType pipelineType : object3dTypes) {
+		for (int32_t i = 0; i < static_cast<int32_t>(BlendMode::kCountOfBlendMode); i++) {
+			D3D12_GRAPHICS_PIPELINE_STATE_DESC desc = MakeObject3dPipelineDesc(pipelineType, static_cast<BlendMode>(i), vertexShader, pixelShader);
+			HRESULT hr = device->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pipelineStates_[static_cast<int32_t>(pipelineType)][i]));
+			assert(SUCCEEDED(hr));
 		}
-
-		graphicsPipelineStateDesc.BlendState = blendDesc;
-		HRESULT hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&pipelineStates_[static_cast<int32_t>(PipelineType::kObject3d)][i]));
-
-		graphicsPipelineStateDescWireframe.BlendState = blendDesc;
-		hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDescWireframe, IID_PPV_ARGS(&pipelineStates_[static_cast<int32_t>(PipelineType::kObject3dWireframe)][i]));
-		assert(SUCCEEDED(hr));
-
-		// --- 両面(背面カリングなし)。それ以外はkObject3dと同一 ---
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDescDoubleSided = graphicsPipelineStateDesc;
-		D3D12_RASTERIZER_DESC rasterizerDescDoubleSided = rasterizerDesc;
-		rasterizerDescDoubleSided.CullMode = D3D12_CULL_MODE_NONE;
-		graphicsPipelineStateDescDoubleSided.RasterizerState = rasterizerDescDoubleSided;
-		graphicsPipelineStateDescDoubleSided.pRootSignature = rootSignature_[static_cast<int32_t>(PipelineType::kObject3dDoubleSided)].Get();
-		hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDescDoubleSided, IID_PPV_ARGS(&pipelineStates_[static_cast<int32_t>(PipelineType::kObject3dDoubleSided)][i]));
-		assert(SUCCEEDED(hr));
-
-		// --- 深度書き込みOFF(半透明・加算用)。深度テストは行うので、不透明物には正しく隠される ---
-		D3D12_DEPTH_STENCIL_DESC depthStencilDescNoWrite = depthStencilDesc;
-		depthStencilDescNoWrite.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC descNoDepthWrite = graphicsPipelineStateDesc;
-		descNoDepthWrite.DepthStencilState = depthStencilDescNoWrite;
-		descNoDepthWrite.pRootSignature = rootSignature_[static_cast<int32_t>(PipelineType::kObject3dNoDepthWrite)].Get();
-		hr = device->CreateGraphicsPipelineState(&descNoDepthWrite, IID_PPV_ARGS(&pipelineStates_[static_cast<int32_t>(PipelineType::kObject3dNoDepthWrite)][i]));
-		assert(SUCCEEDED(hr));
-
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC descDoubleSidedNoDepthWrite = graphicsPipelineStateDescDoubleSided;
-		descDoubleSidedNoDepthWrite.DepthStencilState = depthStencilDescNoWrite;
-		descDoubleSidedNoDepthWrite.pRootSignature = rootSignature_[static_cast<int32_t>(PipelineType::kObject3dDoubleSidedNoDepthWrite)].Get();
-		hr = device->CreateGraphicsPipelineState(&descDoubleSidedNoDepthWrite, IID_PPV_ARGS(&pipelineStates_[static_cast<int32_t>(PipelineType::kObject3dDoubleSidedNoDepthWrite)][i]));
-		assert(SUCCEEDED(hr));
 	}
 
-	vertexShaderBlob->Release();
 	pixelShaderBlob->Release();
 }
 
@@ -1006,6 +1025,148 @@ void GraphicsPipeline::SetCommandList(PipelineType pipelineType, BlendMode blend
 	// RootSignatureとPSOを設定
 	commandList->SetGraphicsRootSignature(rootSignature_[static_cast<int32_t>(pipelineType)].Get());
 	commandList->SetPipelineState(pipelineStates_[static_cast<int32_t>(pipelineType)][static_cast<int32_t>(blendMode)].Get());
+}
+
+uint32_t GraphicsPipeline::AcquireCustomShader(const std::filesystem::path& path) {
+	if (path.empty()) {
+		return 0;
+	}
+	const std::string key = MakeShaderKey(path);
+	auto found = customShaderIds_.find(key);
+	if (found != customShaderIds_.end()) {
+		return found->second;
+	}
+
+	CustomShader& shader = customShaders_.emplace_back();
+	shader.info.path = path;
+	const uint32_t shaderId = static_cast<uint32_t>(customShaders_.size());
+	customShaderIds_[key] = shaderId;
+
+	std::error_code errorCode;
+	if (std::filesystem::exists(path, errorCode)) {
+		shader.lastWriteTime = std::filesystem::last_write_time(path, errorCode);
+		CompileCustomShader(shader);
+	} else {
+		shader.info.error = "ファイルがありません: " + path.generic_string();
+		Logger::Log("[Shader] 失敗: " + shader.info.error + "\n");
+	}
+	return shaderId;
+}
+
+bool GraphicsPipeline::CompileCustomShader(CustomShader& shader) {
+	const std::filesystem::path& path = shader.info.path;
+
+	// VSMain を書いたときだけ頂点シェーダーもコンパイルする(無ければ標準の頂点処理)。
+	std::string source;
+	{
+		std::ifstream file(path, std::ios::binary);
+		std::ostringstream stream;
+		stream << file.rdbuf();
+		source = stream.str();
+	}
+	// コメントの中の "VSMain" で誤判定しないよう、"VSMain(" の形(関数)を探す。
+	static const std::regex kVertexEntry(R"(\bVSMain\s*\()");
+	const bool hasVertexShader = std::regex_search(source, kVertexEntry);
+
+	std::string errors;
+	Microsoft::WRL::ComPtr<IDxcBlob> pixelShader;
+	pixelShader.Attach(TryCompileShader(path, L"PSMain", L"ps_6_0", L"KUJATA_PIXEL_SHADER", errors));
+	std::string vertexErrors;
+	Microsoft::WRL::ComPtr<IDxcBlob> vertexShader;
+	if (pixelShader && hasVertexShader) {
+		vertexShader.Attach(TryCompileShader(path, L"VSMain", L"vs_6_0", L"KUJATA_VERTEX_SHADER", vertexErrors));
+	}
+
+	const bool succeeded = pixelShader && (!hasVertexShader || vertexShader);
+	if (!succeeded) {
+		// 失敗しても、前に成功した版があればそのまま使う(書きかけの保存で絵が消えないように)。
+		shader.info.error = errors.empty() ? vertexErrors : errors;
+		Logger::Log("[Shader] コンパイル失敗: " + path.generic_string() + "\n" + shader.info.error + "\n");
+		return false;
+	}
+
+	// 入れ替える前に、古いPSOを使っている描画が終わるのを待つ(初めてのコンパイルなら待たない)。
+	if (shader.pixelShader) {
+		DirectXCommon::GetInstance()->WaitForGpu();
+	}
+	for (auto& byType : shader.pipelineStates) {
+		for (auto& pipelineState : byType) {
+			pipelineState.Reset();
+		}
+	}
+	shader.pixelShader = pixelShader;
+	shader.vertexShader = vertexShader;
+	shader.info.usable = true;
+	shader.info.hasVertexShader = hasVertexShader;
+	// 警告だけのときは文面を残しておく(描けるが、直したほうがよいもの)。
+	shader.info.error = errors.empty() ? vertexErrors : errors;
+	Logger::Log("[Shader] コンパイルしました: " + path.generic_string() + "\n");
+	return true;
+}
+
+bool GraphicsPipeline::SetCustomCommandList(uint32_t shaderId, PipelineType pipelineType, BlendMode blendMode) {
+	if (shaderId == 0 || shaderId > customShaders_.size() || !IsObject3dPipelineType(pipelineType)) {
+		return false;
+	}
+	CustomShader& shader = customShaders_[shaderId - 1];
+	if (!shader.info.usable) {
+		return false;
+	}
+
+	Microsoft::WRL::ComPtr<ID3D12PipelineState>& pipelineState = shader.pipelineStates[static_cast<int32_t>(pipelineType)][static_cast<int32_t>(blendMode)];
+	if (!pipelineState) {
+		IDxcBlob* vertexBlob = shader.vertexShader ? shader.vertexShader.Get() : defaultVertexShader_.Get();
+		const D3D12_SHADER_BYTECODE vertexShader = {vertexBlob->GetBufferPointer(), vertexBlob->GetBufferSize()};
+		const D3D12_SHADER_BYTECODE pixelShader = {shader.pixelShader->GetBufferPointer(), shader.pixelShader->GetBufferSize()};
+		D3D12_GRAPHICS_PIPELINE_STATE_DESC desc = MakeObject3dPipelineDesc(pipelineType, blendMode, vertexShader, pixelShader);
+		HRESULT hr = DirectXCommon::GetInstance()->GetDevice()->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pipelineState));
+		if (FAILED(hr)) {
+			// 出力の形(SV_TARGET の数など)が合わないと、コンパイルは通ってもここで失敗する。
+			shader.info.usable = false;
+			shader.info.error = "PSOを作れません(PSMain の出力が PixelShaderOutput になっているか確かめてください)";
+			Logger::Log("[Shader] 失敗: " + shader.info.path.generic_string() + ": " + shader.info.error + "\n");
+			return false;
+		}
+	}
+
+	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList();
+	commandList->SetGraphicsRootSignature(rootSignature_[static_cast<int32_t>(pipelineType)].Get());
+	commandList->SetPipelineState(pipelineState.Get());
+	return true;
+}
+
+bool GraphicsPipeline::ReloadChangedCustomShaders(bool force) {
+	bool reloaded = false;
+	for (CustomShader& shader : customShaders_) {
+		std::error_code errorCode;
+		if (!std::filesystem::exists(shader.info.path, errorCode)) {
+			continue;
+		}
+		const std::filesystem::file_time_type writeTime = std::filesystem::last_write_time(shader.info.path, errorCode);
+		if (errorCode || (!force && writeTime == shader.lastWriteTime)) {
+			continue;
+		}
+		shader.lastWriteTime = writeTime;
+		CompileCustomShader(shader);
+		reloaded = true;
+	}
+	return reloaded;
+}
+
+std::vector<CustomShaderInfo> GraphicsPipeline::GetCustomShaderInfos() const {
+	std::vector<CustomShaderInfo> infos;
+	infos.reserve(customShaders_.size());
+	for (const CustomShader& shader : customShaders_) {
+		infos.push_back(shader.info);
+	}
+	return infos;
+}
+
+const CustomShaderInfo* GraphicsPipeline::FindCustomShaderInfo(uint32_t shaderId) const {
+	if (shaderId == 0 || shaderId > customShaders_.size()) {
+		return nullptr;
+	}
+	return &customShaders_[shaderId - 1].info;
 }
 
 void GraphicsPipeline::Finalize() {

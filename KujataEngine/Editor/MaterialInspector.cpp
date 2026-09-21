@@ -18,7 +18,9 @@
 #include <array>
 #include <cctype>
 #include <cstring>
+#include <algorithm>
 #include <filesystem>
+#include <fstream>
 #include <iterator>
 #include <memory>
 #include <string>
@@ -302,7 +304,155 @@ void RefreshMaterialUsers(const std::filesystem::path& materialPath) {
 	}
 }
 
+// 自作シェーダーの欄(Shader の選択・New・Reload・状態・Shader Params)。変更があればtrue。
+bool DrawCustomShaderEditor(MaterialInspectorState& state) {
+	bool changed = false;
+	ImGui::SeparatorText("Custom Shader");
+
+	// Data 配下の .hlsl から選ぶ。先頭の「(標準)」は自作シェーダーを使わない。
+	const std::vector<std::string> shaderFiles = ListCustomShaderFiles();
+	const std::string currentLabel = state.material.shaderPath.empty() ? "(標準)" : state.material.shaderPath;
+	if (ImGui::BeginCombo("Shader", currentLabel.c_str())) {
+		if (ImGui::Selectable("(標準)", state.material.shaderPath.empty())) {
+			state.material.shaderPath.clear();
+			changed = true;
+		}
+		for (const std::string& file : shaderFiles) {
+			if (ImGui::Selectable(file.c_str(), file == state.material.shaderPath)) {
+				state.material.shaderPath = file;
+				changed = true;
+			}
+		}
+		ImGui::EndCombo();
+	}
+	if (ImGui::IsItemHovered()) {
+		ImGui::SetTooltip("自作シェーダー(Data 配下の .hlsl)。(標準) はエンジンの Object3d で描く。");
+	}
+
+	// ひな形を作って、そのまま選ぶ(名前はマテリアル名)。
+	if (ImGui::Button("New")) {
+		std::string relativePath;
+		std::string message;
+		if (CreateCustomShaderFile(state.material.name, relativePath, message)) {
+			state.material.shaderPath = relativePath;
+			changed = true;
+		} else {
+			state.errorMessage = message;
+		}
+	}
+	if (ImGui::IsItemHovered()) {
+		ImGui::SetTooltip("Data/Shaders/<マテリアル名>.hlsl にひな形を作って選ぶ。");
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Reload")) {
+		GraphicsPipeline::GetInstance()->ReloadChangedCustomShaders(true);
+	}
+	if (ImGui::IsItemHovered()) {
+		ImGui::SetTooltip("自作シェーダーをすべてコンパイルし直す(ファイルを保存すれば自動でも読み直す)。");
+	}
+
+	if (state.material.shaderPath.empty()) {
+		return changed;
+	}
+
+	// コンパイルの状態。失敗していれば直前に成功した版(無ければ標準)で描いている。
+	const uint32_t shaderId = MaterialAsset::ResolveCustomShader(state.material);
+	if (const CustomShaderInfo* info = GraphicsPipeline::GetInstance()->FindCustomShaderInfo(shaderId)) {
+		if (!info->error.empty()) {
+			const ImVec4 color = info->usable ? ImVec4(1.0f, 0.8f, 0.3f, 1.0f) : ImVec4(1.0f, 0.4f, 0.4f, 1.0f);
+			ImGui::PushStyleColor(ImGuiCol_Text, color);
+			ImGui::TextWrapped("%s%s", info->usable ? "(直前に成功した版で描いています)\n" : "", info->error.c_str());
+			ImGui::PopStyleColor();
+		} else {
+			ImGui::TextDisabled("コンパイル済み(頂点: %s)", info->hasVertexShader ? "VSMain" : "標準");
+		}
+	}
+
+	// 自作シェーダーへ渡す自由な値。意味は各シェーダーのコメントを見る。
+	for (int i = 0; i < 4; ++i) {
+		const std::string label = "Param " + std::to_string(i);
+		if (ImGui::DragFloat4(label.c_str(), &state.material.shaderParams[i].x, 0.01f)) {
+			changed = true;
+		}
+	}
+	return changed;
+}
+
 } // namespace
+
+bool CreateCustomShaderFile(const std::string& name, std::string& outRelativePath, std::string& message) {
+	const std::string fileName = MaterialAsset::SanitizeName(name.empty() ? "NewShader" : name);
+	const std::filesystem::path directory = GetProjectDataRoot() / "Shaders";
+	std::error_code errorCode;
+	std::filesystem::create_directories(directory, errorCode);
+	const std::filesystem::path path = directory / (fileName + ".hlsl");
+	if (std::filesystem::exists(path, errorCode)) {
+		message = "同じ名前のシェーダーがあります: " + path.generic_string();
+		return false;
+	}
+
+	// ひな形: 頂点を時間で揺らす VSMain と、平行光のトゥーンで塗る PSMain。消して書き換える前提の例。
+	std::ofstream file(path, std::ios::binary);
+	if (!file) {
+		message = "ファイルを作れません: " + path.generic_string();
+		return false;
+	}
+	file << "// 自作シェーダー: " << fileName << "\n"
+	     << "// 書き方と使えるものは EngineData/shader/Object3dCustom.hlsli の先頭を参照。\n"
+	     << "// マテリアルの Shader でこのファイルを選び、Shader Params で値を渡す(gShaderParams.params[0..3])。\n"
+	     << "// 保存するとエディタが自動で読み直す。エラーは Console に出る(そのあいだは直前に成功した版で描く)。\n"
+	     << "#include \"Object3dCustom.hlsli\"\n"
+	     << "\n"
+	     << "#ifdef KUJATA_VERTEX_SHADER\n"
+	     << "// 頂点を動かさないなら、この関数ごと消してよい(標準の頂点処理になる)。\n"
+	     << "// 例: 法線の向きへ、時間で波打つふくらみを足す。params[0].x = 揺れの大きさ、params[0].y = 速さ。\n"
+	     << "VertexShaderOutput VSMain(VertexShaderInput input)\n"
+	     << "{\n"
+	     << "    float32_t wave = sin(gShaderParams.time * gShaderParams.params[0].y + input.position.y * 4.0f);\n"
+	     << "    input.position.xyz += input.normal * wave * gShaderParams.params[0].x;\n"
+	     << "    return DefaultVertex(input);\n"
+	     << "}\n"
+	     << "#endif\n"
+	     << "\n"
+	     << "#ifdef KUJATA_PIXEL_SHADER\n"
+	     << "// 例: 平行光のトゥーン(段の数はマテリアルの Toon Steps、影の色は Directional Light の Shadow Color)。\n"
+	     << "PixelShaderOutput PSMain(VertexShaderOutput input)\n"
+	     << "{\n"
+	     << "    float32_t3 normal = normalize(input.normal);\n"
+	     << "    float32_t2 uv = mul(float32_t4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform).xy;\n"
+	     << "    float32_t4 textureColor = SampleTexture(gTexture, uv);\n"
+	     << "    float32_t3 albedo = gMaterial.color.rgb * textureColor.rgb;\n"
+	     << "\n"
+	     << "    float32_t lit = ToonStep(saturate(dot(normal, -normalize(gDirectionalLight.direction))));\n"
+	     << "    float32_t3 shadow = albedo * gDirectionalLight.shadowColor;\n"
+	     << "    float32_t3 bright = max(albedo * gDirectionalLight.color.rgb * gDirectionalLight.intensity, shadow);\n"
+	     << "\n"
+	     << "    PixelShaderOutput output;\n"
+	     << "    output.color = float32_t4(lerp(shadow, bright, lit), gMaterial.color.a * textureColor.a);\n"
+	     << "    output.emission = float32_t4(0.0f, 0.0f, 0.0f, 1.0f); // ブルームさせたい色はここへ書く\n"
+	     << "    return output;\n"
+	     << "}\n"
+	     << "#endif\n";
+	file.close();
+
+	outRelativePath = std::filesystem::relative(path, GetProjectDataRoot(), errorCode).generic_string();
+	message = "Created: " + outRelativePath;
+	return true;
+}
+
+std::vector<std::string> ListCustomShaderFiles() {
+	std::vector<std::string> files;
+	const std::filesystem::path dataRoot = GetProjectDataRoot();
+	std::error_code errorCode;
+	for (auto it = std::filesystem::recursive_directory_iterator(dataRoot, errorCode); !errorCode && it != std::filesystem::recursive_directory_iterator();
+	     it.increment(errorCode)) {
+		if (it->is_regular_file() && it->path().extension() == ".hlsl") {
+			files.push_back(std::filesystem::relative(it->path(), dataRoot, errorCode).generic_string());
+		}
+	}
+	std::sort(files.begin(), files.end());
+	return files;
+}
 
 bool SaveMaterialAsset(const std::filesystem::path& materialPath, const MaterialAssetData& material, std::string& message) {
 	const std::filesystem::path normalizedPath = NormalizeEditorPath(materialPath);
@@ -425,6 +575,10 @@ void DrawMaterialAssetInspector(ProjectWindow& projectWindow) {
 	}
 	if (ImGui::IsItemHovered()) {
 		ImGui::SetTooltip("テクスチャをぼかさずに読む(粗いテクスチャをドットのまま見せる)。");
+	}
+
+	if (DrawCustomShaderEditor(state)) {
+		changed = true;
 	}
 
 	// 合成方法。加算は光・炎・魔法のように「重ねるほど明るくなる」表現に使う。

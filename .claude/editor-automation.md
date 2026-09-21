@@ -129,6 +129,8 @@ wait 60
 | | `animation.save <オブジェクト>` | クリップをファイルへ保存する(Save Clip) |
 | マテリアル | `material.list` / `material.create [名前]` | マテリアルの一覧(Data 基準のパス) / `Data/Materials/` に作る |
 | | `material.get <パス>` / `material.set <パス> <キー> <値>` | 全フィールド(キー名はファイルと同じ) / 1 つ書き換えて保存し、使っているオブジェクトへ反映する(Material の Inspector と同じ処理。Undo 不可) |
+| 自作シェーダー | `shader.list` | Data 配下の .hlsl と、コンパイルの成否・エラー |
+| | `shader.create [名前]` / `shader.reload` | ひな形を `Data/Shaders/` に作る(Inspector の New) / すべてコンパイルし直す(保存すれば自動でも読み直す) |
 | 選択 | `select <オブジェクト>` / `select none` | Hierarchy の選択を変える |
 | 編集 | `object.create <名前> [親]` | 空のオブジェクトを作る |
 | | `object.delete <オブジェクト>` | 子ごと削除する |

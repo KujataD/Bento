@@ -91,6 +91,9 @@ public:
 
 	void Draw() override;
 
+	/// <summary>深度を書かないマテリアル(半透明・加算)なら true。Scene が不透明物の後に遠い順で描く。</summary>
+	bool IsTransparentDraw() const override { return !material_.depthWrite; }
+
 	/// <summary>
 	/// アニメーション可能チャンネル(emissiveIntensity/emissiveColor.r,g,b)を公開する。
 	/// AnimationWindowでカーブを打つと発光の明滅などが作れる。

@@ -2,6 +2,7 @@
 #include "../base/DirectXCommon.h"
 #include "../base/ProjectPath.h"
 #include "../base/TextureManager.h"
+#include "../base/Time.h"
 #include "DirectionalLight.h"
 #include "GraphicsPipeline.h"
 #include "ModelUtil.h"
@@ -323,6 +324,7 @@ Model* Model::CreateDynamic(uint32_t maxVertices, const std::string& textureFile
 	subMesh.materialResource->Map(0, nullptr, reinterpret_cast<void**>(&subMesh.materialMap));
 	WriteMaterialConstants(subMesh.materialMap, defaultMaterial);
 	subMesh.textureIndex = defaultMaterial.textureIndex;
+	CreateShaderParamsBuffer(subMesh);
 
 	model->subMeshes_.push_back(std::move(subMesh));
 	return model;
@@ -546,11 +548,18 @@ void Model::Draw(const WorldTransform& worldTransform, const Camera& camera, Fil
 		} else if (!depthWrite_) {
 			pipelineType = PipelineType::kObject3dNoDepthWrite;
 		}
-		GraphicsPipeline::GetInstance()->SetCommandList(pipelineType, blendMode_);
+		// 自作シェーダーが描けないとき(未指定・コンパイル失敗)は標準のシェーダーで描く。
+		if (!GraphicsPipeline::GetInstance()->SetCustomCommandList(customShaderId_, pipelineType, blendMode_)) {
+			GraphicsPipeline::GetInstance()->SetCommandList(pipelineType, blendMode_);
+		}
 	}
 	else if (fillMode == kFillModeWireframe) {
-		GraphicsPipeline::GetInstance()->SetCommandList(PipelineType::kObject3dWireframe, blendMode_);
+		if (!GraphicsPipeline::GetInstance()->SetCustomCommandList(customShaderId_, PipelineType::kObject3dWireframe, blendMode_)) {
+			GraphicsPipeline::GetInstance()->SetCommandList(PipelineType::kObject3dWireframe, blendMode_);
+		}
 	}
+	// 自作シェーダーに渡す時間(見た目用。一時停止や時間スケールでは止まらない)。
+	const float shaderTime = Time::GetRealTimeSinceStartup();
 
 	// 全サブメッシュ共通のCBufferは1回だけセットする。
 	// WVP・WorldCBuffer（RootParameter[1]: VertexShader, b0）
@@ -581,8 +590,18 @@ void Model::Draw(const WorldTransform& worldTransform, const Camera& camera, Fil
 			emissiveIndex = TextureManager::GetInstance()->GetDefaultWhiteTexture();
 		}
 		commandList->SetGraphicsRootDescriptorTable(7, TextureManager::GetInstance()->GetSrvHandle(emissiveIndex));
+		// 自作シェーダー用の定数(RootParameter[8]: b5)。標準のシェーダーは読まないが、常に積んでおく。
+		subMesh.shaderParamsMap->time = shaderTime;
+		commandList->SetGraphicsRootConstantBufferView(8, subMesh.shaderParamsResource->GetGPUVirtualAddress());
 		commandList->DrawInstanced(subMesh.vertexCount, 1, 0, 0);
 	}
+}
+
+void Model::CreateShaderParamsBuffer(SubMesh& subMesh) {
+	subMesh.shaderParamsResource = DirectXCommon::GetInstance()->CreateBufferResource((sizeof(ShaderParamsData) + 0xff) & ~0xff);
+	subMesh.shaderParamsResource->Map(0, nullptr, reinterpret_cast<void**>(&subMesh.shaderParamsMap));
+	// Mapした先は初期化されていないので、既定値(0)を書いておく。
+	*subMesh.shaderParamsMap = ShaderParamsData{};
 }
 
 void Model::AddSubMesh(const std::vector<VertexData>& vertices, const MaterialData& material) {
@@ -610,6 +629,7 @@ void Model::AddSubMesh(const std::vector<VertexData>& vertices, const MaterialDa
 	subMesh.materialResource->Map(0, nullptr, reinterpret_cast<void**>(&subMesh.materialMap));
 	WriteMaterialConstants(subMesh.materialMap, material);
 	subMesh.textureIndex = material.textureIndex;
+	CreateShaderParamsBuffer(subMesh);
 
 	// raycast/preview用の統合頂点へ追記する。
 	mergedVertices_.insert(mergedVertices_.end(), vertices.begin(), vertices.end());

@@ -1033,6 +1033,15 @@
     <None Include="EngineData\shader\Fog.PS.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </None>
+    <None Include="EngineData\shader\Object3dPixel.hlsli">
+      <Filter>KujataEngine\shader</Filter>
+    </None>
+    <None Include="EngineData\shader\Object3dVertex.hlsli">
+      <Filter>KujataEngine\shader</Filter>
+    </None>
+    <None Include="EngineData\shader\Object3dCustom.hlsli">
+      <Filter>KujataEngine\shader</Filter>
+    </None>
     <None Include="EngineData\shader\Fullscreen.VS.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </None>

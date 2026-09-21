@@ -26,6 +26,11 @@ public:
 	KUJATA_API void Initialize();
 	KUJATA_API void Update();
 	KUJATA_API void Draw();
+	/// <summary>
+	/// deferredTransparent を渡すと、半透明のコンポーネント(IsTransparentDraw)は描かずにそこへ集める
+	/// (Scene が不透明物をすべて描いた後に、カメラから遠い順に描くため)。
+	/// </summary>
+	KUJATA_API void Draw(std::vector<Component*>* deferredTransparent);
 
 	KUJATA_API void Finalize();
 
@@ -65,6 +70,8 @@ public:
 	KUJATA_API void UpdateHierarchy();
 
 	KUJATA_API void DrawHierarchy();
+	/// <summary>子階層ごと描く。半透明の扱いは Draw(deferredTransparent) と同じ。</summary>
+	KUJATA_API void DrawHierarchy(std::vector<Component*>* deferredTransparent);
 	 
 	/// <summary>
 	/// 親から子へワールド行列を更新

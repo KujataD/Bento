@@ -1,6 +1,8 @@
 #pragma once
 
 #include <filesystem>
+#include <utility>
+#include <vector>
 #include <string>
 
 namespace KujataEngine {
@@ -45,6 +47,13 @@ public:
 
 	/// <summary>エンジン側のLogger::Logも、このファイルへ流れるようにする。起動時に1回呼ぶ。</summary>
 	static void HookEngineLogger();
+
+	/// <summary>
+	/// エンジン側(Logger::Log)の警告・エラーのうち、まだ Console へ出していないものを取り出す。
+	/// Logger::Log は別スレッドからも呼ばれるので、Console へはメインスレッドで毎フレーム移す(EditorApplication)。
+	/// ファイルへは Logger::Log の時点で書いてあるので、Console へは EditorConsole::AddConsoleOnly で出す。
+	/// </summary>
+	static std::vector<std::pair<std::string, EditorLogLevel>> TakePendingConsoleLogs();
 };
 
 } // namespace KujataEngine

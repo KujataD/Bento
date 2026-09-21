@@ -32,8 +32,18 @@ EditorConsole* EditorConsole::GetInstance() {
 }
 
 void EditorConsole::AddLog(const std::string& message, EditorLogLevel level) {
-	logs_.push_back(Entry{message, level});
 	EditorLog::Write("Console", message, level);
+	AddEntry(message, level);
+}
+
+void EditorConsole::FlushEngineLogs() {
+	for (auto& [message, level] : EditorLog::TakePendingConsoleLogs()) {
+		AddEntry(message, level);
+	}
+}
+
+void EditorConsole::AddEntry(const std::string& message, EditorLogLevel level) {
+	logs_.push_back(Entry{message, level});
 	if (capturing_) {
 		captured_.push_back(message);
 	}
@@ -52,6 +62,8 @@ void EditorConsole::BeginCapture() {
 }
 
 std::vector<std::string> EditorConsole::EndCapture() {
+	// コマンドの実行中にエンジン側で出た警告・エラー(シェーダーのコンパイル失敗など)も、そのコマンドのログに含める。
+	FlushEngineLogs();
 	capturing_ = false;
 	return std::move(captured_);
 }

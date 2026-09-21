@@ -231,27 +231,37 @@ void GameObject::UpdateHierarchy() {
 	}
 }
 
-void GameObject::Draw() {
+void GameObject::Draw() { Draw(nullptr); }
+
+void GameObject::Draw(std::vector<Component*>* deferredTransparent) {
 	if (!active_) {
 		return;
 	}
 
 	for (const std::unique_ptr<Component>& component : components_) {
-		if (component && component->IsEnabled()) {
-			component->Draw();
+		if (!component || !component->IsEnabled()) {
+			continue;
 		}
+		// 半透明は後回しにする(Sceneが不透明物をすべて描いてから、遠い順に描く)。
+		if (deferredTransparent && component->IsTransparentDraw()) {
+			deferredTransparent->push_back(component.get());
+			continue;
+		}
+		component->Draw();
 	}
 }
 
-void GameObject::DrawHierarchy() {
+void GameObject::DrawHierarchy() { DrawHierarchy(nullptr); }
+
+void GameObject::DrawHierarchy(std::vector<Component*>* deferredTransparent) {
 	if (!active_) {
 		return;
 	}
 
-	Draw();
+	Draw(deferredTransparent);
 	for (GameObject* child : children_) {
 		if (child) {
-			child->DrawHierarchy();
+			child->DrawHierarchy(deferredTransparent);
 		}
 	}
 }

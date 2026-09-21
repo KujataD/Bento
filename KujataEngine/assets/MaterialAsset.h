@@ -82,6 +82,10 @@ struct MaterialAssetData {
 	bool flatShading = false;
 	// テクスチャをぼかさずに読む(粗いテクスチャをドットのまま見せる)。どのシェーダー方式でも効く。
 	bool pointSampling = false;
+	// 自作シェーダー(Data からの相対パスの .hlsl。空なら標準のシェーダー)。書き方は EngineData/shader/Object3dCustom.hlsli。
+	std::string shaderPath;
+	// 自作シェーダーへ渡す自由なパラメータ(float4×4)。意味は各シェーダーが決める(HLSLでは gShaderParams.params[0..3])。
+	Vector4 shaderParams[4] = {};
 	std::vector<MaterialTexture> textures;
 };
 
@@ -138,6 +142,11 @@ public:
 	/// Materialが参照するTextureをTextureManagerへ読み込み、SRVインデックスを返します。
 	/// </summary>
 	static KUJATA_API uint32_t ResolveTextureIndex(const MaterialAssetData& material, MaterialTextureSlot slot = MaterialTextureSlot::BaseColor);
+
+	/// <summary>
+	/// 自作シェーダーを登録して番号を返す(GraphicsPipeline::AcquireCustomShader)。shaderPath が空なら0(標準のシェーダー)。
+	/// </summary>
+	static KUJATA_API uint32_t ResolveCustomShader(const MaterialAssetData& material);
 };
 
 } // namespace KujataEngine

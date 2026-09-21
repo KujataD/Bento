@@ -10,6 +10,8 @@
 #include <fstream>
 #include <mutex>
 #include <system_error>
+#include <utility>
+#include <vector>
 
 namespace KujataEngine {
 
@@ -46,14 +48,33 @@ std::string MakeTimestamp(const char* format) {
 	return std::vformat(format, std::make_format_args(localTime));
 }
 
+// Console へまだ移していない、エンジン側の警告・エラー。Logger::Log は別スレッドからも呼ばれるので鍵をかける。
+struct PendingConsoleLogs {
+	std::mutex mutex;
+	std::vector<std::pair<std::string, EditorLogLevel>> entries;
+};
+
+PendingConsoleLogs& GetPendingConsoleLogs() {
+	static PendingConsoleLogs pending;
+	return pending;
+}
+
 void OnEngineLog(const std::string& message) {
 	// Logger::Log は行末に改行を付けて渡されることがあるので外す。
 	std::string trimmed = message;
 	while (!trimmed.empty() && (trimmed.back() == '\n' || trimmed.back() == '\r')) {
 		trimmed.pop_back();
 	}
-	if (!trimmed.empty()) {
-		EditorLog::Write("Engine", trimmed);
+	if (trimmed.empty()) {
+		return;
+	}
+	EditorLog::Write("Engine", trimmed);
+	// 警告・エラーは人が気づけるよう Console にも出す(メインスレッドで TakePendingConsoleLogs が移す)。
+	const EditorLogLevel level = ClassifyEditorLog(trimmed);
+	if (level != EditorLogLevel::Info) {
+		PendingConsoleLogs& pending = GetPendingConsoleLogs();
+		std::lock_guard<std::mutex> lock(pending.mutex);
+		pending.entries.emplace_back(trimmed, level);
 	}
 }
 
@@ -138,5 +159,11 @@ void EditorLog::Write(const std::string& source, const std::string& message, Edi
 std::filesystem::path EditorLog::GetFilePath() { return GetPath(); }
 
 void EditorLog::HookEngineLogger() { Logger::SetListener(OnEngineLog); }
+
+std::vector<std::pair<std::string, EditorLogLevel>> EditorLog::TakePendingConsoleLogs() {
+	PendingConsoleLogs& pending = GetPendingConsoleLogs();
+	std::lock_guard<std::mutex> lock(pending.mutex);
+	return std::exchange(pending.entries, {});
+}
 
 } // namespace KujataEngine

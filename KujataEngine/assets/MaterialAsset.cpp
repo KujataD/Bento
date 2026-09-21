@@ -2,6 +2,7 @@
 #include "../runtime/AssetResolver.h"
 #include "../base/ProjectPath.h"
 #include "../base/TextureManager.h"
+#include "../3d/GraphicsPipeline.h"
 
 #include <algorithm>
 #include <array>
@@ -530,6 +531,22 @@ MaterialAssetData MaterialAsset::ReadJsonObject(const nlohmann::json& json, cons
 		material.pointSampling = json.at("pointSampling").get<bool>();
 	}
 
+	// 自作シェーダー(キーが無い旧Material JSONは標準のシェーダー)。
+	material.shaderPath = ReadString(json, "shaderPath", material.shaderPath);
+	if (json.contains("shaderParams") && json.at("shaderParams").is_array()) {
+		const nlohmann::json& params = json.at("shaderParams");
+		for (size_t index = 0; index < 4 && index < params.size(); ++index) {
+			if (!params[index].is_array()) {
+				continue;
+			}
+			for (size_t component = 0; component < 4 && component < params[index].size(); ++component) {
+				if (params[index][component].is_number()) {
+					(&material.shaderParams[index].x)[component] = params[index][component].get<float>();
+				}
+			}
+		}
+	}
+
 	bool readNewTextures = ReadTexturesObject(json, material);
 	if (!readNewTextures) {
 		std::string legacyAssetId = ReadString(json, "textureAssetId", "");
@@ -563,6 +580,12 @@ void MaterialAsset::WriteJsonObject(nlohmann::json& json, const MaterialAssetDat
 	json["toonSmoothness"] = material.toonSmoothness;
 	json["flatShading"] = material.flatShading;
 	json["pointSampling"] = material.pointSampling;
+	json["shaderPath"] = material.shaderPath;
+	nlohmann::json shaderParams = nlohmann::json::array();
+	for (const Vector4& param : material.shaderParams) {
+		shaderParams.push_back({param.x, param.y, param.z, param.w});
+	}
+	json["shaderParams"] = shaderParams;
 
 	nlohmann::json texturesJson = nlohmann::json::object();
 	for (MaterialTextureSlot slot : GetKnownTextureSlots()) {
@@ -582,6 +605,14 @@ void MaterialAsset::WriteJsonObject(nlohmann::json& json, const MaterialAssetDat
 
 std::filesystem::path MaterialAsset::ResolveTexturePath(const MaterialAssetData& material, MaterialTextureSlot slot) {
 	return ResolveMaterialTexturePath(GetTexture(material, slot), slot);
+}
+
+uint32_t MaterialAsset::ResolveCustomShader(const MaterialAssetData& material) {
+	if (material.shaderPath.empty()) {
+		return 0;
+	}
+	// テクスチャと同じく、相対パスはプロジェクトの Data 基準。
+	return GraphicsPipeline::GetInstance()->AcquireCustomShader(ResolveProjectPath(material.shaderPath));
 }
 
 uint32_t MaterialAsset::ResolveTextureIndex(const MaterialAssetData& material, MaterialTextureSlot slot) {

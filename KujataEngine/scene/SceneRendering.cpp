@@ -14,18 +14,52 @@
 #include "../runtime/PlayState.h"
 #include "../runtime/SelectionProvider.h"
 
+#include <algorithm>
+#include <vector>
+
 namespace KujataEngine {
+
+namespace {
+
+// 不透明物を先にすべて描き、半透明(深度を書かないもの)をカメラから遠い順に描く。
+// 半透明は奥の物を隠せないので、先に描かれた物の上にしか重ならない。遠い順に描けば、手前の半透明ほど後から重なる。
+// 距離は2乗のまま比べる(並び順が分かればよいので平方根は要らない)。同じ距離ならシーンの並び順のまま。
+void DrawGameObjectsSorted(const std::vector<std::unique_ptr<GameObject>>& gameObjects, const Camera* camera) {
+	// 毎フレームの確保を避けるため使い回す(描画は1スレッドなのでstaticでよい)。
+	static std::vector<Component*> transparentComponents;
+	static std::vector<std::pair<float, Component*>> sorted;
+	transparentComponents.clear();
+
+	for (const std::unique_ptr<GameObject>& gameObject : gameObjects) {
+		if (gameObject && gameObject->IsRoot()) {
+			gameObject->DrawHierarchy(&transparentComponents);
+		}
+	}
+
+	sorted.clear();
+	for (Component* component : transparentComponents) {
+		float distanceSquared = 0.0f;
+		if (camera && component->GetOwner()) {
+			const Vector3 position = component->GetOwner()->GetTransform().GetWorldPosition();
+			const Vector3 delta = {position.x - camera->translation_.x, position.y - camera->translation_.y, position.z - camera->translation_.z};
+			distanceSquared = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+		}
+		sorted.emplace_back(distanceSquared, component);
+	}
+	std::stable_sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) { return a.first > b.first; });
+	for (const auto& entry : sorted) {
+		entry.second->Draw();
+	}
+}
+
+} // namespace
 
 void Scene::RefreshEditorBillboards() { EditorBillboards::PrepareScene(*this); }
 
 void Scene::Draw() {
 	UpdateWorldTransforms();
 
-	for (const std::unique_ptr<GameObject>& gameObject : gameObjects_) {
-		if (gameObject && gameObject->IsRoot()) {
-			gameObject->DrawHierarchy();
-		}
-	}
+	DrawGameObjectsSorted(gameObjects_, GetEditorCamera());
 
 	EditorBillboards::Draw(*this);
 	SceneGizmos::DrawSelectedColliders(*this);
@@ -44,13 +78,8 @@ void Scene::ApplyVolumes(const Camera* camera) {
 }
 
 void Scene::RenderView(Camera* camera, bool drawEditorOverlays) {
-	(void)camera; // モデルのカメラは派生側でApplyRenderCameraToModelRenderers済みの想定。
-
-	for (const std::unique_ptr<GameObject>& gameObject : gameObjects_) {
-		if (gameObject && gameObject->IsRoot()) {
-			gameObject->DrawHierarchy();
-		}
-	}
+	// モデルのカメラは派生側でApplyRenderCameraToModelRenderers済みの想定。ここでは半透明の並べ替えにだけ使う。
+	DrawGameObjectsSorted(gameObjects_, camera);
 
 	// 編集用オーバーレイはSceneビューのみ(呼び出し側のdrawEditorOverlaysで制御)。
 	if (drawEditorOverlays) {

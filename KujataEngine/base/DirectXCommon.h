@@ -133,6 +133,12 @@ public:
 	/// </summary>
 	void ResizeGameRenderTarget(int32_t width, int32_t height);
 
+	/// <summary>
+	/// これまでにGPUへ送った描画がすべて終わるまで待つ。GPUが使っているかもしれないリソース
+	/// (RenderTexture・PSOなど)を作り直す・消す前に呼ぶ。描画コマンドを積んでいる最中には呼ばないこと。
+	/// </summary>
+	void WaitForGpu();
+
 	void PostDraw();
 
 	void ClearRenderTarget();
@@ -264,8 +270,6 @@ private:
 	// サイズが変わったときだけ、GPUの完了を待ってRenderTextureを作り直す(ディスクリプタは使い回す)。
 	void ResizeRenderTexture(RenderTexture& target, int32_t width, int32_t height);
 	void CreateFence();
-
-	void WaitForGpu();
 
 private:
 	static const uint32_t kSwapChainBufferCount = 3;

@@ -4,7 +4,9 @@
 #include <cstddef>
 #include <d3d12.h>
 #include <dxcapi.h>
+#include <filesystem>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include <wrl.h>
 
@@ -140,6 +142,16 @@ enum class ShaderModel {
 };
 
 /// <summary>
+/// マテリアルで選ぶ自作シェーダー(Data 配下の .hlsl)の状態。Inspector・CUI の一覧に使う。
+/// </summary>
+struct CustomShaderInfo {
+	std::filesystem::path path;   // ファイルの絶対パス
+	bool usable = false;          // 描ける状態か(一度でもコンパイルに成功していれば true。失敗したら直前の成功版で描く)
+	bool hasVertexShader = false; // VSMain があるか(無ければ標準の頂点処理)
+	std::string error;            // 直近のコンパイルのエラー(成功なら空)
+};
+
+/// <summary>
 /// グラフィックスパイプライン管理クラス
 /// RootSignature・シェーダーコンパイル・PSOの生成を担当する
 /// </summary>
@@ -169,6 +181,34 @@ public:
 	/// (DXCインスタンスの重複生成を避けるためここへ集約)。
 	/// </summary>
 	IDxcBlob* CompileShader(const std::wstring& filePath, const wchar_t* profile);
+
+	// --- マテリアルで選ぶ自作シェーダー ---
+	// 1 ファイルに PSMain(必須)と VSMain(省略可)を書く。書き方は EngineData/shader/Object3dCustom.hlsli。
+	// コンパイルに失敗してもエンジンは止めず、エラーをログに出して直前の成功版(無ければ標準のシェーダー)で描く。
+
+	/// <summary>
+	/// 自作シェーダーを登録して番号を返す(同じファイルなら同じ番号)。初めてのファイルはここでコンパイルする。
+	/// 戻り値 0 は「自作シェーダーを使わない」。ファイルがまだ無くても番号は返し、できたら読み込む。
+	/// </summary>
+	uint32_t AcquireCustomShader(const std::filesystem::path& path);
+
+	/// <summary>
+	/// 自作シェーダーのRootSignatureとPSOを積む。描けない(未登録・コンパイル失敗)ときはfalseを返すので、
+	/// 呼び出し側は標準の SetCommandList で描く。PSOはこの組み合わせで初めて描くときに作る。
+	/// </summary>
+	bool SetCustomCommandList(uint32_t shaderId, PipelineType pipelineType, BlendMode blendMode);
+
+	/// <summary>
+	/// 更新されたファイルだけコンパイルし直す(forceなら全部)。古いPSOを消すのでGPUの完了を待つ。
+	/// **描画コマンドを積んでいる最中には呼ばないこと**(Update中に呼ぶ)。読み直したらtrue。
+	/// </summary>
+	bool ReloadChangedCustomShaders(bool force = false);
+
+	/// <summary>登録済みの自作シェーダーの一覧。</summary>
+	std::vector<CustomShaderInfo> GetCustomShaderInfos() const;
+
+	/// <summary>番号の自作シェーダーの状態(無ければnullptr)。</summary>
+	const CustomShaderInfo* FindCustomShaderInfo(uint32_t shaderId) const;
 
 private:
 	GraphicsPipeline() = default;
@@ -204,6 +244,29 @@ private:
 	/// </summary>
 	void CreateUIStylePipelineStateObject(PipelineType pipelineType, bool depthTestEnabled, bool ldrTarget);
 
+	/// <summary>
+	/// hlslをコンパイルする。失敗したらnullptrを返し、理由をerrorsへ入れる(警告も入る)。assertはしない。
+	/// define を渡すと、そのマクロを定義してコンパイルする(自作シェーダーの頂点用/ピクセル用の切り替え)。
+	/// </summary>
+	IDxcBlob* TryCompileShader(const std::filesystem::path& absolutePath, const wchar_t* entryPoint, const wchar_t* profile, const wchar_t* define, std::string& errors);
+
+	/// <summary>Object3d系(標準・自作共通)のPSOの設定。種類(両面・深度書き込み・ワイヤー)と合成方法で変わる。</summary>
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC MakeObject3dPipelineDesc(PipelineType pipelineType, BlendMode blendMode, D3D12_SHADER_BYTECODE vertexShader,
+	                                                            D3D12_SHADER_BYTECODE pixelShader) const;
+
+	// 自作シェーダー1本分。PSOは(種類×合成方法)ごとに、初めて使うときに作る。
+	struct CustomShader {
+		CustomShaderInfo info;
+		std::filesystem::file_time_type lastWriteTime{};
+		Microsoft::WRL::ComPtr<IDxcBlob> vertexShader; // VSMain が無ければ空(標準の頂点シェーダーを使う)
+		Microsoft::WRL::ComPtr<IDxcBlob> pixelShader;
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineStates[static_cast<int32_t>(PipelineType::kCountOfPipeLineType)]
+		                                                          [static_cast<int32_t>(BlendMode::kCountOfBlendMode)];
+	};
+
+	// shaderのファイルをコンパイルする。成功したら中身を入れ替える(PSOは作り直すので消す)。成功したらtrue。
+	bool CompileCustomShader(CustomShader& shader);
+
 private:
 	// DXCコンパイラ関連
 	IDxcUtils* dxcUtils_ = nullptr;
@@ -215,6 +278,12 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineState_;
 
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelineStates_[static_cast<int32_t>(PipelineType::kCountOfPipeLineType)][static_cast<int32_t>(BlendMode::kCountOfBlendMode)];
+
+	// 標準の頂点シェーダー(VSMain の無い自作シェーダーが使う)。
+	Microsoft::WRL::ComPtr<IDxcBlob> defaultVertexShader_;
+	// 自作シェーダー。番号は「添字+1」(0は使わない印)。
+	std::vector<CustomShader> customShaders_;
+	std::unordered_map<std::string, uint32_t> customShaderIds_; // 正規化したパス → 番号
 };
 
 } // namespace KujataEngine
