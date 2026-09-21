@@ -3,7 +3,7 @@
 AI(Claude Code 等)と人間の両方が、同じコマンドでエディタを操作・確認できるようにするための設計文書。
 
 - 対象: KujataEngine のエディタ(`KujataEngine/Editor/`)と、起動・ログまわり。
-- 状態: **Step 1(CUI の土台)・Step 2(スクリーンショット・状態の書き出し・ログ)・Step 3(ログの重さ・プレハブ・アニメーション)を実装済み。** Step 4 以降は未着手(§6)。
+- 状態: **Step 1〜4 を実装済み**(CUI の土台 / スクリーンショット・状態の書き出し・ログ / ログの重さ・プレハブ・アニメーション / 型情報)。Step 5 以降は未着手(§6)。
 - 関連: [CLAUDE.md](CLAUDE.md) の「現在の方針」②(決定論+リプレイ)、[determinism.md](determinism.md) の Step 4(入力の記録・再生)
 
 ---
@@ -102,7 +102,7 @@ wait 60
 返事の `text` は人間向けに整形した結果(Console と `kujata` はこれを表示する)。
 `kujata -Json` は返事の JSON をそのまま出す(AI・スクリプト向け)。失敗すると終了コード 1。
 
-## 5. コマンド一覧(Step 1〜3 で実装したもの)
+## 5. コマンド一覧(Step 1〜4 で実装したもの)
 
 | 分類 | コマンド | 内容 |
 |---|---|---|
@@ -111,6 +111,7 @@ wait 60
 | | `scene.list` | 全オブジェクトのパス・instanceId・有効/無効・コンポーネント |
 | | `object.get <オブジェクト>` | コンポーネントごとの全フィールド値 |
 | | `component.types` | 追加できるコンポーネントの型名 |
+| | `schema.get [型名]` / `schema.get <オブジェクト> <型名>` | フィールドの型・範囲・説明・初期値(§5.5)。引数なしで一覧 |
 | | `log.tail [件数] [info\|warning\|error]` | Console の最近のログ。重さを付けるとそれ以上のものだけ |
 | | `log.file` | 今回の起動のログファイル(JSON Lines)の場所 |
 | | `state.dump [ファイル]` | エディタの状態と全オブジェクトの全フィールド(差分を取って変化を確かめる用) |
@@ -180,6 +181,15 @@ wait 60
   CUI・プレハブ・アニメーションのログは明示している。
 - 重さを付けずに出した古いログ(`AddLog(message)`・`ImGuiManager::AddConsoleLog`・エンジンの `Logger::Log`)は、今までどおり文面から推測する。
 
+### 5.5 型情報(schema.get)
+
+- `SerializedFieldRegistry` に `Mode::DescribeSchema` を足した。Inspector の表示・JSON の読み書きと**同じ登録**から、
+  キー・表示名・型・範囲(min/max)・ドラッグの刻み・説明(ツールチップ)を書き出す。登録が 1 か所なので、Inspector と食い違わない。
+- `KUJATA_SERIALIZED_FIELDS_BEGIN` で登録しているコンポーネントは `Component::DescribeSerializedFields` が自動で対応する(`source: "registry"`)。
+- Inspector と JSON を**手書きしているコンポーネント**(Transform・ModelRenderer・ライト・コライダー・UI など 18 個)は、
+  今の値の JSON から型だけを推測する(`source: "inferred"`。範囲・説明は出ない)。正確にするには登録簿へ移す必要がある(§6)。
+- `field.set` は型情報に範囲があれば確かめ、範囲外なら範囲を添えて失敗にする(以前は読み込み時に黙って丸めていた)。
+
 ## 6. これからの Step
 
 | Step | 内容 |
@@ -189,7 +199,8 @@ wait 60
 | 2(済) | `view.screenshot`、`window.show`、`state.dump`、ログの JSON Lines 出力と Console の色分け・絞り込み、完了を待つコマンドの仕組み(`EditorCommandResult::poll`) |
 | 3(済) | ログの重さの明示、プレハブ(`prefab.*`)とアニメーション(`animation.*`)のコマンド化。処理を `PrefabEditing` / `AnimationEditing` に移して UI と共通にした |
 |  | 残り: シーンの切り替え(Scenes ウィンドウ)・マテリアルの編集・UI 編集モードのコマンド化、古いログ(ホットリロード等)への重さの付与 |
-| 4 | 型情報: `SerializedFieldRegistry` に `Mode::DescribeSchema` を足し、`schema.get` でフィールドの型・範囲・説明を返す。Inspector のツールチップ・範囲チェックも同じ情報から出す |
+| 4(済) | 型情報: `SerializedFieldRegistry` の `Mode::DescribeSchema` と `schema.get`、`field.set` の範囲チェック |
+|  | 残り: 手書きのコンポーネント(18 個)を登録簿へ移す(移せば型・範囲・説明が正確になり、Inspector と JSON の手書きも減る) |
 | 5 | MCP サーバー(`kujata` と同じパイプを使う)、コマンドパレット(Ctrl+P)、Undo の履歴ウィンドウ、CUI で変えたオブジェクトの強調表示 |
 | 6 | 固定 ID(今は `GenerateInstanceId()` が時刻と乱数で作るので差分がぶれる)と入力の記録・再生。決定論(determinism.md)と一緒に進める |
 

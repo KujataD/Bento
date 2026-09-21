@@ -47,6 +47,7 @@ kujata state.dump state.json                            # 全オブジェクト�
 kujata log.tail 20 error                                # 最近のエラーだけ
 kujata prefab.instantiate Prefabs/Enemy.prefab.json     # プレハブを置く(prefab.list で一覧)
 kujata animation.addKey Door RotatorComponent/speed 1 0.5  # 1 秒の位置にキー(animation.save で保存)
+kujata schema.get RigidbodyComponent                    # フィールドの型・範囲・説明
 ```
 
 - オブジェクトは `親/子` のパスか instanceId で指定する。同じパスが複数あるとエラーになる(instanceId で指定する)

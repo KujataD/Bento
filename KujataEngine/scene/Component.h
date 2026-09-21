@@ -54,6 +54,16 @@ public:
 	/// </summary>
 	virtual void ReadJson(const nlohmann::json& json);
 
+	/// <summary>
+	/// フィールドの型情報(キー・型・範囲・説明)を fields に書き出す(CUI の schema.get が使う)。
+	/// KUJATA_SERIALIZED_FIELDS_BEGIN で登録しているコンポーネントは自動で対応し、trueを返す。
+	/// Inspector/JSON を手書きしているコンポーネントは既定のまま false(型情報なし)。
+	/// </summary>
+	virtual bool DescribeSerializedFields(nlohmann::json& fields) {
+		(void)fields;
+		return false;
+	}
+
 	virtual void OnAfterReadJson() {}
 
 	/// <summary>

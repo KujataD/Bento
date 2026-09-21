@@ -39,6 +39,7 @@ struct AnimatableChannel {
 
 /// <summary>
 /// 登録された調整項目をInspector表示、JSON保存、JSON読み込みへ流すRegistry。
+/// 同じ登録から型情報(キー・型・範囲・説明)も書き出せる(DescribeSchema)。CUI の schema.get が使う。
 /// </summary>
 class KUJATA_API SerializedFieldRegistry {
 public:
@@ -48,7 +49,11 @@ public:
 		ReadJson,
 		CollectAnimatables,
 		ResolveReferences,
+		DescribeSchema,
 	};
+
+	/// <summary>型情報の書き出し用Registryを作るときの目印(WriteJson用のコンストラクタと区別するため)。</summary>
+	struct DescribeSchemaTag {};
 
 	/// <summary>
 	/// Inspector描画用Registryを作成します。
@@ -76,12 +81,25 @@ public:
 	/// </summary>
 	explicit SerializedFieldRegistry(const IObjectResolver& resolver) : mode_(Mode::ResolveReferences), resolver_(&resolver) {}
 
+	/// <summary>
+	/// 型情報の書き出し用Registryを作成します。fieldsは配列になり、登録順に1フィールド1要素が入る。
+	/// 要素: {"key", "label", "type"(float/int/uint32/bool/vector3/color/string/object/objectRef/componentRef),
+	///        "min", "max"(範囲がある場合だけ), "step"(ドラッグの刻み), "tooltip"(ある場合だけ), "fields"(objectの中身)}
+	/// </summary>
+	SerializedFieldRegistry(DescribeSchemaTag, nlohmann::json& fields) : mode_(Mode::DescribeSchema), schema_(&fields) {
+		*schema_ = nlohmann::json::array();
+	}
+
 	void Float(const char* memberName, float& value, float dragSpeed, float minValue, float maxValue, const char* tooltip = nullptr) {
 		std::string key = MakeJsonKey(memberName);
 		FloatNamed(key.c_str(), MakeDisplayName(key).c_str(), value, dragSpeed, minValue, maxValue, tooltip);
 	}
 
 	void FloatNamed(const char* jsonKey, const char* label, float& value, float dragSpeed, float minValue, float maxValue, const char* tooltip = nullptr) {
+		if (mode_ == Mode::DescribeSchema) {
+			AddSchema(jsonKey, label, "float", tooltip, minValue, maxValue, dragSpeed);
+			return;
+		}
 		if (mode_ == Mode::CollectAnimatables) {
 			channels_->push_back({pathPrefix_ + jsonKey, &value});
 			return;
@@ -116,6 +134,10 @@ public:
 	}
 
 	void IntNamed(const char* jsonKey, const char* label, int& value, float dragSpeed, int minValue, int maxValue, const char* tooltip = nullptr) {
+		if (mode_ == Mode::DescribeSchema) {
+			AddSchema(jsonKey, label, "int", tooltip, minValue, maxValue, dragSpeed);
+			return;
+		}
 		if (mode_ == Mode::DrawInspector) {
 			InspectorUI::DragInt(label, &value, dragSpeed, minValue, maxValue);
 			InspectorUI::ItemTooltip(tooltip);
@@ -143,6 +165,10 @@ public:
 	}
 
 	void UInt32Named(const char* jsonKey, const char* label, uint32_t& value, float dragSpeed, uint32_t minValue, uint32_t maxValue, const char* tooltip = nullptr) {
+		if (mode_ == Mode::DescribeSchema) {
+			AddSchema(jsonKey, label, "uint32", tooltip, static_cast<double>(minValue), static_cast<double>(maxValue), dragSpeed);
+			return;
+		}
 		if (mode_ == Mode::DrawInspector) {
 			int intValue = static_cast<int>(std::min<uint32_t>(value, static_cast<uint32_t>(0x7fffffff)));
 			int intMin = static_cast<int>(std::min<uint32_t>(minValue, static_cast<uint32_t>(0x7fffffff)));
@@ -183,6 +209,10 @@ public:
 	}
 
 	void BoolNamed(const char* jsonKey, const char* label, bool& value, const char* tooltip = nullptr) {
+		if (mode_ == Mode::DescribeSchema) {
+			AddSchema(jsonKey, label, "bool", tooltip);
+			return;
+		}
 		if (mode_ == Mode::CollectAnimatables) {
 			AnimatableChannel channel;
 			channel.path = pathPrefix_ + jsonKey;
@@ -214,6 +244,12 @@ public:
 	// ラベル見出しの下に X/Y/Z の3チェックボックスを横並びで描く(Unityのconstraints風)。
 	// JSONは各軸を個別キーで保存/読込する。
 	void BoolAxes(const char* label, const char* keyX, bool& x, const char* keyY, bool& y, const char* keyZ, bool& z) {
+		if (mode_ == Mode::DescribeSchema) {
+			AddSchema(keyX, (std::string(label) + " X").c_str(), "bool", nullptr);
+			AddSchema(keyY, (std::string(label) + " Y").c_str(), "bool", nullptr);
+			AddSchema(keyZ, (std::string(label) + " Z").c_str(), "bool", nullptr);
+			return;
+		}
 		if (mode_ == Mode::DrawInspector) {
 			InspectorUI::TextUnformatted(label);
 			// 表示は "X"/"Y"/"Z"、IDはキーで一意化(##で不可視化)。
@@ -250,6 +286,10 @@ public:
 	}
 
 	void Vector3Named(const char* jsonKey, const char* label, Vector3& value, float dragSpeed, float minValue, float maxValue, const char* tooltip = nullptr) {
+		if (mode_ == Mode::DescribeSchema) {
+			AddSchema(jsonKey, label, "vector3", tooltip, minValue, maxValue, dragSpeed);
+			return;
+		}
 		if (mode_ == Mode::CollectAnimatables) {
 			std::string basePath = pathPrefix_ + jsonKey;
 			channels_->push_back({basePath + ".x", &value.x});
@@ -288,6 +328,11 @@ public:
 	}
 
 	void Vector4Named(const char* jsonKey, const char* label, Vector4& value, float dragSpeed, float minValue, float maxValue, const char* tooltip = nullptr) {
+		if (mode_ == Mode::DescribeSchema) {
+			// Inspectorでは色(RGBA)として編集している。範囲は使っていないので出さない。
+			AddSchema(jsonKey, label, "color", tooltip);
+			return;
+		}
 		if (mode_ == Mode::CollectAnimatables) {
 			std::string basePath = pathPrefix_ + jsonKey;
 			channels_->push_back({basePath + ".x", &value.x});
@@ -337,6 +382,10 @@ public:
 	}
 
 	void StringNamed(const char* jsonKey, const char* label, std::string& value, const char* tooltip = nullptr) {
+		if (mode_ == Mode::DescribeSchema) {
+			AddSchema(jsonKey, label, "string", tooltip);
+			return;
+		}
 		if (mode_ == Mode::DrawInspector) {
 			std::array<char, 256> buffer{};
 			size_t copyLength = (std::min)(value.size(), buffer.size() - 1);
@@ -369,6 +418,14 @@ public:
 
 	template <class TObject>
 	void ObjectNamed(const char* jsonKey, const char* label, TObject& value, const char* tooltip = nullptr) {
+		if (mode_ == Mode::DescribeSchema) {
+			nlohmann::json childFields;
+			SerializedFieldRegistry childRegistry(DescribeSchemaTag{}, childFields);
+			value.RegisterSerializedFields(childRegistry);
+			nlohmann::json& entry = AddSchema(jsonKey, label, "object", tooltip);
+			entry["fields"] = childFields;
+			return;
+		}
 		if (mode_ == Mode::CollectAnimatables) {
 			SerializedFieldRegistry childRegistry(*channels_);
 			childRegistry.pathPrefix_ = pathPrefix_ + jsonKey + ".";
@@ -415,6 +472,11 @@ public:
 	}
 
 	void ObjectRefNamed(const char* jsonKey, const char* label, ObjectRef& ref) {
+		if (mode_ == Mode::DescribeSchema) {
+			// JSON(field.set)では参照先の instanceId の文字列として書く。
+			AddSchema(jsonKey, label, "objectRef", nullptr);
+			return;
+		}
 		if (mode_ == Mode::DrawInspector) {
 			DrawObjectField(label, ref.value, [&ref]() { ref.Clear(); }, [&ref](GameObject* dropped) { ref.Assign(dropped); });
 			return;
@@ -445,6 +507,10 @@ public:
 
 	template <class T>
 	void ComponentRefNamed(const char* jsonKey, const char* label, ComponentRef<T>& ref) {
+		if (mode_ == Mode::DescribeSchema) {
+			AddSchema(jsonKey, label, "componentRef", nullptr);
+			return;
+		}
 		if (mode_ == Mode::DrawInspector) {
 			DrawObjectField(label, ref.owner, [&ref]() { ref.Clear(); }, [&ref](GameObject* dropped) { ref.Assign(dropped); });
 			return;
@@ -511,6 +577,28 @@ public:
 
 private:
 	/// <summary>
+	/// 型情報を1件足す。範囲は min < max のときだけ出す(ReadJson と同じく、それ以外は「制限なし」の意味)。
+	/// </summary>
+	nlohmann::json& AddSchema(const char* jsonKey, const char* label, const char* type, const char* tooltip, double minValue = 0.0, double maxValue = 0.0, float dragSpeed = 0.0f) {
+		nlohmann::json entry;
+		entry["key"] = jsonKey;
+		entry["label"] = label;
+		entry["type"] = type;
+		if (minValue < maxValue) {
+			entry["min"] = minValue;
+			entry["max"] = maxValue;
+		}
+		if (dragSpeed > 0.0f) {
+			entry["step"] = dragSpeed;
+		}
+		if (tooltip && tooltip[0] != '\0') {
+			entry["tooltip"] = tooltip;
+		}
+		schema_->push_back(entry);
+		return schema_->back();
+	}
+
+	/// <summary>
 	/// 録画用のチャンネル名。ネストしたObjectの中では "leg0.hipYawDeg" のように親のキーが前置され、
 	/// CollectAnimatablesが列挙するpathと一致する。トップレベルでは jsonKey そのまま。
 	/// </summary>
@@ -568,6 +656,7 @@ private:
 	std::vector<AnimatableChannel>* channels_ = nullptr;
 	std::string pathPrefix_;
 	const IObjectResolver* resolver_ = nullptr;
+	nlohmann::json* schema_ = nullptr;
 };
 
 } // namespace KujataEngine
@@ -605,6 +694,11 @@ public: \
 	void ResolveReferences(KujataEngine::IObjectResolver& resolver) override { \
 		KujataEngine::SerializedFieldRegistry registry(resolver); \
 		RegisterSerializedFields(registry); \
+	} \
+	bool DescribeSerializedFields(nlohmann::json& fields) override { \
+		KujataEngine::SerializedFieldRegistry registry(KujataEngine::SerializedFieldRegistry::DescribeSchemaTag{}, fields); \
+		RegisterSerializedFields(registry); \
+		return true; \
 	} \
 private: \
 	void RegisterSerializedFields(KujataEngine::SerializedFieldRegistry& registry)

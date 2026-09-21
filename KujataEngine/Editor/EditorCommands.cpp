@@ -23,6 +23,7 @@
 #include "../scene/ComponentFactory.h"
 #include "../scene/GameObject.h"
 #include "../scene/Scene.h"
+#include "../scene/SerializedFieldRegistry.h"
 #include <algorithm>
 #include <chrono>
 #include <format>
@@ -623,6 +624,133 @@ EditorCommandResult CommandComponentRemove(const EditorCommandArgs& args) {
 	return EditorCommandResult::Success();
 }
 
+// ---- 型情報(schema.get) ----
+
+// Inspector/JSON を手書きしているコンポーネント向け: 初期値のJSONから型だけ推測する(範囲・説明は出せない)。
+json InferSchemaFromJson(const json& properties) {
+	json fields = json::array();
+	for (auto it = properties.begin(); it != properties.end(); ++it) {
+		const json& value = it.value();
+		std::string type = "unknown";
+		if (value.is_boolean()) {
+			type = "bool";
+		} else if (value.is_number_integer()) {
+			type = "int";
+		} else if (value.is_number()) {
+			type = "float";
+		} else if (value.is_string()) {
+			type = "string";
+		} else if (value.is_object()) {
+			type = "object";
+		} else if (value.is_array()) {
+			const bool allNumbers = std::all_of(value.begin(), value.end(), [](const json& element) { return element.is_number(); });
+			if (allNumbers && value.size() == 3) {
+				type = "vector3";
+			} else if (allNumbers && value.size() == 4) {
+				type = "vector4";
+			} else {
+				type = "array";
+			}
+		}
+		fields.push_back({{"key", it.key()}, {"label", SerializedFieldRegistry::MakeDisplayName(it.key())}, {"type", type}});
+	}
+	return fields;
+}
+
+// 1つのコンポーネントの型情報。登録簿(KUJATA_SERIALIZED_FIELDS_BEGIN)から出せればそれを使う(source = "registry")。
+// 出せなければ初期値から推測する(source = "inferred")。どちらも "default" に今の値を添える。
+json DescribeComponentSchema(Component& component) {
+	json fields;
+	const bool fromRegistry = component.DescribeSerializedFields(fields);
+	json values = json::object();
+	component.WriteJson(values);
+	if (!fromRegistry) {
+		fields = InferSchemaFromJson(values);
+	}
+	for (json& field : fields) {
+		const std::string key = field.value("key", std::string());
+		if (values.contains(key)) {
+			field["default"] = values[key];
+		}
+	}
+
+	json schema;
+	schema["type"] = component.GetTypeName();
+	schema["source"] = fromRegistry ? "registry" : "inferred";
+	if (!fromRegistry) {
+		schema["note"] = "Inspector と JSON を手書きしているコンポーネントなので、型は値から推測したもの(範囲・説明はありません)。";
+	}
+	schema["fields"] = fields;
+	return schema;
+}
+
+// フィールドの型情報を探す(object の中は "親.子" では探さない。field.set が扱うのはトップレベルのキーだけ)。
+const json* FindFieldSchema(const json& fields, const std::string& key) {
+	for (const json& field : fields) {
+		if (field.value("key", std::string()) == key) {
+			return &field;
+		}
+	}
+	return nullptr;
+}
+
+// 型情報に範囲があれば、値(数値、または数値の配列の各要素)が範囲内かを確かめる。
+bool CheckRange(const json& fieldSchema, const json& value, std::string& error) {
+	if (!fieldSchema.contains("min") || !fieldSchema.contains("max")) {
+		return true;
+	}
+	const double minValue = fieldSchema["min"].get<double>();
+	const double maxValue = fieldSchema["max"].get<double>();
+	auto inRange = [&](const json& element) { return !element.is_number() || (element.get<double>() >= minValue && element.get<double>() <= maxValue); };
+	const bool ok = value.is_array() ? std::all_of(value.begin(), value.end(), inRange) : inRange(value);
+	if (!ok) {
+		error = "範囲外です(" + json(minValue).dump() + " 〜 " + json(maxValue).dump() + ")。";
+	}
+	return ok;
+}
+
+EditorCommandResult CommandSchemaGet(const EditorCommandArgs& args) {
+	ComponentFactory& factory = ComponentFactory::GetInstance();
+	if (args.Count() == 0) {
+		// 一覧: 型名と、型情報がどこから来るか(registry = 正確 / inferred = 推測)。
+		json types = json::array();
+		for (const std::string& typeName : factory.GetRegisteredTypeNames()) {
+			std::unique_ptr<Component> component = factory.Create(typeName);
+			if (!component) {
+				continue;
+			}
+			json schema = DescribeComponentSchema(*component);
+			types.push_back({{"type", typeName}, {"source", schema["source"]}, {"fields", schema["fields"].size()}});
+		}
+		return EditorCommandResult::Success(types);
+	}
+
+	// 2つ目があれば「オブジェクト 型名」: シーンにある実物の型情報(default は今の値)。
+	if (args.Count() > 1) {
+		Scene* scene = GetScene();
+		if (!scene) {
+			return EditorCommandResult::Failure("シーンがありません。");
+		}
+		std::string error;
+		GameObject* gameObject = ResolveObject(*scene, args.Get(0), error);
+		if (!gameObject) {
+			return EditorCommandResult::Failure(error);
+		}
+		Component* component = ResolveComponent(*gameObject, args.Get(1), error);
+		if (!component) {
+			return EditorCommandResult::Failure(error);
+		}
+		return EditorCommandResult::Success(DescribeComponentSchema(*component));
+	}
+
+	// 型名だけ: 新しく作ったときの型情報(default は初期値)。
+	std::unique_ptr<Component> component = factory.Create(args.Get(0));
+	if (!component) {
+		return EditorCommandResult::Failure("登録されていないコンポーネントです: " + args.Get(0) + "(schema.get で一覧を表示できます)");
+	}
+	return EditorCommandResult::Success(DescribeComponentSchema(*component));
+}
+
 EditorCommandResult CommandFieldSet(const EditorCommandArgs& args) {
 	Scene* scene = GetScene();
 	if (!scene) {
@@ -688,6 +816,13 @@ EditorCommandResult CommandFieldSet(const EditorCommandArgs& args) {
 		before = properties[key];
 		if (!IsCompatibleValue(before, value, error)) {
 			return EditorCommandResult::Failure(key + " の値が合いません: " + error);
+		}
+		// 型情報に範囲があれば確かめる(黙って丸めずに、範囲を添えて失敗にする)。
+		json fieldSchemas;
+		if (component->DescribeSerializedFields(fieldSchemas)) {
+			if (const json* fieldSchema = FindFieldSchema(fieldSchemas, key); fieldSchema && !CheckRange(*fieldSchema, value, error)) {
+				return EditorCommandResult::Failure(key + " の値が" + error);
+			}
 		}
 		properties[key] = value;
 	}
@@ -1188,6 +1323,8 @@ void RegisterBuiltinEditorCommands() {
 	registry.Register("scene.list", "scene.list", "シーンの全オブジェクト(パス・instanceId・有効/無効・コンポーネント)を階層順に表示する", CommandSceneList);
 	registry.Register("object.get", "object.get <オブジェクト>", "オブジェクトのコンポーネントと全フィールドの値を表示する", CommandObjectGet);
 	registry.Register("component.types", "component.types", "追加できるコンポーネントの型名を表示する", CommandComponentTypes);
+	registry.Register("schema.get", "schema.get [型名] | schema.get <オブジェクト> <型名[#番号]>",
+	                  "コンポーネントのフィールドの型・範囲・説明・初期値。引数なしで一覧(registry = 正確 / inferred = 値から推測)", CommandSchemaGet);
 	registry.Register("log.tail", "log.tail [件数] [info|warning|error]", "Console の最近のログを表示する(既定 20 件)。重さを付けるとそれ以上のものだけ", CommandLogTail);
 	registry.Register("log.file", "log.file", "今回の起動のログファイル(JSON Lines)の場所を表示する", CommandLogFile);
 	registry.Register("state.dump", "state.dump [ファイル]", "エディタの状態と全オブジェクトの全フィールドを書き出す(ファイル省略時は返事に含める)", CommandStateDump);
