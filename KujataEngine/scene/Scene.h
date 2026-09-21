@@ -2,16 +2,15 @@
 
 #include "../runtime/KujataApi.h"
 #include "GameObject.h"
+#include "SceneCollisionSystem.h"
 #include <filesystem>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 namespace KujataEngine {
 
 class Camera;
-class ColliderComponent;
 
 class Scene {
 public:
@@ -166,16 +165,8 @@ protected:
 	std::vector<std::unique_ptr<GameObject>> gameObjects_;
 
 private:
-	struct CollisionPairState {
-		ColliderComponent* colliderA = nullptr;
-		ColliderComponent* colliderB = nullptr;
-		bool isTrigger = false;
-	};
-
-	void UpdateCollisions();
-
 	bool initialized_ = false;
-	std::unordered_map<std::string, CollisionPairState> collisionPairStates_;
+	SceneCollisionSystem collisionSystem_;
 
 	// SetSceneName()で設定されるロード対象名。空なら GetDefaultSceneName() を使う。
 	std::string sceneName_;

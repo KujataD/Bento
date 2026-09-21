@@ -327,6 +327,24 @@
     <ClCompile Include="scene\Scene.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
+    <ClCompile Include="scene\EditorBillboards.cpp">
+      <Filter>KujataEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\SceneCollisionSystem.cpp">
+      <Filter>KujataEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\SceneGizmos.cpp">
+      <Filter>KujataEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\ScenePhysics.cpp">
+      <Filter>KujataEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\SceneRendering.cpp">
+      <Filter>KujataEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\SceneSerialization.cpp">
+      <Filter>KujataEngine</Filter>
+    </ClCompile>
     <ClCompile Include="components\BuiltinComponents.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
@@ -807,6 +825,18 @@
       <Filter>KujataEngine</Filter>
     </ClInclude>
     <ClInclude Include="scene\Scene.h">
+      <Filter>KujataEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\EditorBillboards.h">
+      <Filter>KujataEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\SceneCollisionSystem.h">
+      <Filter>KujataEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\SceneGizmos.h">
+      <Filter>KujataEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\ScenePhysics.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
     <ClInclude Include="..\externals\ImGuizmo-1.9\src\ImGuizmo.h">
