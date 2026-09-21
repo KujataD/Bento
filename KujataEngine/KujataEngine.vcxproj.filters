@@ -423,6 +423,9 @@
     <ClCompile Include="components\TrailRendererComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
+    <ClCompile Include="components\SplineRendererComponent.cpp">
+      <Filter>KujataEngine\components</Filter>
+    </ClCompile>
     <ClCompile Include="components\PointLightComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
@@ -666,6 +669,9 @@
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
     <ClInclude Include="components\TrailRendererComponent.h">
+      <Filter>KujataEngine\components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\SplineRendererComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
     <ClInclude Include="components\PointLightComponent.h">

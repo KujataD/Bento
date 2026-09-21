@@ -104,6 +104,12 @@ public:
 	uint32_t GetRenderViewIndex() const { return renderViewIndex_; }
 
 	/// <summary>
+	/// 描いたフレームの番号(PreDrawのたびに1増える)。同じフレームで何度も呼ばれる処理が
+	/// 「このフレームはもうやったか」を見分けるのに使う(毎フレーム形が変わるメッシュの組み立てなど)。
+	/// </summary>
+	uint64_t GetFrameIndex() const { return frameIndex_; }
+
+	/// <summary>
 	/// 指定サイズのRenderTexture(カラー+深度+RTV/DSV/SRV)を作成する。
 	/// rtvIndex/dsvIndexはそれぞれのヒープ内で使うスロット番号。
 	/// </summary>
@@ -324,6 +330,8 @@ private:
 	int32_t backBufferHeight_ = 0;
 	// 現在描画中のビュー番号(Scene=0/Game=1)。BeginSceneRender/BeginGameRenderで切り替える。
 	uint32_t renderViewIndex_ = kSceneViewIndex;
+	// PreDrawのたびに1増えるフレーム番号。
+	uint64_t frameIndex_ = 0;
 	// 現在の描画先の大きさ。BeginRenderTextureで更新する。
 	int32_t currentTargetWidth_ = WinApp::kWindowWidth;
 	int32_t currentTargetHeight_ = WinApp::kWindowHeight;

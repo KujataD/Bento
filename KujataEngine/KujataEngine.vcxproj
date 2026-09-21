@@ -147,6 +147,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="components\NoiseTextureComponent.cpp" />
     <ClCompile Include="components\ParticleSystemComponent.cpp" />
     <ClCompile Include="components\TrailRendererComponent.cpp" />
+    <ClCompile Include="components\SplineRendererComponent.cpp" />
     <ClCompile Include="components\OrbitCameraComponent.cpp" />
     <ClCompile Include="scene\MovementUtil.cpp" />
     <ClCompile Include="components\CanvasComponent.cpp" />
@@ -310,6 +311,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="components\NoiseTextureComponent.h" />
     <ClInclude Include="components\ParticleSystemComponent.h" />
     <ClInclude Include="components\TrailRendererComponent.h" />
+    <ClInclude Include="components\SplineRendererComponent.h" />
     <ClInclude Include="components\OrbitCameraComponent.h" />
     <ClInclude Include="scene\MovementUtil.h" />
     <ClInclude Include="math\Quaternion.h" />

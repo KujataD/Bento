@@ -79,6 +79,9 @@ public:
 	/// </summary>
 	void UpdateDynamicVertices(const std::vector<VertexData>& vertices);
 
+	/// <summary>CreateDynamicで確保した頂点数(動的メッシュでなければ0)。これを超える頂点は描かれない。</summary>
+	size_t GetDynamicVertexCapacity() const { return subMeshes_.empty() ? 0 : subMeshes_[0].vertexCapacity; }
+
 	static Model* CreateRing(const std::string& textureFilePath, ShaderModel shaderModel = ShaderModel::kNone, uint32_t subdivision = 48,
 	    float innerRatio = 0.55f);
 

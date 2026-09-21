@@ -12,6 +12,7 @@
 #include "NoiseTextureComponent.h"
 #include "ParticleSystemComponent.h"
 #include "TrailRendererComponent.h"
+#include "SplineRendererComponent.h"
 #include "OrbitCameraComponent.h"
 #include "PointLightComponent.h"
 #include "RectTransformComponent.h"
@@ -39,6 +40,7 @@ void RegisterBuiltinComponents() {
 	factory.RegisterComponent<NoiseTextureComponent>();
 	factory.RegisterComponent<ParticleSystemComponent>();
 	factory.RegisterComponent<TrailRendererComponent>();
+	factory.RegisterComponent<SplineRendererComponent>();
 	// world空間2D(Sprite方式)。スクリーン空間UIはCanvas方式のImageComponent側。
 	factory.RegisterComponent<SpriteRendererComponent>();
 	factory.RegisterComponent<CameraComponent>();

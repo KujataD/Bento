@@ -522,6 +522,7 @@ void DirectXCommon::CreateFence() {
 }
 
 void DirectXCommon::PreDraw() {
+	++frameIndex_;
 	// これから書き込むバックバッファのインデックスを取得
 	backBufferIndex_ = swapChain_->GetCurrentBackBufferIndex();
 
