@@ -62,10 +62,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		editorApplication->EndFrame();
 	}
 
+	// --run のスクリプトで失敗したコマンドがあれば1を返す(呼び出し側が終了コードで判定できるように)。
+	const int exitCode = editorApplication->GetExitCode();
 	editorApplication->Finalize();
 
 	// エンジンの終了処理
 	KujataEngine::Finalize();
 
-	return 0;
+	return exitCode;
 }

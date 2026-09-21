@@ -25,6 +25,29 @@ exe と GameModule.dll は同じ構成(Debug/Release)でビルドすること。
 
 - クリックでフォーカスしてから: WASD 移動 / QE 上下 / 右クリックホールド+マウスで視点
 
+### エディタの CUI(コマンドで操作する)
+
+エディタは、コマンドでも操作・確認できる。人間も AI も同じコマンドを使う(設計は [editor-automation.md](editor-automation.md))。
+
+- **Console の入力欄**: エディタの Console ウィンドウの一番下に打つ。`help` で一覧、↑↓で履歴
+- **ターミナル**: エディタを起動した状態で `Tools\kujata.cmd <コマンド>`。引数なしで対話モード(`exit` で終了)
+  - 空白や `"` を含む引数は、1 行ずつ標準入力で渡すと確実: `echo object.rename MonsterBall "Monster Ball" | Tools\kujata.cmd`
+  - `-Json` を付けると返事の JSON をそのまま出す(スクリプト・AI 向け)。失敗すると終了コード 1
+- **スクリプト**: `KujataEngine.exe --run <ファイル> --exit` で、1 行 1 コマンドのファイルを順に実行して終了する。結果は `<ファイル>.result.jsonl`、失敗があれば終了コード 1
+
+```
+kujata scene.list                                       # 全オブジェクト
+kujata object.get MonsterBall                           # フィールドの値
+kujata field.set MonsterBall RotatorComponent speed 0.05
+kujata play.start
+kujata wait 60                                          # 60 フレーム進むのを待つ(その間のログも返る)
+kujata undo
+```
+
+- オブジェクトは `親/子` のパスか instanceId で指定する。同じパスが複数あるとエラーになる(instanceId で指定する)
+- 変更系のコマンドは Undo できる(履歴のラベルは `[CUI] ...`)
+- 返事には毎回、そのコマンドの実行中に出たログと、エディタの状態(モード・シーン・選択・Undo の先頭)が付く
+
 ### エディタのレイアウト
 
 - ウィンドウのドッキング配置・位置・大きさと、各ウィンドウを開いているか閉じているか(Window メニュー)は `KujataEngine/imgui.ini` に保存され、次回起動時に戻る(人ごとに違うので git 管理外)

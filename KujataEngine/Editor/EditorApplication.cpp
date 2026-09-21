@@ -1,4 +1,5 @@
 #include "EditorApplication.h"
+#include "EditorCommandServer.h"
 #include "ImGuiManager.h"
 #include "AssetDatabase.h"
 #include "../runtime/AssetResolver.h"
@@ -147,6 +148,11 @@ void EditorApplication::Initialize() {
 		SetCurrentScene(std::make_unique<Scene>());
 	}
 
+#ifdef USE_IMGUI
+	// CUI(Consoleの入力欄・kujata CLI・--run)の受付を始める。シーンができてから始めること(--run が最初のフレームから動くため)。
+	EditorCommandServer::GetInstance().Initialize();
+#endif // USE_IMGUI
+
 #ifndef USE_IMGUI
 	// エディタUI無し(リリース/ゲーム単体)ビルドでは Start(Play)モードのみで動作させる。
 	// Startボタンが無く、そのままではEditのままゲームが更新されないため、起動時に自動でPlayへ移行する。
@@ -163,6 +169,11 @@ void EditorApplication::BeginFrame() {
 void EditorApplication::Update() {
 	// フレーム先頭でシーン切り替え予約を処理する(破棄中の反復や自己解放を避けるため描画/更新の前に)。
 	ProcessPendingSceneChange();
+
+#ifdef USE_IMGUI
+	// CUIのコマンドはここ(フレームの頭・描画の前)でだけ実行する。人間のUI操作と同じ処理を通す。
+	EditorCommandServer::GetInstance().ProcessFrame();
+#endif // USE_IMGUI
 
 #ifdef USE_IMGUI
 	// Editor UIはEditorApplicationを入口として更新する。
@@ -327,6 +338,9 @@ void EditorApplication::EndFrame() {
 }
 
 void EditorApplication::Finalize() {
+#ifdef USE_IMGUI
+	EditorCommandServer::GetInstance().Finalize();
+#endif // USE_IMGUI
 	if (editorMode_ == EditorMode::PrefabEdit) {
 		ClosePrefabEditMode(false);
 	}
@@ -405,6 +419,14 @@ void EditorApplication::Stop() {
 
 	AddConsoleLog("[Editor] Stop");
 	AddConsoleLog("Editor Mode: Edit");
+}
+
+int EditorApplication::GetExitCode() const {
+#ifdef USE_IMGUI
+	return EditorCommandServer::GetInstance().GetExitCode();
+#else
+	return 0;
+#endif // USE_IMGUI
 }
 
 bool EditorApplication::IsPlaying() const {

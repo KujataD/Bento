@@ -41,6 +41,11 @@ public:
 	void Finalize();
 
 	/// <summary>
+	/// プロセスの終了コード。--run のスクリプトで失敗したコマンドがあれば1。
+	/// </summary>
+	int GetExitCode() const;
+
+	/// <summary>
 	/// Playを開始する
 	/// </summary>
 	void Start();

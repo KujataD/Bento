@@ -48,6 +48,11 @@ public:
 
 	bool CanRedo() const { return !redoStack_.empty(); }
 
+	/// <summary>
+	/// 次にUndoしたときに戻る操作のラベル(履歴が空なら空文字)。CUIの返事の state.undoTop に使う。
+	/// </summary>
+	std::string GetUndoTopLabel() const { return undoStack_.empty() ? std::string() : undoStack_.back().label; }
+
 private:
 	EditorUndoManager() = default;
 	~EditorUndoManager() = default;

@@ -174,6 +174,15 @@
     <ClCompile Include="Editor\EditorApplication.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="Editor\EditorCommand.cpp">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorCommands.cpp">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorCommandServer.cpp">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClCompile>
     <ClCompile Include="Editor\GameModuleHotReloader.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
@@ -648,6 +657,12 @@
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
     <ClInclude Include="Editor\EditorApplication.h">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorCommand.h">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorCommandServer.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
     <ClInclude Include="Editor\GameModuleHotReloader.h">
