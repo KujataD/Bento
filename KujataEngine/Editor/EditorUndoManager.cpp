@@ -22,6 +22,10 @@ void EditorUndoManager::Capture(Scene& scene, const std::string& label, const st
 		return;
 	}
 	if (!undoStack_.empty() && undoStack_.back().sceneJson == sceneJson) {
+		// 前のスナップショットから何も変わっていない(=戻る先は同じ)。これから行う操作の名前にだけ差し替える。
+		// 例: 起動直後の "Initial" のまま最初の編集をしても、Undoの先頭がその編集の名前になる。
+		undoStack_.back().label = label;
+		redoStack_.clear();
 		return;
 	}
 
