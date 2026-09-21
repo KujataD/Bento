@@ -252,6 +252,31 @@ void ImGuiManager::ExportCurrentSceneJson() {
 	AddConsoleLog("[Editor] Scene JSON export failed: " + exportResult.message);
 }
 
+bool ImGuiManager::ShowWindow(const std::string& name, bool visible) {
+	for (const WindowVisibilityEntry& item : kWindowVisibilityEntries) {
+		if (name != item.name) {
+			continue;
+		}
+		windowVisibility_.*item.flag = visible;
+#ifdef USE_IMGUI
+		if (visible) {
+			// 同じノードに重なったタブの後ろにあっても、前に出して見えるようにする。
+			ImGui::SetWindowFocus(item.name);
+		}
+#endif // USE_IMGUI
+		return true;
+	}
+	return false;
+}
+
+std::vector<std::pair<std::string, bool>> ImGuiManager::GetWindowVisibilities() const {
+	std::vector<std::pair<std::string, bool>> result;
+	for (const WindowVisibilityEntry& item : kWindowVisibilityEntries) {
+		result.emplace_back(item.name, windowVisibility_.*item.flag);
+	}
+	return result;
+}
+
 void ImGuiManager::RegisterWindowVisibilitySettings() {
 #ifdef USE_IMGUI
 	ImGuiSettingsHandler handler;

@@ -157,6 +157,8 @@ public:
 	ID3D12Device* GetDevice() const { return device_.Get(); }
 
 	ID3D12GraphicsCommandList* GetCommandList() const { return commandList_.Get(); }
+	// 今フレームに描いているバックバッファ(PreDraw〜PostDrawの間はRENDER_TARGET状態)。
+	ID3D12Resource* GetCurrentBackBuffer() const { return swapChainResources_[backBufferIndex_].Get(); }
 	ID3D12CommandQueue* GetCommandQueue() const { return commandQueue_.Get(); }
 
 	ID3D12DescriptorHeap* GetSrvDescriptorHeap() const { return srvDescriptorHeap_.Get(); }

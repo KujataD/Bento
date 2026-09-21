@@ -24,6 +24,11 @@ void PostProcess::SetFade(const Vector3& color, float amount) {
 	fadeAmount_ = std::clamp(amount, 0.0f, 1.0f);
 }
 
+ID3D12Resource* PostProcess::GetDisplayResource(uint32_t viewIndex) const {
+	assert(viewIndex < DirectXCommon::kRenderViewCount);
+	return viewTargets_[viewIndex].resolve.resource.Get();
+}
+
 D3D12_GPU_DESCRIPTOR_HANDLE PostProcess::GetDisplaySrvHandle(uint32_t viewIndex) const {
 	assert(viewIndex < DirectXCommon::kRenderViewCount);
 	const ViewTargets& targets = viewTargets_[viewIndex];

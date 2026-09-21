@@ -32,6 +32,8 @@
 - **エディタの操作・確認は CUI を使う**(`Tools/kujata.cmd`。設計と一覧は [editor-automation.md](editor-automation.md))。スクリーンショットの座標クリックや OS へのキー注入より先にこちらを使う。
   - AI からは、コマンドを標準入力で渡して `-Json` で受け取るのが確実: `printf '%s\n' 'scene.list' 'object.get MonsterBall' | Tools/kujata.cmd -Json`
   - 返事の `logs`(実行中に出たログ)と `state` を毎回確かめ、エディタ側で問題が起きていないかを見る。
+  - 見た目の確認は `view.screenshot <scene|game|editor> <パス>` で撮って画像を読む(ウィンドウの撮影より確実。隠れたビューも撮れる)。エディタの UI を撮るときは先に `window.show <ウィンドウ名>` で前に出す。
+  - ログは `log.tail 50 error`、または `log.file` の JSON Lines を読む。変更の前後比較は `state.dump` の差分で見る。
   - 起動からの確認を 1 回で済ませるときは `KujataEngine.exe --run <ファイル> --exit`(終了コードで成否が分かる)。
   - 新しいエディタ機能を作ったら、その操作もコマンドとして登録する(`Editor/EditorCommands.cpp`)。UI にしかない操作を増やさない。
 - **Component 等の共有ヘッダ(ABI)を変更したら、必ず .sln 経由で exe と GameModule を同時に再ビルド**すること。片方だけ古いと起動時にエントリポイントエラーで落ちる。

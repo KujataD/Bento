@@ -3,7 +3,7 @@
 AI(Claude Code 等)と人間の両方が、同じコマンドでエディタを操作・確認できるようにするための設計文書。
 
 - 対象: KujataEngine のエディタ(`KujataEngine/Editor/`)と、起動・ログまわり。
-- 状態: **Step 1(CUI の土台)を実装済み。** Step 2 以降は未着手(§6)。
+- 状態: **Step 1(CUI の土台)と Step 2(スクリーンショット・状態の書き出し・ログ)を実装済み。** Step 3 以降は未着手(§6)。
 - 関連: [CLAUDE.md](CLAUDE.md) の「現在の方針」②(決定論+リプレイ)、[determinism.md](determinism.md) の Step 4(入力の記録・再生)
 
 ---
@@ -102,7 +102,7 @@ wait 60
 返事の `text` は人間向けに整形した結果(Console と `kujata` はこれを表示する)。
 `kujata -Json` は返事の JSON をそのまま出す(AI・スクリプト向け)。失敗すると終了コード 1。
 
-## 5. コマンド一覧(Step 1 で実装したもの)
+## 5. コマンド一覧(Step 1・2 で実装したもの)
 
 | 分類 | コマンド | 内容 |
 |---|---|---|
@@ -111,7 +111,11 @@ wait 60
 | | `scene.list` | 全オブジェクトのパス・instanceId・有効/無効・コンポーネント |
 | | `object.get <オブジェクト>` | コンポーネントごとの全フィールド値 |
 | | `component.types` | 追加できるコンポーネントの型名 |
-| | `log.tail [件数]` | Console の最近のログ |
+| | `log.tail [件数] [info\|warning\|error]` | Console の最近のログ。重さを付けるとそれ以上のものだけ |
+| | `log.file` | 今回の起動のログファイル(JSON Lines)の場所 |
+| | `state.dump [ファイル]` | エディタの状態と全オブジェクトの全フィールド(差分を取って変化を確かめる用) |
+| 確認 | `view.screenshot <scene\|game\|editor> [ファイル]` | ビューの描画結果、またはエディタ全体を PNG に保存する(§5.1) |
+| | `window.show [ウィンドウ名] [true\|false]` | ウィンドウを開いて前面に出す / 閉じる。引数なしで一覧 |
 | 選択 | `select <オブジェクト>` / `select none` | Hierarchy の選択を変える |
 | 編集 | `object.create <名前> [親]` | 空のオブジェクトを作る |
 | | `object.delete <オブジェクト>` | 子ごと削除する |
@@ -131,14 +135,30 @@ wait 60
 - `field.set` は、シーンの JSON の該当フィールドだけを書き換えて Undo と同じ経路(`SceneJsonImporter::ApplySceneJsonString`)で適用する。
   参照フィールド(ObjectRef)も JSON 上の instanceId として書き換えられる。
 
+### 5.1 スクリーンショット(view.screenshot)
+
+- `scene` / `game`: ポスト処理(フォグ・ブルーム・トーンマップ)と画面の UI まで描いた、そのビューの描画結果。
+  **タブが隠れているビューも、撮るときだけ描かせる**(同じ場所に Scene と Game がタブで重なっていても撮れる)。大きさは描画先の大きさ。
+- `editor`: ImGui まで描いたエディタ全体(バックバッファ)。UI の見た目を確かめる用。隠れたタブは写らないので、先に `window.show` で前に出す。
+- 流れ: コマンドが予約 → 描画の途中で読み出し用バッファへコピー → 次のフレームの頭で PNG に保存して返事(`EditorScreenshot`)。
+  `DirectXCommon::PostDraw` が毎フレーム GPU の完了を待つので、1 フレーム遅れで確実に読める。
+- 保存先の既定は `<プロジェクト>/Temp/Screenshots/<対象>_<日時>.png`(git 管理外)。相対パスはプロジェクトのフォルダ基準。
+
+### 5.2 ログ
+
+- Console のログと、エンジンの `Logger::Log`(シェーダーのコンパイル等)を、`<エンジン>/logs/editor_<日時>.jsonl` に 1 行 1 件の JSON で残す(`EditorLog`)。
+  1 行: `{"time", "level", "source"("Console"/"Engine"), "category"(先頭の [..]), "message"}`
+- 重さ(info / warning / error)は、今のログが重さを持たないので**文面から判定**している(「失敗」「error」等)。完全ではない。
+- Console は重さごとに色分け(警告は黄・エラーは赤)し、件数付きのチェックと文字列で絞り込める。
+
 ## 6. これからの Step
 
 | Step | 内容 |
 |---|---|
 | 1(済) | コマンド層、名前付きパイプ、Console の入力欄、`kujata` CLI、`--run` / `--exit` |
 |  | 実装中に CUI で見つかって直した既存の不具合: 折りたたまれた親の子を選ぶと Hierarchy が選択を外す / Windows のメッセージを 1 フレーム 1 件しか処理せず入力が遅れる / 最初の編集の Undo ラベルが "Initial" のまま |
-| 2 | `view.screenshot`(Scene/Game ビューの描画結果を PNG に書き出す)、`state.dump`(シーン状態の書き出し)、ログの JSON Lines 出力と Console の絞り込み |
-| 3 | エディタ独自の機能のコマンド化: `prefab.open` / `prefab.apply` / `prefab.revert`、`animation.addKey` など。UI 側の処理をコマンドへ寄せる |
+| 2(済) | `view.screenshot`、`window.show`、`state.dump`、ログの JSON Lines 出力と Console の色分け・絞り込み、完了を待つコマンドの仕組み(`EditorCommandResult::poll`) |
+| 3 | ログに重さを明示して出す仕組み(今は文面から推測)。エディタ独自の機能のコマンド化: `prefab.open` / `prefab.apply` / `prefab.revert`、`animation.addKey` など。UI 側の処理をコマンドへ寄せる |
 | 4 | 型情報: `SerializedFieldRegistry` に `Mode::DescribeSchema` を足し、`schema.get` でフィールドの型・範囲・説明を返す。Inspector のツールチップ・範囲チェックも同じ情報から出す |
 | 5 | MCP サーバー(`kujata` と同じパイプを使う)、コマンドパレット(Ctrl+P)、Undo の履歴ウィンドウ、CUI で変えたオブジェクトの強調表示 |
 | 6 | 固定 ID(今は `GenerateInstanceId()` が時刻と乱数で作るので差分がぶれる)と入力の記録・再生。決定論(determinism.md)と一緒に進める |

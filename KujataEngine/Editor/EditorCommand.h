@@ -37,13 +37,17 @@ private:
 };
 
 /// <summary>
-/// コマンド1回分の結果。waitFramesが正なら、その分フレームが進むのを待ってから返事をする(waitコマンド用)。
+/// コマンド1回分の結果。すぐに返事ができないコマンドは次のどちらかを設定する。
+///   - waitFrames: その分フレームが進むのを待ってから返事をする(waitコマンド用)
+///   - poll      : 毎フレームの頭に呼ばれる。終わったら out に最終結果を書いて true を返す
+///                 (view.screenshotのように、GPUの描画が終わるのを待つもの用)
 /// </summary>
 struct EditorCommandResult {
 	bool ok = true;
 	nlohmann::json result = nullptr;
 	std::string error;
 	int waitFrames = 0;
+	std::function<bool(EditorCommandResult& out)> poll;
 
 	static EditorCommandResult Success(nlohmann::json value = nullptr) {
 		EditorCommandResult commandResult;

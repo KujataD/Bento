@@ -9,6 +9,7 @@ namespace KujataEngine {
 // ログストリームはこの翻訳単位ローカルのstaticに保持する。
 namespace {
 std::ofstream logStream_;
+void (*listener_)(const std::string& message) = nullptr;
 }
 
 void Logger::Initialize() {
@@ -30,7 +31,12 @@ void Logger::Initialize() {
 #endif
 }
 
+void Logger::SetListener(void (*listener)(const std::string& message)) { listener_ = listener; }
+
 void Logger::Log(const std::string& message) {
+	if (listener_) {
+		listener_(message);
+	}
 #ifdef _DEBUG
 	logStream_ << message << std::endl;
 	OutputDebugStringA(message.c_str());

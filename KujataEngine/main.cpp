@@ -1,6 +1,9 @@
 #include <KujataEngineEditor.h>
 #include <base/ProjectPath.h>
 #include <base/StringUtil.h>
+#ifdef USE_IMGUI
+#include <Editor/EditorLog.h>
+#endif // USE_IMGUI
 
 #include "../externals/nlohmann/json.hpp"
 
@@ -46,6 +49,11 @@ WindowSettings LoadWindowSettings() {
 
 // Windowsアプリでのエントリーポイント
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+
+#ifdef USE_IMGUI
+	// エンジンのログ(シェーダーのコンパイル等)もエディタのログファイル(JSON Lines)へ流す。初期化より前につなぐ。
+	EditorLog::HookEngineLogger();
+#endif // USE_IMGUI
 
 	// エンジン初期化
 	const WindowSettings windowSettings = LoadWindowSettings();

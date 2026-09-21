@@ -13,6 +13,8 @@
 #include "RenderingWindow.h"
 #include "SceneViewWindow.h"
 #include <string>
+#include <utility>
+#include <vector>
 
 namespace KujataEngine {
 
@@ -41,6 +43,16 @@ public:
 	void ClearConsoleLogs();
 
 	void Finalize();
+
+	/// <summary>
+	/// Windowメニューのウィンドウを開く/閉じる(CUIの window.show)。開くときは前面(ドッキング中ならそのタブ)に出す。
+	/// nameはウィンドウ名(Scene / Game / Hierarchy / Inspector / Project / Console / Performance / Animation / Scenes / Rendering)。
+	/// 知らない名前ならfalse。
+	/// </summary>
+	bool ShowWindow(const std::string& name, bool visible);
+
+	/// <summary>各ウィンドウの名前と、開いているか。</summary>
+	std::vector<std::pair<std::string, bool>> GetWindowVisibilities() const;
 
 private:
 	ImGuiManager() = default;

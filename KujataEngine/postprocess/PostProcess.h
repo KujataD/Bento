@@ -60,6 +60,12 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetDisplaySrvHandle(uint32_t viewIndex) const;
 
 	/// <summary>
+	/// ポスト適用済みRT(LDR)のリソース。まだ一度もRenderされていなければnullptr。
+	/// Render後はPIXEL_SHADER_RESOURCE状態(エディタのスクリーンショットが読み出しに使う)。
+	/// </summary>
+	ID3D12Resource* GetDisplayResource(uint32_t viewIndex) const;
+
+	/// <summary>
 	/// このフレームで適用するポストエフェクト設定を差し替える。
 	/// シーン上のVolumeをVolumeStackが解決した結果を毎フレーム渡す想定で、
 	/// PostProcess自身は設定の権威を持たない(シーンごとに違う値にできるのはこのため)。

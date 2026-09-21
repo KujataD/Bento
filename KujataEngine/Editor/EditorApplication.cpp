@@ -1,5 +1,6 @@
 #include "EditorApplication.h"
 #include "EditorCommandServer.h"
+#include "EditorScreenshot.h"
 #include "ImGuiManager.h"
 #include "AssetDatabase.h"
 #include "../runtime/AssetResolver.h"
@@ -233,8 +234,10 @@ void EditorApplication::Draw() {
 #ifdef USE_IMGUI
 	// エディタ(ImGui)有効時: Scene/Gameを別々のオフスクリーンRTへ描き、ImGuiのImageで表示する。
 	// 非表示のビュー(タブ非アクティブ/折り畳み)は描画パスをスキップして負荷を抑える。
-	const bool sceneVisible = IsSceneViewVisible();
-	const bool gameVisible = IsGameViewVisible();
+	// CUIの view.screenshot で撮影待ちのビューは、タブが隠れていても描く。
+	EditorScreenshot& screenshot = EditorScreenshot::GetInstance();
+	const bool sceneVisible = IsSceneViewVisible() || screenshot.WantsView(DirectXCommon::kSceneViewIndex);
+	const bool gameVisible = IsGameViewVisible() || screenshot.WantsView(DirectXCommon::kGameViewIndex);
 
 	Camera* gameCamera = currentScene_ ? currentScene_->GetGameViewCamera() : nullptr;
 	if (currentScene_ && gameCamera) {
@@ -262,6 +265,7 @@ void EditorApplication::Draw() {
 			// このビューのカメラ位置でVolumeを解決してから適用する(Local Volumeがビューごとに変わるため)。
 			scene->ApplyVolumes(sceneCamera);
 			PostProcess::GetInstance()->Render(DirectXCommon::kSceneViewIndex, dxCommon->GetSceneRenderTexture(), sceneCamera, [scene](float width, float height) { scene->RenderScreenSpaceUI(width, height, true); });
+			screenshot.RecordViewCopy(DirectXCommon::kSceneViewIndex);
 		} else {
 			LineRenderer::GetInstance()->Clear();
 		}
@@ -279,6 +283,7 @@ void EditorApplication::Draw() {
 			Scene* scene = currentScene_;
 			scene->ApplyVolumes(gameCamera);
 			PostProcess::GetInstance()->Render(DirectXCommon::kGameViewIndex, dxCommon->GetGameRenderTexture(), gameCamera, [scene](float width, float height) { scene->RenderScreenSpaceUI(width, height, false); });
+			screenshot.RecordViewCopy(DirectXCommon::kGameViewIndex);
 		}
 	} else if (currentScene_ && sceneVisible) {
 		// --- 単一ビュー(Prefab編集/フォールバック): 従来のDrawをScene RTへ ---
@@ -295,6 +300,7 @@ void EditorApplication::Draw() {
 		// 単一ビュー(Prefab編集等)でもトーンマップは必ず通す(HDR RTは直接表示できないため)。
 		currentScene_->ApplyVolumes(renderCamera);
 		PostProcess::GetInstance()->Render(DirectXCommon::kSceneViewIndex, dxCommon->GetSceneRenderTexture(), renderCamera);
+		screenshot.RecordViewCopy(DirectXCommon::kSceneViewIndex);
 	} else {
 		LineRenderer::GetInstance()->Clear();
 	}
@@ -332,6 +338,8 @@ void EditorApplication::EndFrame() {
 		FrameProfiler::Scope profile(FrameProfiler::kImGuiRender);
 		ImGuiManager::GetInstance()->End();
 	}
+	// CUIの view.screenshot editor: ImGuiまで描き終えたバックバッファを、画面へ出す前に写し取る。
+	EditorScreenshot::GetInstance().RecordEditorCopy();
 #endif // USE_IMGUI
 
 	DirectXCommon::GetInstance()->PostDraw();

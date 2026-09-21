@@ -5,8 +5,11 @@
 #include "EditorApplication.h"
 #include "EditorCommandServer.h"
 #include "EditorConsole.h"
+#include "EditorLog.h"
+#include "EditorScreenshot.h"
 #include "EditorSelection.h"
 #include "EditorUndoManager.h"
+#include "ImGuiManager.h"
 #include "SceneJsonExporter.h"
 #include "SceneJsonImporter.h"
 #include "../base/ProjectPath.h"
@@ -16,6 +19,9 @@
 #include "../scene/GameObject.h"
 #include "../scene/Scene.h"
 #include <algorithm>
+#include <chrono>
+#include <format>
+#include <fstream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -288,17 +294,157 @@ EditorCommandResult CommandComponentTypes(const EditorCommandArgs&) {
 }
 
 EditorCommandResult CommandLogTail(const EditorCommandArgs& args) {
+	// log.tail [件数] [info|warning|error]。重さを指定すると、それ以上の重さのログだけにする。
 	size_t count = 20;
-	if (args.Count() > 0) {
+	EditorLogLevel minimumLevel = EditorLogLevel::Info;
+	for (size_t index = 0; index < args.Count(); ++index) {
+		const std::string& argument = args.Get(index);
+		if (ParseEditorLogLevel(argument, minimumLevel)) {
+			continue;
+		}
 		try {
-			count = static_cast<size_t>(std::stoul(args.Get(0)));
+			count = static_cast<size_t>(std::stoul(argument));
 		} catch (...) {
-			return EditorCommandResult::Failure("件数は数字で指定してください(例: log.tail 50)。");
+			return EditorCommandResult::Failure("log.tail [件数] [info|warning|error] の形で指定してください(例: log.tail 50 error)。");
 		}
 	}
-	const std::vector<std::string>& logs = EditorConsole::GetInstance()->GetLogs();
-	size_t begin = logs.size() > count ? logs.size() - count : 0;
-	return EditorCommandResult::Success(std::vector<std::string>(logs.begin() + static_cast<std::ptrdiff_t>(begin), logs.end()));
+
+	std::vector<std::string> matched;
+	for (const EditorConsole::Entry& entry : EditorConsole::GetInstance()->GetLogs()) {
+		if (entry.level >= minimumLevel) {
+			matched.push_back(entry.message);
+		}
+	}
+	size_t begin = matched.size() > count ? matched.size() - count : 0;
+	return EditorCommandResult::Success(std::vector<std::string>(matched.begin() + static_cast<std::ptrdiff_t>(begin), matched.end()));
+}
+
+EditorCommandResult CommandLogFile(const EditorCommandArgs&) {
+	const std::filesystem::path path = EditorLog::GetFilePath();
+	if (path.empty()) {
+		return EditorCommandResult::Failure("ログファイルはまだ作られていません。");
+	}
+	return EditorCommandResult::Success(path.string());
+}
+
+std::string MakeFileTimestamp() {
+	const auto now = std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now());
+	const std::chrono::zoned_time localTime{std::chrono::current_zone(), now};
+	return std::format("{:%Y%m%d_%H%M%S}", localTime);
+}
+
+// 相対パスはプロジェクトのフォルダ基準にする(起動したカレントフォルダに左右されないように)。
+std::filesystem::path ResolveOutputPath(const std::string& text) {
+	std::filesystem::path path(text);
+	return path.is_absolute() ? path : GetActiveProjectRoot() / path;
+}
+
+EditorCommandResult CommandViewScreenshot(const EditorCommandArgs& args) {
+	const std::string& targetName = args.Get(0);
+	EditorScreenshot::Target target = EditorScreenshot::Target::SceneView;
+	if (targetName == "scene") {
+		target = EditorScreenshot::Target::SceneView;
+	} else if (targetName == "game") {
+		target = EditorScreenshot::Target::GameView;
+	} else if (targetName == "editor") {
+		target = EditorScreenshot::Target::Editor;
+	} else {
+		return EditorCommandResult::Failure("撮る対象を scene / game / editor から指定してください(例: view.screenshot game)。");
+	}
+	if (target == EditorScreenshot::Target::GameView && !GetScene()) {
+		return EditorCommandResult::Failure("シーンがありません。");
+	}
+
+	// 既定の保存先: <プロジェクト>/Temp/Screenshots/<対象>_<日時>.png(Temp は git 管理外)
+	std::filesystem::path outputPath = args.Count() > 1 ? ResolveOutputPath(args.RestFrom(1))
+	                                                    : GetActiveProjectRoot() / "Temp" / "Screenshots" / (targetName + "_" + MakeFileTimestamp() + ".png");
+	if (outputPath.extension() != ".png") {
+		outputPath += ".png";
+	}
+
+	std::string error;
+	if (!EditorScreenshot::GetInstance().Request(target, outputPath, error)) {
+		return EditorCommandResult::Failure(error);
+	}
+
+	// 描画が終わるのを待ってから返事をする(次のフレームの頭で保存される)。
+	EditorCommandResult pending = EditorCommandResult::Success();
+	pending.poll = [](EditorCommandResult& out) {
+		std::string pollError;
+		std::optional<nlohmann::json> finished = EditorScreenshot::GetInstance().Poll(pollError);
+		if (!finished) {
+			return false;
+		}
+		out = pollError.empty() ? EditorCommandResult::Success(*finished) : EditorCommandResult::Failure(pollError);
+		return true;
+	};
+	return pending;
+}
+
+json DescribeObjectFull(const GameObject& gameObject) {
+	json entry;
+	entry["path"] = MakeObjectPath(&gameObject);
+	entry["id"] = gameObject.GetInstanceId();
+	entry["parent"] = gameObject.GetParent() ? MakeObjectPath(gameObject.GetParent()) : "";
+	entry["active"] = gameObject.IsActive();
+	entry["activeInHierarchy"] = gameObject.IsActiveInHierarchy();
+	entry["tag"] = gameObject.GetTag();
+	entry["layer"] = gameObject.GetLayer();
+	json components = json::array();
+	for (const std::unique_ptr<Component>& component : gameObject.GetComponents()) {
+		if (component) {
+			components.push_back(DescribeComponent(*component, SameTypeIndexOf(gameObject, component.get())));
+		}
+	}
+	entry["components"] = components;
+	return entry;
+}
+
+void AppendHierarchyFull(const GameObject& gameObject, json& out) {
+	out.push_back(DescribeObjectFull(gameObject));
+	for (const GameObject* child : gameObject.GetChildren()) {
+		if (child) {
+			AppendHierarchyFull(*child, out);
+		}
+	}
+}
+
+EditorCommandResult CommandStateDump(const EditorCommandArgs& args) {
+	Scene* scene = GetScene();
+	if (!scene) {
+		return EditorCommandResult::Failure("シーンがありません。");
+	}
+
+	// エディタの状態と、全オブジェクトの全フィールドを1つのJSONにまとめる(差分を取って変化を確かめる用)。
+	json dump;
+	dump["state"] = EditorCommandServer::GetInstance().BuildState();
+	json objects = json::array();
+	for (const std::unique_ptr<GameObject>& gameObject : scene->GetGameObjects()) {
+		if (gameObject && gameObject->IsRoot()) {
+			AppendHierarchyFull(*gameObject, objects);
+		}
+	}
+	dump["objects"] = objects;
+
+	if (args.Count() == 0) {
+		return EditorCommandResult::Success(dump);
+	}
+
+	const std::filesystem::path outputPath = ResolveOutputPath(args.RestFrom(0));
+	std::error_code errorCode;
+	if (outputPath.has_parent_path()) {
+		std::filesystem::create_directories(outputPath.parent_path(), errorCode);
+	}
+	std::ofstream output(outputPath, std::ios::trunc);
+	if (!output) {
+		return EditorCommandResult::Failure("書き出せませんでした: " + outputPath.string());
+	}
+	output << dump.dump(2, ' ', false, json::error_handler_t::replace) << '\n';
+
+	json result;
+	result["path"] = outputPath.string();
+	result["objects"] = objects.size();
+	return EditorCommandResult::Success(result);
 }
 
 EditorCommandResult CommandSelect(const EditorCommandArgs& args) {
@@ -647,6 +793,30 @@ EditorCommandResult CommandModuleReload(const EditorCommandArgs&) {
 	return EditorCommandResult::Success();
 }
 
+EditorCommandResult CommandWindowShow(const EditorCommandArgs& args) {
+	ImGuiManager* imgui = ImGuiManager::GetInstance();
+	if (args.Count() == 0) {
+		// 引数なし: ウィンドウの一覧と、開いているか。
+		json windows = json::object();
+		for (const auto& [name, visible] : imgui->GetWindowVisibilities()) {
+			windows[name] = visible;
+		}
+		return EditorCommandResult::Success(windows);
+	}
+	bool visible = true;
+	if (args.Count() > 1 && !ParseBool(args.Get(1), visible)) {
+		return EditorCommandResult::Failure("true / false を指定してください。例: window.show Console true");
+	}
+	if (!imgui->ShowWindow(args.Get(0), visible)) {
+		std::string names;
+		for (const auto& [name, isVisible] : imgui->GetWindowVisibilities()) {
+			names += " " + name;
+		}
+		return EditorCommandResult::Failure("知らないウィンドウです: " + args.Get(0) + "。ウィンドウ:" + names);
+	}
+	return EditorCommandResult::Success();
+}
+
 EditorCommandResult CommandQuit(const EditorCommandArgs&) {
 	RequestQuitApplication();
 	return EditorCommandResult::Success("エディタを終了します。");
@@ -662,7 +832,11 @@ void RegisterBuiltinEditorCommands() {
 	registry.Register("scene.list", "scene.list", "シーンの全オブジェクト(パス・instanceId・有効/無効・コンポーネント)を階層順に表示する", CommandSceneList);
 	registry.Register("object.get", "object.get <オブジェクト>", "オブジェクトのコンポーネントと全フィールドの値を表示する", CommandObjectGet);
 	registry.Register("component.types", "component.types", "追加できるコンポーネントの型名を表示する", CommandComponentTypes);
-	registry.Register("log.tail", "log.tail [件数]", "Console の最近のログを表示する(既定 20 件)", CommandLogTail);
+	registry.Register("log.tail", "log.tail [件数] [info|warning|error]", "Console の最近のログを表示する(既定 20 件)。重さを付けるとそれ以上のものだけ", CommandLogTail);
+	registry.Register("log.file", "log.file", "今回の起動のログファイル(JSON Lines)の場所を表示する", CommandLogFile);
+	registry.Register("state.dump", "state.dump [ファイル]", "エディタの状態と全オブジェクトの全フィールドを書き出す(ファイル省略時は返事に含める)", CommandStateDump);
+	registry.Register("view.screenshot", "view.screenshot <scene|game|editor> [ファイル]",
+	                  "ビューの描画結果(scene/game)かエディタ全体(editor)を PNG に保存する。既定は <プロジェクト>/Temp/Screenshots/", CommandViewScreenshot);
 
 	registry.Register("select", "select <オブジェクト> | select none", "Hierarchy の選択を変える", CommandSelect);
 
@@ -682,6 +856,8 @@ void RegisterBuiltinEditorCommands() {
 	registry.Register("wait", "wait <フレーム数>", "指定フレーム進むのを待ってから返す。待っている間のログも返す", CommandWait);
 	registry.Register("scene.save", "scene.save", "シーンを保存する(Ctrl+S と同じ)", CommandSceneSave);
 	registry.Register("module.reload", "module.reload", "GameModule をビルドし直して差し替える(Reload DLL と同じ)", CommandModuleReload);
+	registry.Register("window.show", "window.show [ウィンドウ名] [true|false]",
+	                  "ウィンドウを開いて前面に出す(false で閉じる)。引数なしでウィンドウの一覧と開閉を表示する", CommandWindowShow);
 	registry.Register("quit", "quit", "エディタを終了する", CommandQuit);
 }
 

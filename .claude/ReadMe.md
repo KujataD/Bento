@@ -42,11 +42,15 @@ kujata field.set MonsterBall RotatorComponent speed 0.05
 kujata play.start
 kujata wait 60                                          # 60 フレーム進むのを待つ(その間のログも返る)
 kujata undo
+kujata view.screenshot game                              # Game ビューを PNG に(Temp/Screenshots/)。editor でエディタ全体
+kujata state.dump state.json                            # 全オブジェクトの全フィールドを書き出す
+kujata log.tail 20 error                                # 最近のエラーだけ
 ```
 
 - オブジェクトは `親/子` のパスか instanceId で指定する。同じパスが複数あるとエラーになる(instanceId で指定する)
 - 変更系のコマンドは Undo できる(履歴のラベルは `[CUI] ...`)
 - 返事には毎回、そのコマンドの実行中に出たログと、エディタの状態(モード・シーン・選択・Undo の先頭)が付く
+- ログは Console(警告は黄・エラーは赤。上のチェックと入力欄で絞り込める)と、`KujataEngine/logs/editor_<日時>.jsonl`(1 行 1 件の JSON)の両方に出る
 
 ### エディタのレイアウト
 

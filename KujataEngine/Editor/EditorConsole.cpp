@@ -30,7 +30,8 @@ EditorConsole* EditorConsole::GetInstance() {
 }
 
 void EditorConsole::AddLog(const std::string& message) {
-	logs_.push_back(message);
+	logs_.push_back(Entry{message, ClassifyEditorLog(message)});
+	EditorLog::Write("Console", message);
 	if (capturing_) {
 		captured_.push_back(message);
 	}
@@ -93,6 +94,34 @@ int EditorConsole::InputCallback(ImGuiInputTextCallbackData* data) {
 	return 0;
 }
 
+bool EditorConsole::PassesFilter(const Entry& entry) const {
+	if ((entry.level == EditorLogLevel::Info && !showInfo_) || (entry.level == EditorLogLevel::Warning && !showWarning_) ||
+	    (entry.level == EditorLogLevel::Error && !showError_)) {
+		return false;
+	}
+	return filterBuffer_[0] == '\0' || entry.message.find(filterBuffer_) != std::string::npos;
+}
+
+void EditorConsole::DrawFilterBar() {
+#ifdef USE_IMGUI
+	// 重さごとの件数を出しておくと、閉じたままでもエラーが出たことに気づける。
+	size_t warningCount = 0;
+	size_t errorCount = 0;
+	for (const Entry& entry : logs_) {
+		warningCount += entry.level == EditorLogLevel::Warning ? 1 : 0;
+		errorCount += entry.level == EditorLogLevel::Error ? 1 : 0;
+	}
+	ImGui::Checkbox("Info", &showInfo_);
+	ImGui::SameLine();
+	ImGui::Checkbox(("Warning (" + std::to_string(warningCount) + ")###ConsoleWarning").c_str(), &showWarning_);
+	ImGui::SameLine();
+	ImGui::Checkbox(("Error (" + std::to_string(errorCount) + ")###ConsoleError").c_str(), &showError_);
+	ImGui::SameLine();
+	ImGui::SetNextItemWidth(-1.0f);
+	ImGui::InputTextWithHint("##ConsoleFilter", "絞り込み(含む文字)", filterBuffer_, sizeof(filterBuffer_));
+#endif // USE_IMGUI
+}
+
 void EditorConsole::DrawCommandInput() {
 #ifdef USE_IMGUI
 	ImGui::Separator();
@@ -134,13 +163,26 @@ void EditorConsole::Draw(bool* pOpen) {
 		EditorUndoManager::GetInstance()->SetMaxUndoCount(static_cast<size_t>(undoMaxCount));
 	}
 	ImGui::Separator();
+	DrawFilterBar();
 
 	// ログは入力欄の上の領域だけでスクロールさせる(入力欄は常に下に見えているように)。
 	const float inputHeight = ImGui::GetFrameHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y;
 	ImGui::BeginChild("##ConsoleLogs", ImVec2(0.0f, -inputHeight), ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar);
 	const bool wasAtBottom = ImGui::GetScrollY() >= ImGui::GetScrollMaxY();
-	for (const std::string& log : logs_) {
-		ImGui::TextUnformatted(log.c_str());
+	// 警告は黄、エラーは赤で出す。
+	const ImVec4 warningColor(1.0f, 0.8f, 0.3f, 1.0f);
+	const ImVec4 errorColor(1.0f, 0.4f, 0.4f, 1.0f);
+	for (const Entry& entry : logs_) {
+		if (!PassesFilter(entry)) {
+			continue;
+		}
+		if (entry.level == EditorLogLevel::Info) {
+			ImGui::TextUnformatted(entry.message.c_str());
+		} else {
+			ImGui::PushStyleColor(ImGuiCol_Text, entry.level == EditorLogLevel::Error ? errorColor : warningColor);
+			ImGui::TextUnformatted(entry.message.c_str());
+			ImGui::PopStyleColor();
+		}
 	}
 	// 末尾までスクロールされている場合は、新しいログへ追従する。
 	if (scrollToBottom_ && wasAtBottom) {
