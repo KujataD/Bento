@@ -1,0 +1,613 @@
+<title>Kujata クラス地図</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+:root {
+  --ground: #eef1ea;
+  --surface: #f8faf5;
+  --ink: #1e2519;
+  --muted: #5c6655;
+  --line: #cbd3c1;
+  --accent: #4f6b39;
+  --accent-soft: #dfe8d4;
+  --edge-strong: #37452d;
+  --edge-soft: #7f8b76;
+  --node-text: #16200f;
+  --fade: 0.12;
+  --font-body: "Noto Sans JP", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #13170f;
+    --surface: #1a1f16;
+    --ink: #e3e9da;
+    --muted: #9ba690;
+    --line: #2f3828;
+    --accent: #a3c182;
+    --accent-soft: #2a3521;
+    --edge-strong: #c9d6b8;
+    --edge-soft: #6f7b66;
+    --node-text: #10160b;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #13170f;
+  --surface: #1a1f16;
+  --ink: #e3e9da;
+  --muted: #9ba690;
+  --line: #2f3828;
+  --accent: #a3c182;
+  --accent-soft: #2a3521;
+  --edge-strong: #c9d6b8;
+  --edge-soft: #6f7b66;
+  --node-text: #10160b;
+}
+html, body { height: 100%; }
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 12px;
+  padding-inline: 16px;
+  padding-block: 12px 16px;
+  box-sizing: border-box;
+}
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 20px;
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-wrap: balance;
+}
+.stats { color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.stats code { font-family: var(--font-mono); font-size: 12px; }
+.layout {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr) 330px;
+  gap: 12px;
+}
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  overflow: auto;
+  min-height: 0;
+  box-sizing: border-box;
+}
+.panel h2 {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.controls { display: flex; flex-direction: column; gap: 18px; }
+.search { display: flex; gap: 6px; }
+.search input {
+  flex: 1;
+  min-width: 0;
+  font: 13px var(--font-mono);
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--ground);
+  color: var(--ink);
+}
+button, .chip {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  border: 1px solid var(--line);
+  background: var(--ground);
+  color: var(--ink);
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+button:hover, .chip:hover { border-color: var(--accent); }
+button:focus-visible, .chip:focus-visible, input:focus-visible, label:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.edge-types { display: flex; flex-direction: column; gap: 6px; }
+.edge-type {
+  display: grid;
+  grid-template-columns: 18px 44px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.edge-type svg { width: 44px; height: 14px; }
+.edge-type .count { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12px; }
+.edge-type .hint { grid-column: 3 / 5; color: var(--muted); font-size: 11.5px; margin-top: -4px; }
+.modules { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; font-size: 12px; }
+.chip .dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.chip[aria-pressed="false"] { opacity: 0.45; }
+.chip .n { color: var(--muted); font-variant-numeric: tabular-nums; }
+.toggle { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; cursor: pointer; }
+.row { display: flex; flex-wrap: wrap; gap: 6px; }
+.canvas-wrap {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-height: 0;
+  overflow: hidden;
+}
+#cy { position: absolute; inset: 0; }
+.status {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--surface);
+  padding: 2px 8px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+.detail .empty { color: var(--muted); font-size: 13px; }
+.detail .name {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 600;
+  word-break: break-all;
+  margin: 0 0 6px;
+}
+.badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.badge {
+  font-size: 11.5px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+.file { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); word-break: break-all; margin-bottom: 12px; }
+.rel { margin-top: 12px; }
+.rel h3 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+}
+.rel ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.rel li button {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  padding: 3px 6px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  border-radius: 4px;
+}
+.rel li button:hover { background: var(--accent-soft); }
+.rel .dot { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.notes { color: var(--muted); font-size: 12px; line-height: 1.7; }
+.notes p { margin: 0 0 6px; }
+@media (max-width: 1100px) {
+  .layout { grid-template-columns: 230px minmax(0, 1fr); }
+  .detail { grid-column: 1 / -1; max-height: 40vh; }
+}
+@media (max-width: 720px) {
+  .app { height: auto; }
+  .layout { grid-template-columns: 1fr; }
+  .canvas-wrap { height: 70vh; }
+  .detail { max-height: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app">
+  <header>
+    <h1>Kujata クラス地図</h1>
+    <div class="stats" id="stats"></div>
+  </header>
+  <div class="layout">
+    <aside class="panel controls" aria-label="表示の設定">
+      <div>
+        <h2>探す</h2>
+        <div class="search">
+          <input id="search" list="names" placeholder="クラス名(例: Scene)" autocomplete="off">
+          <button id="search-go" type="button">移動</button>
+        </div>
+        <datalist id="names"></datalist>
+      </div>
+      <div>
+        <h2>関係の種類</h2>
+        <div class="edge-types" id="edge-types"></div>
+      </div>
+      <div>
+        <h2>表示</h2>
+        <label class="toggle"><input type="checkbox" id="focus-mode"> 選んだクラスと、直接つながるものだけにする</label>
+        <div class="row" style="margin-top:8px">
+          <button id="relayout" type="button">並べ直す</button>
+          <button id="fit" type="button">全体を表示</button>
+        </div>
+      </div>
+      <div>
+        <h2>モジュール(フォルダ)</h2>
+        <div class="modules" id="modules"></div>
+      </div>
+      <div class="notes">
+        <p>ソースを機械的に解析して作った図です。テンプレートの込み入った書き方などは取りこぼすことがあります。</p>
+        <p>名前空間(六角形)は、クラスではなく関数をまとめたものです。</p>
+      </div>
+    </aside>
+    <div class="canvas-wrap">
+      <div id="cy" role="img" aria-label="クラスの関係図"></div>
+      <div class="status" id="status">配置を計算しています…</div>
+    </div>
+    <aside class="panel detail" id="detail" aria-live="polite">
+      <h2>選んだクラス</h2>
+      <p class="empty">図のクラスをクリックすると、継承・持つ・参照・使う・使われる、のすべての関係がここに出ます。</p>
+    </aside>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/layout-base@2.0.1/layout-base.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cose-base@2.2.0/cose-base.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape-fcose@2.2.0/cytoscape-fcose.js"></script>
+<script>
+const DATA = /*__DATA__*/null;
+
+const EDGE_TYPES = [
+  { key: "inherits", label: "継承", hint: "子 → 親(白抜きの三角)", on: true },
+  { key: "nested", label: "内側の型", hint: "外側 → 内側で定義した型", on: true },
+  { key: "owns", label: "持つ", hint: "値・unique_ptr・コンテナのメンバ(菱形が持ち主)", on: true },
+  { key: "refers", label: "参照する", hint: "ポインタ・参照・ObjectRef のメンバ", on: true },
+  { key: "uses", label: "使う", hint: "メソッドの中で使う・GetInstance など(多いので最初は隠す)", on: false },
+];
+const RELATION_LABELS = {
+  out: { inherits: "継承している", nested: "内側に持つ型", owns: "持っている", refers: "参照している", uses: "使っている" },
+  in: { inherits: "継承されている", nested: "外側のクラス", owns: "持たれている", refers: "参照されている", uses: "使われている" },
+};
+// モジュールの色: 明るさを揃えた落ち着いた色(文字は常に暗い色で乗る)
+const MODULE_PALETTE = ["#a9c98e", "#8fc1c9", "#d6b87f", "#c9a0c2", "#9fb2e0", "#e0a38f", "#b5c77a", "#8fd0b0",
+  "#d3c07a", "#b0a4dc", "#e2a9b5", "#94c7e2", "#c8b59a", "#a6d49a", "#d9b0e0", "#a8b8a0", "#e0c29a", "#9ad0c8"];
+
+const state = {
+  edgeOn: Object.fromEntries(EDGE_TYPES.map(t => [t.key, t.on])),
+  moduleOn: {},
+  selected: null,
+  focus: false,
+  savedPositions: null,
+};
+
+function token(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+const modules = [...new Set(DATA.nodes.map(n => n.module))].sort();
+const moduleColor = Object.fromEntries(modules.map((m, i) => [m, MODULE_PALETTE[i % MODULE_PALETTE.length]]));
+modules.forEach(m => state.moduleOn[m] = true);
+const nodeById = Object.fromEntries(DATA.nodes.map(n => [n.id, n]));
+
+function edgeCounts() {
+  const c = {};
+  DATA.edges.forEach(e => c[e.type] = (c[e.type] || 0) + 1);
+  return c;
+}
+
+function renderStats() {
+  const classes = DATA.nodes.filter(n => n.kind !== "namespace").length;
+  const namespaces = DATA.nodes.length - classes;
+  document.getElementById("stats").innerHTML =
+    `${DATA.nodes.length} 個(クラス・構造体 ${classes}、名前空間 ${namespaces})/ 関係 ${DATA.edges.length} 本 / ` +
+    `${DATA.generatedAt} のソースから生成(<code>python Tools/class_map/build.py</code> で作り直せる)`;
+}
+
+function edgeGlyph(key) {
+  const strong = "var(--edge-strong)", soft = "var(--edge-soft)";
+  const glyphs = {
+    inherits: `<line x1="2" y1="7" x2="32" y2="7" stroke="${strong}" stroke-width="1.6"/><path d="M32 2 L42 7 L32 12 Z" fill="var(--surface)" stroke="${strong}" stroke-width="1.4"/>`,
+    nested: `<circle cx="6" cy="7" r="4" fill="var(--surface)" stroke="${soft}" stroke-width="1.3"/><line x1="10" y1="7" x2="42" y2="7" stroke="${soft}" stroke-width="1.3"/>`,
+    owns: `<path d="M2 7 L8 3 L14 7 L8 11 Z" fill="${strong}"/><line x1="14" y1="7" x2="42" y2="7" stroke="${strong}" stroke-width="1.3"/>`,
+    refers: `<line x1="2" y1="7" x2="34" y2="7" stroke="${soft}" stroke-width="1.3" stroke-dasharray="5 3"/><path d="M34 3 L42 7 L34 11" fill="none" stroke="${soft}" stroke-width="1.3"/>`,
+    uses: `<line x1="2" y1="7" x2="34" y2="7" stroke="${soft}" stroke-width="1.2" stroke-dasharray="1.5 3"/><path d="M34 3.5 L41 7 L34 10.5" fill="none" stroke="${soft}" stroke-width="1.2"/>`,
+  };
+  return `<svg viewBox="0 0 44 14" aria-hidden="true">${glyphs[key]}</svg>`;
+}
+
+function renderEdgeTypes() {
+  const counts = edgeCounts();
+  const box = document.getElementById("edge-types");
+  box.innerHTML = EDGE_TYPES.map(t => `
+    <label class="edge-type">
+      <input type="checkbox" id="edge-${t.key}" ${state.edgeOn[t.key] ? "checked" : ""}>
+      ${edgeGlyph(t.key)}
+      <span>${t.label}</span><span class="count">${counts[t.key] || 0}</span>
+      <span class="hint">${t.hint}</span>
+    </label>`).join("");
+  EDGE_TYPES.forEach(t => document.getElementById(`edge-${t.key}`).addEventListener("change", ev => {
+    state.edgeOn[t.key] = ev.target.checked;
+    applyVisibility();
+  }));
+}
+
+function renderModules() {
+  const counts = {};
+  DATA.nodes.forEach(n => counts[n.module] = (counts[n.module] || 0) + 1);
+  const box = document.getElementById("modules");
+  box.innerHTML = modules.map(m => `
+    <button type="button" class="chip" aria-pressed="true" data-module="${m}">
+      <span class="dot" style="background:${moduleColor[m]}"></span>${m}<span class="n">${counts[m]}</span>
+    </button>`).join("");
+  box.querySelectorAll(".chip").forEach(chip => chip.addEventListener("click", () => {
+    const m = chip.dataset.module;
+    state.moduleOn[m] = !state.moduleOn[m];
+    chip.setAttribute("aria-pressed", String(state.moduleOn[m]));
+    applyVisibility();
+  }));
+}
+
+function renderNames() {
+  document.getElementById("names").innerHTML = DATA.nodes.map(n => `<option value="${n.qualified}">`).join("");
+}
+
+function buildElements() {
+  const elements = [];
+  modules.forEach(m => elements.push({ group: "nodes", data: { id: "module:" + m, label: m, isModule: true, color: moduleColor[m] } }));
+  DATA.nodes.forEach(n => {
+    const label = n.kind === "namespace" ? n.name : n.qualified;
+    elements.push({ group: "nodes", data: { id: n.id, label, parent: "module:" + n.module, color: moduleColor[n.module], kind: n.kind, module: n.module } });
+  });
+  DATA.edges.forEach((e, i) => elements.push({ group: "edges", data: { id: "e" + i, source: e.source, target: e.target, type: e.type } }));
+  return elements;
+}
+
+function cyStyle() {
+  const strong = token("--edge-strong"), soft = token("--edge-soft"), ink = token("--ink"), accent = token("--accent");
+  const surface = token("--surface"), nodeText = token("--node-text"), muted = token("--muted");
+  return [
+    { selector: "node", style: {
+      "label": "data(label)", "font-family": "JetBrains Mono, Consolas, monospace", "font-size": 11,
+      "color": nodeText, "text-valign": "center", "text-halign": "center",
+      "shape": "round-rectangle", "background-color": "data(color)", "border-width": 1, "border-color": strong,
+      "width": "label", "height": 22, "padding": "7px",
+    } },
+    { selector: "node[kind = 'struct']", style: { "border-style": "dashed", "background-opacity": 0.75 } },
+    { selector: "node[kind = 'namespace']", style: { "shape": "hexagon", "padding": "10px", "border-width": 1.5 } },
+    { selector: "node[?isModule]", style: {
+      "label": "data(label)", "font-family": "Noto Sans JP, sans-serif", "font-size": 15, "font-weight": 700,
+      "color": ink, "text-valign": "top", "text-halign": "center", "text-margin-y": -6,
+      "background-color": "data(color)", "background-opacity": 0.13, "border-color": "data(color)", "border-width": 1.5,
+      "shape": "round-rectangle", "padding": "18px",
+    } },
+    { selector: "edge", style: { "curve-style": "bezier", "width": 1.2, "line-color": soft, "target-arrow-color": soft, "source-arrow-color": soft, "arrow-scale": 0.9 } },
+    { selector: "edge[type = 'inherits']", style: { "width": 1.7, "line-color": strong, "target-arrow-shape": "triangle", "target-arrow-fill": "hollow", "target-arrow-color": strong, "arrow-scale": 1.3 } },
+    { selector: "edge[type = 'owns']", style: { "line-color": strong, "source-arrow-shape": "diamond", "source-arrow-color": strong, "arrow-scale": 1.1 } },
+    { selector: "edge[type = 'refers']", style: { "line-style": "dashed", "target-arrow-shape": "vee" } },
+    { selector: "edge[type = 'uses']", style: { "line-style": "dotted", "width": 0.9, "target-arrow-shape": "vee", "opacity": 0.55, "arrow-scale": 0.7 } },
+    { selector: "edge[type = 'nested']", style: { "source-arrow-shape": "circle", "source-arrow-fill": "hollow", "width": 1 } },
+    { selector: ".faded", style: { "opacity": 0.1 } },
+    { selector: "node.hl", style: { "border-width": 2, "border-color": accent } },
+    { selector: "edge.hl", style: { "opacity": 1, "width": 2, "line-color": accent, "target-arrow-color": accent, "source-arrow-color": accent } },
+    { selector: "node:selected", style: { "border-width": 3, "border-color": accent, "underlay-color": accent, "underlay-opacity": 0.25, "underlay-padding": 5 } },
+    { selector: "node[?isModule]:selected", style: { "border-width": 1.5, "underlay-opacity": 0 } },
+  ];
+}
+
+const hasFcose = typeof cytoscapeFcose !== "undefined";
+if (hasFcose) cytoscape.use(cytoscapeFcose);
+
+const cy = cytoscape({
+  container: document.getElementById("cy"),
+  elements: buildElements(),
+  style: cyStyle(),
+  wheelSensitivity: 0.25,
+  minZoom: 0.05,
+  maxZoom: 3,
+  boxSelectionEnabled: false,
+});
+
+function layoutOptions(eles) {
+  if (hasFcose) {
+    return { name: "fcose", eles, quality: "default", animate: false, randomize: true, nodeDimensionsIncludeLabels: true,
+      packComponents: true, nodeRepulsion: 9000, idealEdgeLength: 70, edgeElasticity: 0.35, nestingFactor: 0.12,
+      gravity: 0.3, gravityCompound: 1.2, gravityRangeCompound: 1.4, numIter: 3000, tile: true, tilingPaddingVertical: 14, tilingPaddingHorizontal: 14 };
+  }
+  return { name: "cose", eles, animate: false, nodeDimensionsIncludeLabels: true, nodeRepulsion: 9000, idealEdgeLength: 70 };
+}
+
+function setStatus(text) {
+  const el = document.getElementById("status");
+  el.textContent = text;
+  el.hidden = !text;
+}
+
+function runLayout(eles, fitTo) {
+  setStatus("配置を計算しています…");
+  // 描画が一度止まるので、文字を出してから重い計算に入る
+  requestAnimationFrame(() => setTimeout(() => {
+    const layout = eles.layout(layoutOptions(eles));
+    layout.one("layoutstop", () => {
+      setStatus("");
+      // モジュールの枠の大きさが決まるのを 1 フレーム待ってから全体に合わせる
+      requestAnimationFrame(() => cy.fit(fitTo || visibleElements(), 30));
+    });
+    layout.run();
+  }, 30));
+}
+
+function visibleElements() {
+  return cy.elements().filter(el => el.style("display") !== "none");
+}
+
+function applyVisibility() {
+  cy.batch(() => {
+    cy.nodes().forEach(n => {
+      const module = n.data("isModule") ? n.data("label") : n.data("module");
+      n.style("display", state.moduleOn[module] ? "element" : "none");
+    });
+    cy.edges().forEach(e => {
+      const on = state.edgeOn[e.data("type")] && state.moduleOn[nodeById[e.data("source")].module] && state.moduleOn[nodeById[e.data("target")].module];
+      e.style("display", on ? "element" : "none");
+    });
+    if (state.focus && state.selected) {
+      const node = cy.getElementById(state.selected);
+      const keep = neighborhood(node);
+      cy.nodes().forEach(n => { if (!n.data("isModule") && !keep.contains(n)) n.style("display", "none"); });
+      cy.nodes("[?isModule]").forEach(m => { if (m.children().filter(c => c.style("display") !== "none").empty()) m.style("display", "none"); });
+    }
+  });
+  if (state.selected) highlight(cy.getElementById(state.selected));
+}
+
+function neighborhood(node) {
+  const edges = node.connectedEdges().filter(e => state.edgeOn[e.data("type")]);
+  return edges.connectedNodes().union(node);
+}
+
+function highlight(node) {
+  cy.batch(() => {
+    cy.elements().removeClass("faded hl");
+    if (!node || node.empty()) return;
+    const edges = node.connectedEdges().filter(e => e.style("display") !== "none");
+    const keep = edges.connectedNodes().union(node);
+    cy.elements().not(keep).not(edges).not(keep.parents()).addClass("faded");
+    edges.addClass("hl");
+    keep.not(node).addClass("hl");
+  });
+}
+
+function renderDetail(id) {
+  const box = document.getElementById("detail");
+  const n = nodeById[id];
+  if (!n) {
+    box.innerHTML = `<h2>選んだクラス</h2><p class="empty">図のクラスをクリックすると、継承・持つ・参照・使う・使われる、のすべての関係がここに出ます。</p>`;
+    return;
+  }
+  const kindLabel = { class: "class", struct: "struct", namespace: "名前空間(関数の集まり)" }[n.kind] || n.kind;
+  const groups = [];
+  for (const dir of ["out", "in"]) {
+    for (const t of EDGE_TYPES) {
+      const list = DATA.edges.filter(e => e.type === t.key && (dir === "out" ? e.source === id : e.target === id))
+        .map(e => nodeById[dir === "out" ? e.target : e.source]).filter(Boolean)
+        .sort((a, b) => a.qualified.localeCompare(b.qualified));
+      if (list.length) groups.push({ title: RELATION_LABELS[dir][t.key], list });
+    }
+  }
+  box.innerHTML = `
+    <h2>選んだクラス</h2>
+    <p class="name">${n.qualified}</p>
+    <div class="badges"><span class="badge">${kindLabel}</span><span class="badge">${n.module}</span></div>
+    <div class="file">${n.file}:${n.line}</div>
+    ${groups.length ? "" : `<p class="empty">解析で見つかった関係はありません。</p>`}
+    ${groups.map(g => `
+      <section class="rel">
+        <h3><span>${g.title}</span><span>${g.list.length}</span></h3>
+        <ul>${g.list.map(o => `<li><button type="button" data-id="${o.id}"><span class="dot" style="background:${moduleColor[o.module]}"></span>${o.qualified}</button></li>`).join("")}</ul>
+      </section>`).join("")}`;
+  box.querySelectorAll("button[data-id]").forEach(b => b.addEventListener("click", () => select(b.dataset.id, true)));
+}
+
+function select(id, center) {
+  const node = cy.getElementById(id);
+  if (node.empty() || node.data("isModule")) return;
+  state.selected = id;
+  cy.$(":selected").unselect();
+  node.select();
+  if (state.focus) {
+    applyVisibility();
+    runLayout(visibleElements(), visibleElements());
+  } else {
+    highlight(node);
+    if (center) cy.animate({ center: { eles: node }, zoom: Math.max(cy.zoom(), 0.9) }, { duration: 250 });
+  }
+  renderDetail(id);
+}
+
+function clearSelection() {
+  state.selected = null;
+  cy.$(":selected").unselect();
+  highlight(null);
+  renderDetail(null);
+  if (state.focus) {
+    applyVisibility();
+    restorePositions();
+  }
+}
+
+function savePositions() {
+  state.savedPositions = {};
+  cy.nodes().forEach(n => state.savedPositions[n.id()] = { ...n.position() });
+}
+
+function restorePositions() {
+  if (!state.savedPositions) return;
+  cy.batch(() => cy.nodes().forEach(n => { const p = state.savedPositions[n.id()]; if (p && !n.isParent()) n.position(p); }));
+  cy.fit(visibleElements(), 30);
+}
+
+cy.on("tap", "node", ev => { if (!ev.target.data("isModule")) select(ev.target.id(), false); });
+cy.on("tap", ev => { if (ev.target === cy) clearSelection(); });
+
+document.getElementById("focus-mode").addEventListener("change", ev => {
+  state.focus = ev.target.checked;
+  if (state.focus) {
+    savePositions();
+    applyVisibility();
+    if (state.selected) runLayout(visibleElements(), visibleElements());
+  } else {
+    applyVisibility();
+    restorePositions();
+  }
+});
+document.getElementById("relayout").addEventListener("click", () => { runLayout(visibleElements()); });
+document.getElementById("fit").addEventListener("click", () => cy.fit(visibleElements(), 30));
+
+function goToSearch() {
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  if (!q) return;
+  const hit = DATA.nodes.find(n => n.qualified.toLowerCase() === q) || DATA.nodes.find(n => n.name.toLowerCase() === q)
+    || DATA.nodes.find(n => n.qualified.toLowerCase().includes(q));
+  if (hit) {
+    if (!state.moduleOn[hit.module]) {
+      state.moduleOn[hit.module] = true;
+      document.querySelector(`.chip[data-module="${CSS.escape(hit.module)}"]`).setAttribute("aria-pressed", "true");
+      applyVisibility();
+    }
+    select(hit.id, true);
+  } else {
+    setStatus(`「${q}」は見つかりませんでした`);
+    setTimeout(() => setStatus(""), 2000);
+  }
+}
+document.getElementById("search-go").addEventListener("click", goToSearch);
+document.getElementById("search").addEventListener("keydown", ev => { if (ev.key === "Enter") goToSearch(); });
+
+// テーマ(OS の設定・ビューアの切り替え)に合わせて図の色も変える
+const refreshStyle = () => cy.style(cyStyle());
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", refreshStyle);
+new MutationObserver(refreshStyle).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+window.addEventListener("resize", () => cy.resize());
+
+renderStats();
+renderEdgeTypes();
+renderModules();
+renderNames();
+applyVisibility();
+runLayout(visibleElements());
+</script>

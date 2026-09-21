@@ -391,3 +391,6 @@ KujataEngine/imgui.ini
 
 # git 管理しない試作プロジェクト
 Sandbox/
+
+# クラス地図の途中データ(Tools/class_map/build.py で作り直せる)
+Tools/class_map/class_map.json
