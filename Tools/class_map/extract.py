@@ -105,6 +105,29 @@ def line_of(text, index):
     return text.count("\n", 0, index) + 1
 
 
+DOC_TAG_RE = re.compile(r"</?(summary|param[^>]*|returns|remarks)>")
+
+
+def doc_above(raw, index):
+    """宣言の直前にある // や /// のコメント行をまとめて、説明文として返す(無ければ空)。"""
+    lines = raw[:index].split("\n")[:-1]  # 宣言と同じ行の手前(インデント等)は捨てる
+    collected = []
+    while lines:
+        line = lines[-1].strip()
+        if line.startswith("template") and not collected:
+            lines.pop()
+            continue
+        if line.startswith("//"):
+            body = DOC_TAG_RE.sub("", line.lstrip("/").strip()).strip()
+            if body:
+                collected.append(body)
+            lines.pop()
+            continue
+        break
+    collected.reverse()
+    return re.sub(r"\s+", " ", " ".join(collected)).strip()[:400]
+
+
 CLASS_RE = re.compile(r"\b(class|struct)\s+((?:KUJATA_API\s+|alignas\s*\([^)]*\)\s+)*)([A-Za-z_]\w*)\s*(final\s*)?(:(?!:)[^;{]*)?\{")
 NAMESPACE_RE = re.compile(r"\bnamespace\s+([A-Za-z_][\w:]*)?\s*\{")
 
@@ -155,12 +178,14 @@ def main():
     namespace_nodes = {}  # id -> info
     code_regions = defaultdict(list)  # owner id -> [code text]
     cleaned = {}
+    raws = {}
 
     # --- 1 回目: クラスと名前空間を見つける ---
     for path in files:
         raw = path.read_text(encoding="utf-8", errors="replace")
         clean = strip_code(raw)
         cleaned[path] = clean
+        raws[path] = raw
         openers = scan_scopes(clean)
         stack = []  # (kind, qualified name or None, close index)
         i = 0
@@ -177,10 +202,17 @@ def main():
                         node_id = qualified
                         if node_id in classes and classes[node_id]["file"] != str(path.relative_to(REPO)).replace("\\", "/"):
                             node_id = f"{qualified}@{path.stem}"  # 別ファイルに同名(無名名前空間の中など)
+                        body_text = clean[i:close + 1]
+                        tags = []
+                        if re.search(r"\bstatic\b[^;{]*\bGetInstance\s*\(", body_text):
+                            tags.append("singleton")
+                        if re.match(r"I[A-Z]", name) and "virtual" in body_text and "= 0" in body_text:
+                            tags.append("interface")
                         classes[node_id] = {
                             "id": node_id, "name": name, "qualified": qualified, "kind": keyword,
                             "module": module_of(path), "file": str(path.relative_to(REPO)).replace("\\", "/"),
                             "line": line_of(clean, start), "bases": bases, "outer": "::".join(outer) or None,
+                            "doc": doc_above(raw, start), "tags": tags,
                         }
                         class_bodies[node_id] = (clean, i, close)
                     stack.append(("class", name, close))
@@ -249,7 +281,7 @@ def main():
                             namespace_nodes.setdefault(ns_id, {
                                 "id": ns_id, "name": name, "qualified": name, "kind": "namespace",
                                 "module": module_of(path), "file": str(path.relative_to(REPO)).replace("\\", "/"),
-                                "line": line_of(clean, i), "bases": [], "outer": None,
+                                "line": line_of(clean, i), "bases": [], "outer": None, "doc": "", "tags": [],
                             })
                             code_regions[ns_id].append(body)
                 i = close + 1
@@ -262,6 +294,19 @@ def main():
             elif ch == ";":
                 last_boundary = i + 1
             i += 1
+
+    # 名前空間の説明: "namespace 名前 {" の直前のコメント(ヘッダを優先。無ければ .cpp)
+    for info in namespace_nodes.values():
+        pattern = re.compile(r"namespace\s+(?:KujataEngine::)?" + re.escape(info["name"]) + r"\s*\{")
+        for path in sorted(raws, key=lambda p: p.suffix != ".h"):
+            m = pattern.search(raws[path])
+            if m:
+                doc = doc_above(raws[path], m.start())
+                if doc:
+                    info["doc"] = doc
+                    info["file"] = str(path.relative_to(REPO)).replace("\\", "/")
+                    info["line"] = line_of(raws[path], m.start())
+                    break
 
     # 関数が 1 つも見つからなかった名前空間(型の宣言だけ等)は除く
     nodes = dict(classes)

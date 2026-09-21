@@ -5,609 +5,536 @@
 <style>
 :root {
   --ground: #eef1ea;
-  --surface: #f8faf5;
+  --surface: #f9fbf6;
+  --raised: #ffffff;
   --ink: #1e2519;
-  --muted: #5c6655;
-  --line: #cbd3c1;
+  --muted: #5d6756;
+  --line: #d3dacb;
   --accent: #4f6b39;
-  --accent-soft: #dfe8d4;
-  --edge-strong: #37452d;
-  --edge-soft: #7f8b76;
-  --node-text: #16200f;
-  --fade: 0.12;
+  --accent-ink: #ffffff;
+  --accent-soft: #e2ebd7;
+  --r-inherits: #3d68ad;
+  --r-nested: #8356ad;
+  --r-owns: #2f7d45;
+  --r-refers: #b07a1c;
+  --r-uses: #6c7686;
   --font-body: "Noto Sans JP", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ground: #13170f;
-    --surface: #1a1f16;
+    --ground: #12160f;
+    --surface: #191e15;
+    --raised: #20261b;
     --ink: #e3e9da;
-    --muted: #9ba690;
-    --line: #2f3828;
+    --muted: #9ea993;
+    --line: #313a2a;
     --accent: #a3c182;
+    --accent-ink: #15200c;
     --accent-soft: #2a3521;
-    --edge-strong: #c9d6b8;
-    --edge-soft: #6f7b66;
-    --node-text: #10160b;
+    --r-inherits: #7ea3e3;
+    --r-nested: #bb95e0;
+    --r-owns: #74c48a;
+    --r-refers: #e0b25f;
+    --r-uses: #a3acb9;
   }
 }
 :root[data-theme="dark"] {
-  --ground: #13170f;
-  --surface: #1a1f16;
+  --ground: #12160f;
+  --surface: #191e15;
+  --raised: #20261b;
   --ink: #e3e9da;
-  --muted: #9ba690;
-  --line: #2f3828;
+  --muted: #9ea993;
+  --line: #313a2a;
   --accent: #a3c182;
+  --accent-ink: #15200c;
   --accent-soft: #2a3521;
-  --edge-strong: #c9d6b8;
-  --edge-soft: #6f7b66;
-  --node-text: #10160b;
+  --r-inherits: #7ea3e3;
+  --r-nested: #bb95e0;
+  --r-owns: #74c48a;
+  --r-refers: #e0b25f;
+  --r-uses: #a3acb9;
 }
-html, body { height: 100%; }
 body {
   background: var(--ground);
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.65;
 }
-.app {
-  height: 100%;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: 12px;
-  padding-inline: 16px;
-  padding-block: 12px 16px;
-  box-sizing: border-box;
-}
-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 8px 20px;
-}
-h1 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-wrap: balance;
-}
+.page { padding-inline: 16px; padding-block: 20px 40px; max-width: 1560px; margin: 0 auto; box-sizing: border-box; }
+header.top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; margin-bottom: 14px; }
+h1 { margin: 0; font-size: 24px; letter-spacing: 0.02em; text-wrap: balance; }
 .stats { color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
-.stats code { font-family: var(--font-mono); font-size: 12px; }
-.layout {
-  min-height: 0;
+code, .mono { font-family: var(--font-mono); }
+.stats code { font-size: 12px; }
+
+/* このページについて */
+.about {
   display: grid;
-  grid-template-columns: 250px minmax(0, 1fr) 330px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
+  margin-bottom: 16px;
 }
-.panel {
+.about section {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 14px;
-  overflow: auto;
-  min-height: 0;
-  box-sizing: border-box;
+  padding: 12px 14px;
 }
-.panel h2 {
-  margin: 0 0 8px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
+.about h2 { margin: 0 0 4px; font-size: 13.5px; }
+.about p, .about ol, .about ul { margin: 0; font-size: 13px; color: var(--ink); }
+.about ol, .about ul { padding-left: 1.3em; }
+.about li + li { margin-top: 2px; }
+.about .fine { color: var(--muted); font-size: 12px; margin-top: 6px; }
+
+/* 操作の帯 */
+.toolbar {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: 8px;
 }
-.controls { display: flex; flex-direction: column; gap: 18px; }
-.search { display: flex; gap: 6px; }
+.search { display: flex; gap: 6px; flex: 1 1 260px; max-width: 380px; }
 .search input {
   flex: 1;
   min-width: 0;
   font: 13px var(--font-mono);
-  padding: 7px 9px;
+  padding: 7px 10px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--ground);
   color: var(--ink);
 }
-button, .chip {
+.group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.group-label { font-size: 11.5px; font-weight: 700; color: var(--muted); letter-spacing: 0.06em; margin-right: 2px; }
+button {
   font-family: var(--font-body);
   font-size: 12.5px;
-  border: 1px solid var(--line);
-  background: var(--ground);
   color: var(--ink);
+  background: var(--ground);
+  border: 1px solid var(--line);
   border-radius: 6px;
-  padding: 6px 10px;
+  padding: 5px 10px;
   cursor: pointer;
 }
-button:hover, .chip:hover { border-color: var(--accent); }
-button:focus-visible, .chip:focus-visible, input:focus-visible, label:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
-.edge-types { display: flex; flex-direction: column; gap: 6px; }
-.edge-type {
-  display: grid;
-  grid-template-columns: 18px 44px 1fr auto;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  cursor: pointer;
-}
-.edge-type svg { width: 44px; height: 14px; }
-.edge-type .count { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12px; }
-.edge-type .hint { grid-column: 3 / 5; color: var(--muted); font-size: 11.5px; margin-top: -4px; }
-.modules { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; font-size: 12px; }
-.chip .dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
-.chip[aria-pressed="false"] { opacity: 0.45; }
-.chip .n { color: var(--muted); font-variant-numeric: tabular-nums; }
-.toggle { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; cursor: pointer; }
-.row { display: flex; flex-wrap: wrap; gap: 6px; }
-.canvas-wrap {
-  position: relative;
+button:hover { border-color: var(--accent); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rel-toggle { display: inline-flex; align-items: center; gap: 6px; }
+.rel-toggle .swatch { width: 12px; height: 12px; border-radius: 3px; background: var(--c); }
+.rel-toggle[aria-pressed="false"] { opacity: 0.4; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+/* 本体: 一覧 + 詳細 */
+.body { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 14px; align-items: start; }
+.atlas { columns: 330px; column-gap: 12px; }
+.module {
+  break-inside: avoid;
+  margin-bottom: 12px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
-  min-height: 0;
-  overflow: hidden;
+  padding: 10px 12px 12px;
+  border-top: 4px solid var(--mc);
 }
-#cy { position: absolute; inset: 0; }
-.status {
-  position: absolute;
-  left: 12px;
-  bottom: 10px;
-  font-size: 12px;
-  color: var(--muted);
-  background: var(--surface);
-  padding: 2px 8px;
-  border-radius: 4px;
-  pointer-events: none;
-}
-.detail .empty { color: var(--muted); font-size: 13px; }
-.detail .name {
-  font-family: var(--font-mono);
-  font-size: 17px;
-  font-weight: 600;
-  word-break: break-all;
-  margin: 0 0 6px;
-}
-.badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-.badge {
-  font-size: 11.5px;
-  padding: 1px 8px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--ink);
-}
-.file { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); word-break: break-all; margin-bottom: 12px; }
-.rel { margin-top: 12px; }
-.rel h3 {
-  margin: 0 0 4px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--muted);
-  display: flex;
-  justify-content: space-between;
-}
-.rel ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
-.rel li button {
-  width: 100%;
-  text-align: left;
-  display: flex;
+.module h3 { margin: 0; font-size: 14px; display: flex; justify-content: space-between; gap: 8px; }
+.module h3 .count { color: var(--muted); font-weight: 400; font-size: 12px; font-variant-numeric: tabular-nums; }
+.module .desc { margin: 2px 0 8px; font-size: 12px; color: var(--muted); line-height: 1.55; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  border: none;
-  background: transparent;
-  padding: 3px 6px;
+  gap: 4px;
   font-family: var(--font-mono);
-  font-size: 12.5px;
-  border-radius: 4px;
+  font-size: 11.5px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  transition: opacity 0.15s, background 0.15s;
 }
-.rel li button:hover { background: var(--accent-soft); }
-.rel .dot { width: 8px; height: 8px; border-radius: 2px; flex: none; }
-.notes { color: var(--muted); font-size: 12px; line-height: 1.7; }
-.notes p { margin: 0 0 6px; }
-@media (max-width: 1100px) {
-  .layout { grid-template-columns: 230px minmax(0, 1fr); }
-  .detail { grid-column: 1 / -1; max-height: 40vh; }
+.chip.struct { border-style: dashed; }
+.chip.namespace { border-radius: 999px; font-style: italic; }
+.chip .tag { font-family: var(--font-body); font-style: normal; font-size: 10px; font-weight: 700; padding: 0 4px; border-radius: 3px; background: var(--accent-soft); color: var(--ink); }
+.chip .arrow { font-family: var(--font-body); font-weight: 700; color: var(--c); }
+.chip.rel { background: color-mix(in srgb, var(--c) 18%, var(--raised)); border-color: var(--c); }
+.chip.selected { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.chip.selected .tag { background: color-mix(in srgb, var(--accent-ink) 25%, transparent); color: inherit; }
+.atlas.focusing .chip:not(.rel):not(.selected) { opacity: 0.28; }
+.atlas.tagging .chip:not(.tagged) { opacity: 0.28; }
+.chip.tagged { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+
+/* 詳細 */
+.detail {
+  position: sticky;
+  top: 76px;
+  max-height: calc(100vh - 92px);
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  box-sizing: border-box;
 }
-@media (max-width: 720px) {
-  .app { height: auto; }
-  .layout { grid-template-columns: 1fr; }
-  .canvas-wrap { height: 70vh; }
-  .detail { max-height: none; }
+.detail .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: var(--muted); margin: 0 0 4px; }
+.detail .name { margin: 0; font-family: var(--font-mono); font-size: 18px; font-weight: 600; word-break: break-all; }
+.badges { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0; }
+.badge { font-size: 11.5px; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); }
+.file { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); word-break: break-all; }
+.doc { margin: 8px 0 0; font-size: 13px; }
+.doc.none { color: var(--muted); font-size: 12.5px; }
+.mini {
+  position: relative;
+  height: 300px;
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--raised);
 }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+#mini { position: absolute; inset: 0; }
+.mini-note { font-size: 11.5px; color: var(--muted); margin: 4px 0 0; }
+.rel-group { margin-top: 12px; }
+.rel-group h4 { margin: 0 0 3px; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+.rel-group h4 .swatch { width: 10px; height: 10px; border-radius: 2px; background: var(--c); }
+.rel-group h4 .n { margin-left: auto; color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+.rel-group ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.rel-group li button { font-family: var(--font-mono); font-size: 11.5px; padding: 2px 7px; background: var(--raised); }
+.empty { color: var(--muted); font-size: 13px; }
+
+@media (max-width: 1080px) {
+  .body { grid-template-columns: 1fr; }
+  .detail { position: static; max-height: none; order: -1; }
+  .about { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .chip { transition: none; } }
 </style>
 
-<div class="app">
-  <header>
+<div class="page">
+  <header class="top">
     <h1>Kujata クラス地図</h1>
     <div class="stats" id="stats"></div>
   </header>
-  <div class="layout">
-    <aside class="panel controls" aria-label="表示の設定">
-      <div>
-        <h2>探す</h2>
-        <div class="search">
-          <input id="search" list="names" placeholder="クラス名(例: Scene)" autocomplete="off">
-          <button id="search-go" type="button">移動</button>
-        </div>
-        <datalist id="names"></datalist>
-      </div>
-      <div>
-        <h2>関係の種類</h2>
-        <div class="edge-types" id="edge-types"></div>
-      </div>
-      <div>
-        <h2>表示</h2>
-        <label class="toggle"><input type="checkbox" id="focus-mode"> 選んだクラスと、直接つながるものだけにする</label>
-        <div class="row" style="margin-top:8px">
-          <button id="relayout" type="button">並べ直す</button>
-          <button id="fit" type="button">全体を表示</button>
-        </div>
-      </div>
-      <div>
-        <h2>モジュール(フォルダ)</h2>
-        <div class="modules" id="modules"></div>
-      </div>
-      <div class="notes">
-        <p>ソースを機械的に解析して作った図です。テンプレートの込み入った書き方などは取りこぼすことがあります。</p>
-        <p>名前空間(六角形)は、クラスではなく関数をまとめたものです。</p>
-      </div>
-    </aside>
-    <div class="canvas-wrap">
-      <div id="cy" role="img" aria-label="クラスの関係図"></div>
-      <div class="status" id="status">配置を計算しています…</div>
+
+  <div class="about">
+    <section>
+      <h2>これは何か</h2>
+      <p>KujataEngine(エンジンとゲーム)の<strong>すべてのクラス・構造体</strong>と、関数をまとめた名前空間を、フォルダごとに並べた地図です。クラスを 1 つ選ぶと、それが何を継承し・何を持ち・何を使い・何から使われているかが分かります。</p>
+    </section>
+    <section>
+      <h2>何に使うか</h2>
+      <ul>
+        <li>初めて触る人が、エンジンの全体の形をつかむ</li>
+        <li>クラスを変える前に、影響が及ぶ範囲(「使われている」)を調べる</li>
+        <li>シングルトンやインターフェースがどこにあるかを見て、設計を見直す</li>
+      </ul>
+    </section>
+    <section>
+      <h2>使い方</h2>
+      <ol>
+        <li>クラスの名前をクリックする(または上の欄で検索)</li>
+        <li>関係するクラスが色付きで光り、右に説明・関係図・一覧が出る</li>
+        <li>「関係」のボタンで、見たい種類だけに絞る</li>
+      </ol>
+      <p class="fine">ソースから自動で作った図です(<code>python Tools/class_map/build.py</code>)。テンプレートの込み入った書き方などは取りこぼすことがあります。</p>
+    </section>
+  </div>
+
+  <div class="toolbar" role="toolbar" aria-label="絞り込み">
+    <div class="search">
+      <input id="search" list="names" placeholder="クラス名で探す(例: GameObject)" autocomplete="off" aria-label="クラス名で探す">
+      <button id="search-go" type="button">探す</button>
+      <datalist id="names"></datalist>
     </div>
-    <aside class="panel detail" id="detail" aria-live="polite">
-      <h2>選んだクラス</h2>
-      <p class="empty">図のクラスをクリックすると、継承・持つ・参照・使う・使われる、のすべての関係がここに出ます。</p>
-    </aside>
+    <div class="group" id="rel-toggles"><span class="group-label">関係</span></div>
+    <div class="group seg" id="tag-filter"><span class="group-label">印</span></div>
+  </div>
+
+  <div class="body">
+    <main class="atlas" id="atlas" aria-label="モジュールごとのクラスの一覧"></main>
+    <aside class="detail" id="detail" aria-live="polite"></aside>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/layout-base@2.0.1/layout-base.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/cose-base@2.2.0/cose-base.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/cytoscape-fcose@2.2.0/cytoscape-fcose.js"></script>
 <script>
 const DATA = /*__DATA__*/null;
 
-const EDGE_TYPES = [
-  { key: "inherits", label: "継承", hint: "子 → 親(白抜きの三角)", on: true },
-  { key: "nested", label: "内側の型", hint: "外側 → 内側で定義した型", on: true },
-  { key: "owns", label: "持つ", hint: "値・unique_ptr・コンテナのメンバ(菱形が持ち主)", on: true },
-  { key: "refers", label: "参照する", hint: "ポインタ・参照・ObjectRef のメンバ", on: true },
-  { key: "uses", label: "使う", hint: "メソッドの中で使う・GetInstance など(多いので最初は隠す)", on: false },
+const REL = [
+  { key: "inherits", out: "継承している", in: "継承されている", hint: "子 → 親" },
+  { key: "nested", out: "内側に持つ型", in: "外側のクラス", hint: "外側 → 内側で定義した型" },
+  { key: "owns", out: "持っている", in: "持たれている", hint: "値・unique_ptr・コンテナのメンバ" },
+  { key: "refers", out: "参照している", in: "参照されている", hint: "ポインタ・参照のメンバ" },
+  { key: "uses", out: "使っている", in: "使われている", hint: "メソッドの中で使う・GetInstance など" },
 ];
-const RELATION_LABELS = {
-  out: { inherits: "継承している", nested: "内側に持つ型", owns: "持っている", refers: "参照している", uses: "使っている" },
-  in: { inherits: "継承されている", nested: "外側のクラス", owns: "持たれている", refers: "参照されている", uses: "使われている" },
-};
-// モジュールの色: 明るさを揃えた落ち着いた色(文字は常に暗い色で乗る)
-const MODULE_PALETTE = ["#a9c98e", "#8fc1c9", "#d6b87f", "#c9a0c2", "#9fb2e0", "#e0a38f", "#b5c77a", "#8fd0b0",
-  "#d3c07a", "#b0a4dc", "#e2a9b5", "#94c7e2", "#c8b59a", "#a6d49a", "#d9b0e0", "#a8b8a0", "#e0c29a", "#9ad0c8"];
+const REL_LABEL = { inherits: "継承", nested: "内側の型", owns: "持つ", refers: "参照", uses: "使う" };
+const TAGS = [
+  { key: "", label: "なし" },
+  { key: "singleton", label: "シングルトン", short: "S" },
+  { key: "interface", label: "インターフェース", short: "I" },
+  { key: "namespace", label: "名前空間", short: "" },
+];
+const MODULE_COLORS = ["#7fa35f", "#5f97a3", "#b3914f", "#a2709c", "#6f86c0", "#c07a63", "#8ea449", "#5fab87",
+  "#ad9a45", "#8b7fbf", "#c4838f", "#5f9fc0", "#a08c70", "#79ae6b", "#b184bf", "#88997f"];
 
-const state = {
-  edgeOn: Object.fromEntries(EDGE_TYPES.map(t => [t.key, t.on])),
-  moduleOn: {},
-  selected: null,
-  focus: false,
-  savedPositions: null,
-};
-
-function token(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
-
-const modules = [...new Set(DATA.nodes.map(n => n.module))].sort();
-const moduleColor = Object.fromEntries(modules.map((m, i) => [m, MODULE_PALETTE[i % MODULE_PALETTE.length]]));
-modules.forEach(m => state.moduleOn[m] = true);
 const nodeById = Object.fromEntries(DATA.nodes.map(n => [n.id, n]));
+const describedModules = DATA.modules.map(m => m.name);
+const moduleNames = [...describedModules.filter(m => DATA.nodes.some(n => n.module === m)),
+  ...[...new Set(DATA.nodes.map(n => n.module))].filter(m => !describedModules.includes(m)).sort()];
+const moduleDesc = Object.fromEntries(DATA.modules.map(m => [m.name, m.description]));
+const moduleColor = Object.fromEntries(moduleNames.map((m, i) => [m, MODULE_COLORS[i % MODULE_COLORS.length]]));
 
-function edgeCounts() {
-  const c = {};
-  DATA.edges.forEach(e => c[e.type] = (c[e.type] || 0) + 1);
-  return c;
+const state = { rel: Object.fromEntries(REL.map(r => [r.key, true])), tag: "", selected: null };
+try { const saved = JSON.parse(localStorage.getItem("classmap.rel") || "null"); if (saved) Object.assign(state.rel, saved); } catch (e) {}
+
+const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const richText = s => escapeHtml(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+const displayName = n => n.qualified;
+
+function relationsOf(id) {
+  const out = [], inc = [];
+  DATA.edges.forEach(e => {
+    if (!state.rel[e.type]) return;
+    if (e.source === id && nodeById[e.target]) out.push({ type: e.type, node: nodeById[e.target] });
+    if (e.target === id && nodeById[e.source]) inc.push({ type: e.type, node: nodeById[e.source] });
+  });
+  return { out, inc };
 }
 
 function renderStats() {
   const classes = DATA.nodes.filter(n => n.kind !== "namespace").length;
-  const namespaces = DATA.nodes.length - classes;
+  const singletons = DATA.nodes.filter(n => n.tags.includes("singleton")).length;
   document.getElementById("stats").innerHTML =
-    `${DATA.nodes.length} 個(クラス・構造体 ${classes}、名前空間 ${namespaces})/ 関係 ${DATA.edges.length} 本 / ` +
-    `${DATA.generatedAt} のソースから生成(<code>python Tools/class_map/build.py</code> で作り直せる)`;
+    `クラス・構造体 ${classes} / 名前空間 ${DATA.nodes.length - classes} / 関係 ${DATA.edges.length} 本 / シングルトン ${singletons} / ` +
+    `${DATA.generatedAt} のソースから生成`;
 }
 
-function edgeGlyph(key) {
-  const strong = "var(--edge-strong)", soft = "var(--edge-soft)";
-  const glyphs = {
-    inherits: `<line x1="2" y1="7" x2="32" y2="7" stroke="${strong}" stroke-width="1.6"/><path d="M32 2 L42 7 L32 12 Z" fill="var(--surface)" stroke="${strong}" stroke-width="1.4"/>`,
-    nested: `<circle cx="6" cy="7" r="4" fill="var(--surface)" stroke="${soft}" stroke-width="1.3"/><line x1="10" y1="7" x2="42" y2="7" stroke="${soft}" stroke-width="1.3"/>`,
-    owns: `<path d="M2 7 L8 3 L14 7 L8 11 Z" fill="${strong}"/><line x1="14" y1="7" x2="42" y2="7" stroke="${strong}" stroke-width="1.3"/>`,
-    refers: `<line x1="2" y1="7" x2="34" y2="7" stroke="${soft}" stroke-width="1.3" stroke-dasharray="5 3"/><path d="M34 3 L42 7 L34 11" fill="none" stroke="${soft}" stroke-width="1.3"/>`,
-    uses: `<line x1="2" y1="7" x2="34" y2="7" stroke="${soft}" stroke-width="1.2" stroke-dasharray="1.5 3"/><path d="M34 3.5 L41 7 L34 10.5" fill="none" stroke="${soft}" stroke-width="1.2"/>`,
-  };
-  return `<svg viewBox="0 0 44 14" aria-hidden="true">${glyphs[key]}</svg>`;
-}
-
-function renderEdgeTypes() {
-  const counts = edgeCounts();
-  const box = document.getElementById("edge-types");
-  box.innerHTML = EDGE_TYPES.map(t => `
-    <label class="edge-type">
-      <input type="checkbox" id="edge-${t.key}" ${state.edgeOn[t.key] ? "checked" : ""}>
-      ${edgeGlyph(t.key)}
-      <span>${t.label}</span><span class="count">${counts[t.key] || 0}</span>
-      <span class="hint">${t.hint}</span>
-    </label>`).join("");
-  EDGE_TYPES.forEach(t => document.getElementById(`edge-${t.key}`).addEventListener("change", ev => {
-    state.edgeOn[t.key] = ev.target.checked;
-    applyVisibility();
-  }));
-}
-
-function renderModules() {
+function renderToolbar() {
   const counts = {};
-  DATA.nodes.forEach(n => counts[n.module] = (counts[n.module] || 0) + 1);
-  const box = document.getElementById("modules");
-  box.innerHTML = modules.map(m => `
-    <button type="button" class="chip" aria-pressed="true" data-module="${m}">
-      <span class="dot" style="background:${moduleColor[m]}"></span>${m}<span class="n">${counts[m]}</span>
-    </button>`).join("");
-  box.querySelectorAll(".chip").forEach(chip => chip.addEventListener("click", () => {
-    const m = chip.dataset.module;
-    state.moduleOn[m] = !state.moduleOn[m];
-    chip.setAttribute("aria-pressed", String(state.moduleOn[m]));
-    applyVisibility();
-  }));
-}
-
-function renderNames() {
-  document.getElementById("names").innerHTML = DATA.nodes.map(n => `<option value="${n.qualified}">`).join("");
-}
-
-function buildElements() {
-  const elements = [];
-  modules.forEach(m => elements.push({ group: "nodes", data: { id: "module:" + m, label: m, isModule: true, color: moduleColor[m] } }));
-  DATA.nodes.forEach(n => {
-    const label = n.kind === "namespace" ? n.name : n.qualified;
-    elements.push({ group: "nodes", data: { id: n.id, label, parent: "module:" + n.module, color: moduleColor[n.module], kind: n.kind, module: n.module } });
+  DATA.edges.forEach(e => counts[e.type] = (counts[e.type] || 0) + 1);
+  const rel = document.getElementById("rel-toggles");
+  REL.forEach(r => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "rel-toggle";
+    b.style.setProperty("--c", `var(--r-${r.key})`);
+    b.setAttribute("aria-pressed", String(state.rel[r.key]));
+    b.title = `${r.hint}(${counts[r.key] || 0} 本)`;
+    b.innerHTML = `<span class="swatch"></span>${REL_LABEL[r.key]}`;
+    b.addEventListener("click", () => {
+      state.rel[r.key] = !state.rel[r.key];
+      b.setAttribute("aria-pressed", String(state.rel[r.key]));
+      try { localStorage.setItem("classmap.rel", JSON.stringify(state.rel)); } catch (e) {}
+      if (state.selected) select(state.selected, false);
+    });
+    rel.appendChild(b);
   });
-  DATA.edges.forEach((e, i) => elements.push({ group: "edges", data: { id: "e" + i, source: e.source, target: e.target, type: e.type } }));
-  return elements;
-}
-
-function cyStyle() {
-  const strong = token("--edge-strong"), soft = token("--edge-soft"), ink = token("--ink"), accent = token("--accent");
-  const surface = token("--surface"), nodeText = token("--node-text"), muted = token("--muted");
-  return [
-    { selector: "node", style: {
-      "label": "data(label)", "font-family": "JetBrains Mono, Consolas, monospace", "font-size": 11,
-      "color": nodeText, "text-valign": "center", "text-halign": "center",
-      "shape": "round-rectangle", "background-color": "data(color)", "border-width": 1, "border-color": strong,
-      "width": "label", "height": 22, "padding": "7px",
-    } },
-    { selector: "node[kind = 'struct']", style: { "border-style": "dashed", "background-opacity": 0.75 } },
-    { selector: "node[kind = 'namespace']", style: { "shape": "hexagon", "padding": "10px", "border-width": 1.5 } },
-    { selector: "node[?isModule]", style: {
-      "label": "data(label)", "font-family": "Noto Sans JP, sans-serif", "font-size": 15, "font-weight": 700,
-      "color": ink, "text-valign": "top", "text-halign": "center", "text-margin-y": -6,
-      "background-color": "data(color)", "background-opacity": 0.13, "border-color": "data(color)", "border-width": 1.5,
-      "shape": "round-rectangle", "padding": "18px",
-    } },
-    { selector: "edge", style: { "curve-style": "bezier", "width": 1.2, "line-color": soft, "target-arrow-color": soft, "source-arrow-color": soft, "arrow-scale": 0.9 } },
-    { selector: "edge[type = 'inherits']", style: { "width": 1.7, "line-color": strong, "target-arrow-shape": "triangle", "target-arrow-fill": "hollow", "target-arrow-color": strong, "arrow-scale": 1.3 } },
-    { selector: "edge[type = 'owns']", style: { "line-color": strong, "source-arrow-shape": "diamond", "source-arrow-color": strong, "arrow-scale": 1.1 } },
-    { selector: "edge[type = 'refers']", style: { "line-style": "dashed", "target-arrow-shape": "vee" } },
-    { selector: "edge[type = 'uses']", style: { "line-style": "dotted", "width": 0.9, "target-arrow-shape": "vee", "opacity": 0.55, "arrow-scale": 0.7 } },
-    { selector: "edge[type = 'nested']", style: { "source-arrow-shape": "circle", "source-arrow-fill": "hollow", "width": 1 } },
-    { selector: ".faded", style: { "opacity": 0.1 } },
-    { selector: "node.hl", style: { "border-width": 2, "border-color": accent } },
-    { selector: "edge.hl", style: { "opacity": 1, "width": 2, "line-color": accent, "target-arrow-color": accent, "source-arrow-color": accent } },
-    { selector: "node:selected", style: { "border-width": 3, "border-color": accent, "underlay-color": accent, "underlay-opacity": 0.25, "underlay-padding": 5 } },
-    { selector: "node[?isModule]:selected", style: { "border-width": 1.5, "underlay-opacity": 0 } },
-  ];
-}
-
-const hasFcose = typeof cytoscapeFcose !== "undefined";
-if (hasFcose) cytoscape.use(cytoscapeFcose);
-
-const cy = cytoscape({
-  container: document.getElementById("cy"),
-  elements: buildElements(),
-  style: cyStyle(),
-  wheelSensitivity: 0.25,
-  minZoom: 0.05,
-  maxZoom: 3,
-  boxSelectionEnabled: false,
-});
-
-function layoutOptions(eles) {
-  if (hasFcose) {
-    return { name: "fcose", eles, quality: "default", animate: false, randomize: true, nodeDimensionsIncludeLabels: true,
-      packComponents: true, nodeRepulsion: 9000, idealEdgeLength: 70, edgeElasticity: 0.35, nestingFactor: 0.12,
-      gravity: 0.3, gravityCompound: 1.2, gravityRangeCompound: 1.4, numIter: 3000, tile: true, tilingPaddingVertical: 14, tilingPaddingHorizontal: 14 };
-  }
-  return { name: "cose", eles, animate: false, nodeDimensionsIncludeLabels: true, nodeRepulsion: 9000, idealEdgeLength: 70 };
-}
-
-function setStatus(text) {
-  const el = document.getElementById("status");
-  el.textContent = text;
-  el.hidden = !text;
-}
-
-function runLayout(eles, fitTo) {
-  setStatus("配置を計算しています…");
-  // 描画が一度止まるので、文字を出してから重い計算に入る
-  requestAnimationFrame(() => setTimeout(() => {
-    const layout = eles.layout(layoutOptions(eles));
-    layout.one("layoutstop", () => {
-      setStatus("");
-      // モジュールの枠の大きさが決まるのを 1 フレーム待ってから全体に合わせる
-      requestAnimationFrame(() => cy.fit(fitTo || visibleElements(), 30));
+  const tagBox = document.getElementById("tag-filter");
+  TAGS.forEach(t => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = t.label;
+    b.setAttribute("aria-pressed", String(state.tag === t.key));
+    b.addEventListener("click", () => {
+      state.tag = t.key;
+      tagBox.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      applyTagFilter();
     });
-    layout.run();
-  }, 30));
+    tagBox.appendChild(b);
+  });
+  document.getElementById("names").innerHTML = DATA.nodes.map(n => `<option value="${escapeHtml(n.qualified)}">`).join("");
 }
 
-function visibleElements() {
-  return cy.elements().filter(el => el.style("display") !== "none");
+function renderAtlas() {
+  const atlas = document.getElementById("atlas");
+  atlas.innerHTML = moduleNames.map(m => {
+    const nodes = DATA.nodes.filter(n => n.module === m).sort((a, b) => a.qualified.localeCompare(b.qualified));
+    const chips = nodes.map(n => {
+      const kind = n.kind === "namespace" ? "namespace" : n.kind;
+      const tags = n.tags.map(t => TAGS.find(x => x.key === t)).filter(t => t && t.short).map(t => `<span class="tag" title="${t.label}">${t.short}</span>`).join("");
+      return `<button type="button" class="chip ${kind}" data-id="${escapeHtml(n.id)}" title="${escapeHtml(n.doc || n.qualified)}"><span class="arrow"></span>${escapeHtml(displayName(n))}${tags}</button>`;
+    }).join("");
+    return `<section class="module" style="--mc:${moduleColor[m]}">
+      <h3><span>${escapeHtml(m)}</span><span class="count">${nodes.length}</span></h3>
+      <p class="desc">${escapeHtml(moduleDesc[m] || "")}</p>
+      <div class="chips">${chips}</div>
+    </section>`;
+  }).join("");
+  atlas.addEventListener("click", ev => {
+    const chip = ev.target.closest(".chip");
+    if (chip) select(chip.dataset.id, false);
+  });
 }
 
-function applyVisibility() {
-  cy.batch(() => {
-    cy.nodes().forEach(n => {
-      const module = n.data("isModule") ? n.data("label") : n.data("module");
-      n.style("display", state.moduleOn[module] ? "element" : "none");
-    });
-    cy.edges().forEach(e => {
-      const on = state.edgeOn[e.data("type")] && state.moduleOn[nodeById[e.data("source")].module] && state.moduleOn[nodeById[e.data("target")].module];
-      e.style("display", on ? "element" : "none");
-    });
-    if (state.focus && state.selected) {
-      const node = cy.getElementById(state.selected);
-      const keep = neighborhood(node);
-      cy.nodes().forEach(n => { if (!n.data("isModule") && !keep.contains(n)) n.style("display", "none"); });
-      cy.nodes("[?isModule]").forEach(m => { if (m.children().filter(c => c.style("display") !== "none").empty()) m.style("display", "none"); });
+function applyTagFilter() {
+  const atlas = document.getElementById("atlas");
+  atlas.classList.toggle("tagging", !!state.tag);
+  atlas.querySelectorAll(".chip").forEach(chip => {
+    const n = nodeById[chip.dataset.id];
+    const match = state.tag === "namespace" ? n.kind === "namespace" : n.tags.includes(state.tag);
+    chip.classList.toggle("tagged", !!state.tag && match);
+  });
+}
+
+function highlightAtlas(id, rels) {
+  const atlas = document.getElementById("atlas");
+  atlas.classList.toggle("focusing", !!id);
+  const byId = {};
+  rels.out.forEach(r => { byId[r.node.id] = byId[r.node.id] || r; });
+  rels.inc.forEach(r => { byId[r.node.id] = byId[r.node.id] || { ...r, incoming: true }; });
+  atlas.querySelectorAll(".chip").forEach(chip => {
+    const cid = chip.dataset.id;
+    const r = byId[cid];
+    chip.classList.toggle("selected", cid === id);
+    chip.classList.toggle("rel", !!r && cid !== id);
+    chip.style.removeProperty("--c");
+    chip.querySelector(".arrow").textContent = "";
+    if (r && cid !== id) {
+      chip.style.setProperty("--c", `var(--r-${r.type})`);
+      chip.querySelector(".arrow").textContent = r.incoming ? "←" : "→";
     }
   });
-  if (state.selected) highlight(cy.getElementById(state.selected));
 }
 
-function neighborhood(node) {
-  const edges = node.connectedEdges().filter(e => state.edgeOn[e.data("type")]);
-  return edges.connectedNodes().union(node);
-}
+// --- 選んだクラスの周りの関係図(動かせない。クリックでそのクラスへ移る) ---
+let mini = null;
+function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 
-function highlight(node) {
-  cy.batch(() => {
-    cy.elements().removeClass("faded hl");
-    if (!node || node.empty()) return;
-    const edges = node.connectedEdges().filter(e => e.style("display") !== "none");
-    const keep = edges.connectedNodes().union(node);
-    cy.elements().not(keep).not(edges).not(keep.parents()).addClass("faded");
-    edges.addClass("hl");
-    keep.not(node).addClass("hl");
+function miniStyle() {
+  const ink = cssVar("--ink"), line = cssVar("--line"), raised = cssVar("--raised"), accent = cssVar("--accent"), accentInk = cssVar("--accent-ink");
+  const style = [
+    { selector: "node", style: { "label": "data(label)", "font-family": "JetBrains Mono, Consolas, monospace", "font-size": 10, "color": ink,
+      "shape": "round-rectangle", "width": "label", "height": 18, "padding": "5px", "background-color": raised, "border-width": 1, "border-color": line,
+      "text-valign": "center", "text-halign": "center" } },
+    { selector: "node.center", style: { "background-color": accent, "color": accentInk, "border-color": accent, "font-size": 12, "font-weight": 600, "height": 24 } },
+    { selector: "edge", style: { "width": 1.3, "curve-style": "straight", "arrow-scale": 0.8, "target-distance-from-node": 2, "source-distance-from-node": 2 } },
+  ];
+  REL.forEach(r => {
+    const c = cssVar(`--r-${r.key}`);
+    style.push({ selector: `edge[type = '${r.key}']`, style: { "line-color": c, "target-arrow-color": c, "source-arrow-color": c } });
+    style.push({ selector: `node[rel = '${r.key}']`, style: { "border-color": c, "border-width": 1.5 } });
   });
+  style.push({ selector: "edge[type = 'inherits']", style: { "target-arrow-shape": "triangle", "target-arrow-fill": "hollow", "width": 1.6 } });
+  style.push({ selector: "edge[type = 'owns']", style: { "source-arrow-shape": "diamond" } });
+  style.push({ selector: "edge[type = 'refers']", style: { "line-style": "dashed", "target-arrow-shape": "vee" } });
+  style.push({ selector: "edge[type = 'uses']", style: { "line-style": "dotted", "target-arrow-shape": "vee" } });
+  style.push({ selector: "edge[type = 'nested']", style: { "source-arrow-shape": "circle", "source-arrow-fill": "hollow" } });
+  return style;
 }
 
-function renderDetail(id) {
+function renderMini(id, rels) {
+  const container = document.getElementById("mini");
+  if (!container || typeof cytoscape === "undefined") return;
+  // 関係の種類ごとに、円の上で区画を分けて並べる(同じ種類が固まって読みやすい)
+  const neighbors = [];
+  const seen = new Set();
+  const order = ["inherits", "nested", "owns", "refers", "uses"];
+  for (const type of order) {
+    for (const r of rels.out.filter(x => x.type === type)) if (!seen.has(r.node.id)) { seen.add(r.node.id); neighbors.push({ ...r, dir: "out" }); }
+    for (const r of rels.inc.filter(x => x.type === type)) if (!seen.has(r.node.id)) { seen.add(r.node.id); neighbors.push({ ...r, dir: "in" }); }
+  }
+  const radius = Math.max(120, neighbors.length * 26);
+  const elements = [{ data: { id: "c", label: nodeById[id].name }, classes: "center", position: { x: 0, y: 0 } }];
+  neighbors.forEach((r, i) => {
+    const angle = -Math.PI / 2 + (i / Math.max(neighbors.length, 1)) * Math.PI * 2;
+    elements.push({ data: { id: "n" + i, label: r.node.name, target: r.node.id, rel: r.type }, position: { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius } });
+    elements.push({ data: { id: "e" + i, source: r.dir === "out" ? "c" : "n" + i, target: r.dir === "out" ? "n" + i : "c", type: r.type } });
+  });
+  if (mini) mini.destroy();
+  mini = cytoscape({
+    container, elements, style: miniStyle(), layout: { name: "preset", padding: 20 },
+    autoungrabify: true, boxSelectionEnabled: false, userPanningEnabled: true, userZoomingEnabled: true, wheelSensitivity: 0.3, minZoom: 0.2, maxZoom: 2.5,
+  });
+  mini.on("tap", "node", ev => { const t = ev.target.data("target"); if (t) select(t, true); });
+  mini.on("mouseover", "node", () => { container.style.cursor = "pointer"; });
+  mini.on("mouseout", "node", () => { container.style.cursor = ""; });
+}
+
+function renderDetail(id, rels) {
   const box = document.getElementById("detail");
   const n = nodeById[id];
   if (!n) {
-    box.innerHTML = `<h2>選んだクラス</h2><p class="empty">図のクラスをクリックすると、継承・持つ・参照・使う・使われる、のすべての関係がここに出ます。</p>`;
+    box.innerHTML = `<p class="eyebrow">選んだクラス</p><p class="empty">左の一覧からクラスをクリックすると、説明と関係がここに出ます。</p>`;
     return;
   }
   const kindLabel = { class: "class", struct: "struct", namespace: "名前空間(関数の集まり)" }[n.kind] || n.kind;
+  const tagLabels = n.tags.map(t => (TAGS.find(x => x.key === t) || {}).label).filter(Boolean);
   const groups = [];
-  for (const dir of ["out", "in"]) {
-    for (const t of EDGE_TYPES) {
-      const list = DATA.edges.filter(e => e.type === t.key && (dir === "out" ? e.source === id : e.target === id))
-        .map(e => nodeById[dir === "out" ? e.target : e.source]).filter(Boolean)
-        .sort((a, b) => a.qualified.localeCompare(b.qualified));
-      if (list.length) groups.push({ title: RELATION_LABELS[dir][t.key], list });
-    }
-  }
+  REL.forEach(r => {
+    const outs = rels.out.filter(x => x.type === r.key).map(x => x.node);
+    const ins = rels.inc.filter(x => x.type === r.key).map(x => x.node);
+    if (outs.length) groups.push({ key: r.key, title: `${r.out} →`, list: outs });
+    if (ins.length) groups.push({ key: r.key, title: `← ${r.in}`, list: ins });
+  });
+  const total = new Set([...rels.out, ...rels.inc].map(r => r.node.id)).size;
   box.innerHTML = `
-    <h2>選んだクラス</h2>
-    <p class="name">${n.qualified}</p>
-    <div class="badges"><span class="badge">${kindLabel}</span><span class="badge">${n.module}</span></div>
-    <div class="file">${n.file}:${n.line}</div>
-    ${groups.length ? "" : `<p class="empty">解析で見つかった関係はありません。</p>`}
+    <p class="eyebrow">選んだクラス</p>
+    <h2 class="name">${escapeHtml(n.qualified)}</h2>
+    <div class="badges">
+      <span class="badge">${kindLabel}</span><span class="badge">${escapeHtml(n.module)}</span>
+      ${tagLabels.map(t => `<span class="badge">${t}</span>`).join("")}
+    </div>
+    <div class="file">${escapeHtml(n.file)}:${n.line}</div>
+    ${n.doc ? `<p class="doc">${richText(n.doc)}</p>` : `<p class="doc none">ソースに説明のコメントがありません。</p>`}
+    <div class="mini"><div id="mini" role="img" aria-label="${escapeHtml(n.qualified)} の周りの関係図"></div></div>
+    <p class="mini-note">つながっているクラス ${total} 個。ホイールで拡大・ドラッグで移動、名前のクリックでそのクラスへ移ります。</p>
+    ${groups.length ? "" : `<p class="empty">表示中の種類の関係はありません。</p>`}
     ${groups.map(g => `
-      <section class="rel">
-        <h3><span>${g.title}</span><span>${g.list.length}</span></h3>
-        <ul>${g.list.map(o => `<li><button type="button" data-id="${o.id}"><span class="dot" style="background:${moduleColor[o.module]}"></span>${o.qualified}</button></li>`).join("")}</ul>
+      <section class="rel-group" style="--c:var(--r-${g.key})">
+        <h4><span class="swatch"></span>${g.title}<span class="n">${g.list.length}</span></h4>
+        <ul>${g.list.sort((a, b) => a.qualified.localeCompare(b.qualified)).map(o => `<li><button type="button" data-id="${escapeHtml(o.id)}">${escapeHtml(o.qualified)}</button></li>`).join("")}</ul>
       </section>`).join("")}`;
   box.querySelectorAll("button[data-id]").forEach(b => b.addEventListener("click", () => select(b.dataset.id, true)));
+  renderMini(id, rels);
 }
 
-function select(id, center) {
-  const node = cy.getElementById(id);
-  if (node.empty() || node.data("isModule")) return;
+function select(id, scrollAtlas) {
+  if (!nodeById[id]) return;
   state.selected = id;
-  cy.$(":selected").unselect();
-  node.select();
-  if (state.focus) {
-    applyVisibility();
-    runLayout(visibleElements(), visibleElements());
-  } else {
-    highlight(node);
-    if (center) cy.animate({ center: { eles: node }, zoom: Math.max(cy.zoom(), 0.9) }, { duration: 250 });
-  }
-  renderDetail(id);
+  const rels = relationsOf(id);
+  highlightAtlas(id, rels);
+  renderDetail(id, rels);
+  const chip = document.querySelector(`.chip[data-id="${CSS.escape(id)}"]`);
+  if (scrollAtlas && chip) chip.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  try { history.replaceState(null, "", "#" + encodeURIComponent(id)); } catch (e) {}
 }
 
-function clearSelection() {
-  state.selected = null;
-  cy.$(":selected").unselect();
-  highlight(null);
-  renderDetail(null);
-  if (state.focus) {
-    applyVisibility();
-    restorePositions();
-  }
-}
-
-function savePositions() {
-  state.savedPositions = {};
-  cy.nodes().forEach(n => state.savedPositions[n.id()] = { ...n.position() });
-}
-
-function restorePositions() {
-  if (!state.savedPositions) return;
-  cy.batch(() => cy.nodes().forEach(n => { const p = state.savedPositions[n.id()]; if (p && !n.isParent()) n.position(p); }));
-  cy.fit(visibleElements(), 30);
-}
-
-cy.on("tap", "node", ev => { if (!ev.target.data("isModule")) select(ev.target.id(), false); });
-cy.on("tap", ev => { if (ev.target === cy) clearSelection(); });
-
-document.getElementById("focus-mode").addEventListener("change", ev => {
-  state.focus = ev.target.checked;
-  if (state.focus) {
-    savePositions();
-    applyVisibility();
-    if (state.selected) runLayout(visibleElements(), visibleElements());
-  } else {
-    applyVisibility();
-    restorePositions();
-  }
-});
-document.getElementById("relayout").addEventListener("click", () => { runLayout(visibleElements()); });
-document.getElementById("fit").addEventListener("click", () => cy.fit(visibleElements(), 30));
-
-function goToSearch() {
+function search() {
   const q = document.getElementById("search").value.trim().toLowerCase();
   if (!q) return;
   const hit = DATA.nodes.find(n => n.qualified.toLowerCase() === q) || DATA.nodes.find(n => n.name.toLowerCase() === q)
     || DATA.nodes.find(n => n.qualified.toLowerCase().includes(q));
-  if (hit) {
-    if (!state.moduleOn[hit.module]) {
-      state.moduleOn[hit.module] = true;
-      document.querySelector(`.chip[data-module="${CSS.escape(hit.module)}"]`).setAttribute("aria-pressed", "true");
-      applyVisibility();
-    }
-    select(hit.id, true);
-  } else {
-    setStatus(`「${q}」は見つかりませんでした`);
-    setTimeout(() => setStatus(""), 2000);
-  }
+  if (hit) select(hit.id, true);
+  else document.getElementById("search").setCustomValidity("見つかりませんでした"), document.getElementById("search").reportValidity();
 }
-document.getElementById("search-go").addEventListener("click", goToSearch);
-document.getElementById("search").addEventListener("keydown", ev => { if (ev.key === "Enter") goToSearch(); });
+document.getElementById("search-go").addEventListener("click", search);
+document.getElementById("search").addEventListener("keydown", ev => { if (ev.key === "Enter") search(); });
+document.getElementById("search").addEventListener("input", ev => ev.target.setCustomValidity(""));
+document.addEventListener("keydown", ev => {
+  if (ev.key === "Escape") {
+    state.selected = null;
+    highlightAtlas(null, { out: [], inc: [] });
+    renderDetail(null);
+  }
+});
 
-// テーマ(OS の設定・ビューアの切り替え)に合わせて図の色も変える
-const refreshStyle = () => cy.style(cyStyle());
-window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", refreshStyle);
-new MutationObserver(refreshStyle).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-
-window.addEventListener("resize", () => cy.resize());
+// テーマが変わったら関係図の色も合わせる
+const refreshMini = () => { if (mini) mini.style(miniStyle()); };
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", refreshMini);
+new MutationObserver(refreshMini).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
 renderStats();
-renderEdgeTypes();
-renderModules();
-renderNames();
-applyVisibility();
-runLayout(visibleElements());
+renderToolbar();
+renderAtlas();
+// 最初は中心のクラス(URL の #名前 があればそれ)を選んだ状態で開く
+let initial = "Scene";
+try { const h = decodeURIComponent(location.hash.slice(1)); if (nodeById[h]) initial = h; } catch (e) {}
+select(initial, false);
 </script>
