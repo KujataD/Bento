@@ -1,4 +1,5 @@
 #include "HierarchyWindow.h"
+#include "EditorStyle.h"
 
 #include "../../externals/imgui/imgui.h"
 #include "../components/VolumeComponent.h"
@@ -446,7 +447,7 @@ void HierarchyWindow::DrawObject(Scene& scene, GameObject* gameObject, GameObjec
 		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
 		++pushedTextColorCount;
 	} else if (gameObject->IsPrefabInstance()) {
-		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.47f, 0.74f, 0.68f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_Text, EditorStyle::PrefabTextColor());
 		++pushedTextColorCount;
 	}
 

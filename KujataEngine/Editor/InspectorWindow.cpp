@@ -1,4 +1,5 @@
 #include "InspectorWindow.h"
+#include "EditorStyle.h"
 
 #include "../../externals/imgui/imgui.h"
 #include "../../externals/imsearch/imsearch.h"
@@ -170,7 +171,7 @@ void InspectorWindow::Draw(ProjectWindow& projectWindow, bool* pOpen) {
 	if (selected->IsPrefabInstance()) {
 		ImGui::Separator();
 		GameObject* prefabRoot = PrefabAsset::FindPrefabInstanceRoot(*scene, *selected);
-		ImGui::TextColored(ImVec4(0.47f, 0.74f, 0.68f, 1.0f), "Prefab Instance");
+		ImGui::TextColored(EditorStyle::PrefabTextColor(), "Prefab Instance");
 		ImGui::TextWrapped("%s", selected->GetPrefabAssetPath().c_str());
 
 		if (prefabRoot && prefabRoot != selected) {

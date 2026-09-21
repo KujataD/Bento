@@ -28,6 +28,7 @@ exe と GameModule.dll は同じ構成(Debug/Release)でビルドすること。
 ### エディタの見た目
 
 - 配色はセージグリーンで統一している(`KujataEngine/Editor/EditorStyle.cpp`)。描画先が sRGB なので、書いた値より画面では明るく出る
+- プレハブ(Hierarchy のインスタンス名・Project のプレハブファイル・Inspector の表示)は原色の緑の文字で出る(`EditorStyle::PrefabTextColor()`)
 
 ## 新しいゲームを作る
 

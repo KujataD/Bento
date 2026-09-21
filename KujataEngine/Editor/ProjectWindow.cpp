@@ -1,4 +1,5 @@
 #include "ProjectWindow.h"
+#include "EditorStyle.h"
 
 #include "AssetDatabase.h"
 #include "EditorApplication.h"
@@ -427,7 +428,7 @@ void ProjectWindow::DrawItem(ProjectItem& item, int itemIndex) {
 		isSelectedProjectAsset = NormalizePath(EditorSelection::GetInstance()->GetSelectedAssetPath()) == item.absolutePath;
 	}
 	if (isPrefabFile) {
-		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.47f, 0.74f, 0.68f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_Text, EditorStyle::PrefabTextColor());
 	} else if (isMaterialFile) {
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.86f, 0.80f, 0.48f, 1.0f));
 	}
