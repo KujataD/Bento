@@ -29,6 +29,7 @@ exe と GameModule.dll は同じ構成(Debug/Release)でビルドすること。
 
 - ウィンドウのドッキング配置・位置・大きさと、各ウィンドウを開いているか閉じているか(Window メニュー)は `KujataEngine/imgui.ini` に保存され、次回起動時に戻る(人ごとに違うので git 管理外)
 - 初期配置に戻すときは Window → Reset Layout。`imgui.ini` を消して起動しても初期配置になる
+- Inspector のコンポーネントの項目(Transform など)は最初は閉じている。見出しをクリックで開く
 
 ### エディタの見た目
 

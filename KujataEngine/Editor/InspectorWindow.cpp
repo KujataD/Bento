@@ -228,7 +228,8 @@ void InspectorWindow::Draw(ProjectWindow& projectWindow, bool* pOpen) {
 		}
 
 		ImGui::PushID(component.get());
-		bool headerOpen = ImGui::CollapsingHeader(component->GetTypeName(), ImGuiTreeNodeFlags_DefaultOpen);
+		// 項目は最初は閉じておく(開いた状態は同じComponentを選んでいる間だけImGuiが覚えている)。
+		bool headerOpen = ImGui::CollapsingHeader(component->GetTypeName());
 
 		// コンポーネントヘッダーの右クリックでRemove Componentを提供(常時ボタン表示をやめて隠蔽)。
 		if (ImGui::BeginPopupContextItem("ComponentContextMenu")) {
