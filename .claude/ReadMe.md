@@ -143,6 +143,17 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - ゲームのコードから: `OceanComponent::TryGetSurfaceHeight(シーン, x, z, 高さ)`(`components/OceanComponent.h`)。海の上なら true と海面の高さを返す(Follow Camera ならどこでも海の上)。描かれている面と同じ高さ(頂点の間は三角形の上の高さ)なので、見た目とずれない。着水・水しぶき・泳ぎの判定などに使う
 - 船の航跡は TrailRendererComponent に泡のマテリアルを付けて海面の少し上に引く、着水のしぶきは ParticleSystemComponent の `EmitAt` で出す(どちらも既存の機能)
 
+### 丸影(BlobShadowComponent)
+
+キャラクターや敵に **BlobShadowComponent** を付けるだけで、真下の地面・海面に丸い影が落ちる(風のタクト / A Short Hike の影)。ジャンプ中や空中の敵が「どこの真上にいるか」を分かりやすくするためのもの。
+
+- 影が落ちるのは **Collider を持つ物(トリガーは除く)と海(OceanComponent)**。見た目だけのモデルには落ちない(地面には Collider を付ける)
+- 影は格子の点ごとに真下の地面へ置くので、波・斜面・段差に沿って曲がり、箱や崖の縁で切れる(Edge Drop より下がる場所には描かない)
+- 地面から離れるほど小さく・薄くなり、Max Distance で消える(Size At Max / Opacity At Max)
+- 主な設定: Size(直径)・Color・Opacity・Steps(縁の段。1=くっきりした円、2=濃い芯+薄い縁)・Start Height(地面を探し始める高さ。足元が原点の物は少し上に)・Resolution(格子の細かさ)
+- **Show Debug** で地面を探す線が出る(黄=地面が見つかった、赤=見つからない)
+- ゲームのコードから `HasGround()` / `GetGroundHeight()` で、真下の地面の高さも分かる(着地の予告などに)
+
 ### 速い物の当たり判定(SphereCast)
 
 `SphereCast(シーン, 前の位置, 今の位置, 半径, 結果, 無視する物)`(`scene/PhysicsQuery.h`)で、球を線分に沿って動かしたときに最初に当たる Collider を調べられる。弾・水弾のように 1 フレームで大きく動く物に使う(点で調べると薄い物をすり抜けるため)。
