@@ -590,6 +590,12 @@ void Model::Draw(const WorldTransform& worldTransform, const Camera& camera, Fil
 	// 自作シェーダーに渡す時間(既定は見た目用の実時間。一時停止や時間スケールでは止まらない)。
 	const float shaderTime = shaderTimeOverride_ >= 0.0f ? shaderTimeOverride_ : Time::GetRealTimeSinceStartup();
 
+	// 不透明物の深度のコピー(RootParameter[9]: t3)。半透明の描画中だけ本物が入り、それ以外は白(=いちばん遠い)。
+	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
+	commandList->SetGraphicsRootDescriptorTable(
+	    9, dxCommon->HasCapturedSceneDepth() ? dxCommon->GetCapturedSceneDepthSrvHandle()
+	                                         : TextureManager::GetInstance()->GetSrvHandle(TextureManager::GetInstance()->GetDefaultWhiteTexture()));
+
 	// 全サブメッシュ共通のCBufferは1回だけセットする。
 	// WVP・WorldCBuffer（RootParameter[1]: VertexShader, b0）
 	commandList->SetGraphicsRootConstantBufferView(1, worldTransform.GetConstBuffer()->GetGPUVirtualAddress());

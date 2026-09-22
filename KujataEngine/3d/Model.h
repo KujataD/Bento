@@ -1,6 +1,8 @@
 #pragma once
 
+#include <algorithm>
 #include <d3d12.h>
+#include <iterator>
 #include <string>
 #include <vector>
 #include <wrl.h>
@@ -28,7 +30,10 @@ struct ShaderParamsData {
 	float time = 0.0f;       // 起動からの秒数(描くたびに書く)
 	float curveLength = 0.0f; // SplineRendererComponent の曲線の全長(それ以外は0)。u を長さで割れば 0〜1 の位置になる
 	float userValue = 0.0f;   // コンポーネントからシェーダーへ渡す、オブジェクトごとの自由な値(既定0。意味は各シェーダーが決める)
-	float userValue2 = 0.0f;  // 同じく2つめ(OceanComponent は海の基準の高さを入れる)
+	float userValue2 = 0.0f;  // 同じく2つめ
+	// コンポーネントからシェーダーへ渡す、オブジェクトごとの値(float4 × 12)。params はマテリアル(同じマテリアルの物で共通)、
+	// こちらはオブジェクトごと。意味は各シェーダーが決める(例: OceanComponent の波と見た目の設定)。
+	Vector4 objectParams[12] = {};
 };
 
 /// <summary>
@@ -159,6 +164,15 @@ public:
 		for (SubMesh& subMesh : subMeshes_) {
 			if (subMesh.shaderParamsMap) {
 				subMesh.shaderParamsMap->userValue = value;
+			}
+		}
+	}
+	/// <summary>自作シェーダーへ渡す、オブジェクトごとの float4(gShaderParams.objectParams[0..11])。先頭から count 個を書く。</summary>
+	void SetShaderObjectParams(const Vector4* values, size_t count) {
+		count = (std::min)(count, std::size(ShaderParamsData{}.objectParams));
+		for (SubMesh& subMesh : subMeshes_) {
+			if (subMesh.shaderParamsMap) {
+				std::copy(values, values + count, subMesh.shaderParamsMap->objectParams);
 			}
 		}
 	}

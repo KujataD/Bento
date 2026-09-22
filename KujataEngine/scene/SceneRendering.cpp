@@ -28,12 +28,18 @@ void DrawGameObjectsSorted(const std::vector<std::unique_ptr<GameObject>>& gameO
 	// 毎フレームの確保を避けるため使い回す(描画は1スレッドなのでstaticでよい)。
 	static std::vector<Component*> transparentComponents;
 	static std::vector<std::pair<float, Component*>> sorted;
+	// 描く順番: GetTransparentQueue の小さい順 → 同じなら遠い順。
 	transparentComponents.clear();
 
 	for (const std::unique_ptr<GameObject>& gameObject : gameObjects) {
 		if (gameObject && gameObject->IsRoot()) {
 			gameObject->DrawHierarchy(&transparentComponents);
 		}
+	}
+
+	// 半透明の自作シェーダーが「奥にある不透明物までの距離」を読めるように、ここまでの深度を写しておく。
+	if (!transparentComponents.empty()) {
+		DirectXCommon::GetInstance()->CaptureSceneDepth();
 	}
 
 	sorted.clear();
@@ -46,7 +52,11 @@ void DrawGameObjectsSorted(const std::vector<std::unique_ptr<GameObject>>& gameO
 		}
 		sorted.emplace_back(distanceSquared, component);
 	}
-	std::stable_sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) { return a.first > b.first; });
+	std::stable_sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) {
+		const int queueA = a.second->GetTransparentQueue();
+		const int queueB = b.second->GetTransparentQueue();
+		return queueA != queueB ? queueA < queueB : a.first > b.first;
+	});
 	for (const auto& entry : sorted) {
 		entry.second->Draw();
 	}

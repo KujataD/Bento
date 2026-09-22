@@ -271,7 +271,7 @@ void GraphicsPipeline::CreateObject3dRootSignature() {
 
 	// RootParameter作成
 	// b0 Material
-	D3D12_ROOT_PARAMETER rootParameters[9] = {};
+	D3D12_ROOT_PARAMETER rootParameters[10] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // CBVを使う b0のbに対応する bはConstantBuffer
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
 	rootParameters[0].Descriptor.ShaderRegister = 0;                    // レジスタ番号0とバインド b0の0に対応する。もしb11と紐づけたいなら11となる。
@@ -331,6 +331,17 @@ void GraphicsPipeline::CreateObject3dRootSignature() {
 	rootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	rootParameters[8].Descriptor.ShaderRegister = 5;
+
+	// 不透明物を描き終えた時点の深度のコピー(t3。自作シェーダーの gSceneDepth)。未取得なら白(=いちばん遠い)が入る。
+	D3D12_DESCRIPTOR_RANGE sceneDepthRange[1] = {};
+	sceneDepthRange[0].BaseShaderRegister = 3; // t3
+	sceneDepthRange[0].NumDescriptors = 1;
+	sceneDepthRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	sceneDepthRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	rootParameters[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[9].DescriptorTable.pDescriptorRanges = sceneDepthRange;
+	rootParameters[9].DescriptorTable.NumDescriptorRanges = _countof(sceneDepthRange);
 
 	descriptionRootSignature.pParameters = rootParameters;             // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters); // 配列の長さ

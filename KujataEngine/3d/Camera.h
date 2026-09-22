@@ -23,6 +23,8 @@ struct ConstBufferDataCamera {
 
 struct CameraForGPU {
 	Vector3 worldPosition;
+	float nearZ; // 深度を距離に戻すのに使う(EngineData/shader/Object3d.hlsli の Camera と並びを一致させる)
+	float farZ;
 };
 
 /// <summary>

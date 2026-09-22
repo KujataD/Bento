@@ -11,7 +11,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <cstring>
 #include <numbers>
 
 namespace KujataEngine {
@@ -70,7 +69,7 @@ bool OceanComponent::GetSurfaceHeight(float x, float z, float& outHeight) const 
 	const Vector3 local = Transform(Vector3{x, 0.0f, z}, Inverse(world));
 	const float halfX = sizeX_ * 0.5f;
 	const float halfZ = sizeZ_ * 0.5f;
-	if (local.x < -halfX || local.x > halfX || local.z < -halfZ || local.z > halfZ) {
+	if (!followCamera_ && (local.x < -halfX || local.x > halfX || local.z < -halfZ || local.z > halfZ)) {
 		return false;
 	}
 
@@ -83,16 +82,16 @@ bool OceanComponent::GetSurfaceHeight(float x, float z, float& outHeight) const 
 	const float cellZ = sizeZ_ / static_cast<float>(divisionsZ);
 	const float gx = (local.x + halfX) / cellX;
 	const float gz = (local.z + halfZ) / cellZ;
-	const float ix = std::clamp(std::floor(gx), 0.0f, static_cast<float>(divisionsX - 1));
-	const float iz = std::clamp(std::floor(gz), 0.0f, static_cast<float>(divisionsZ - 1));
+	// Follow Camera のときは板がマス単位でずれるだけなので、マスの番号は板の外まで続けて数えてよい。
+	const float ix = followCamera_ ? std::floor(gx) : std::clamp(std::floor(gx), 0.0f, static_cast<float>(divisionsX - 1));
+	const float iz = followCamera_ ? std::floor(gz) : std::clamp(std::floor(gz), 0.0f, static_cast<float>(divisionsZ - 1));
 	const float fx = gx - ix;
 	const float fz = gz - iz;
 
-	// 格子の頂点(ローカル)の、ワールドでの高さ = 板の高さ + 波(頂点シェーダーはローカルの y に足すので、Y の拡大が掛かる)。
-	const float scaleY = Length(Vector3{world.m[1][0], world.m[1][1], world.m[1][2]});
+	// 格子の頂点(ローカル)の、ワールドでの高さ = 板の高さ + 波。
 	auto vertexHeight = [&](float cx, float cz) {
 		const Vector3 p = Transform(Vector3{-halfX + cx * cellX, 0.0f, -halfZ + cz * cellZ}, world);
-		return p.y + EvaluateWaves({p.x, p.z}) * scaleY;
+		return p.y + EvaluateWaves({p.x, p.z});
 	};
 	// 1マスの三角形は (x0,z0)(x0,z1)(x1,z0) と (x1,z0)(x0,z1)(x1,z1)。対角線は fx + fz = 1。
 	if (fx + fz <= 1.0f) {
@@ -148,18 +147,23 @@ bool OceanComponent::UsesMaterialAsset(const std::string& materialPath) const {
 }
 
 void OceanComponent::ApplyMaterial() {
-	// マテリアルが無ければ、ローポリ・ドット絵向けの既定の見た目(トゥーン3段・面ごとの陰・Water Color)。
+	// マテリアルが無ければ、ローポリ・ドット絵向けの既定の見た目(トゥーン3段・面ごとの陰・模様をぼかさない)。
+	// 海の色は Inspector の色で決まり、マテリアルの色はそれに掛け算する(既定は白 = そのまま)。
 	MaterialAssetData material = MaterialAsset::CreateDefault();
 	material.shaderModel = static_cast<int>(ShaderModel::kToon);
 	material.toonSteps = 3;
 	material.flatShading = true;
-	material.baseColor = waterColor_;
+	material.pointSampling = true;
+	usePatternTexture_ = false;
 	if (!materialPath_.empty()) {
 		const std::filesystem::path resolved = GetAssetResolver().ResolveAssetPath("", materialPath_);
 		MaterialAssetData loaded{};
 		std::string message;
 		if (!resolved.empty() && MaterialAsset::Load(resolved, loaded, message)) {
 			material = loaded;
+			// 既定の白以外のテクスチャが入っていれば、それを泡の模様にする。
+			const std::string texturePath = MaterialAsset::GetTexturePath(material, MaterialTextureSlot::BaseColor);
+			usePatternTexture_ = !texturePath.empty() && texturePath.find("white1x1") == std::string::npos;
 		}
 	}
 	if (material.shaderPath.empty()) {
@@ -178,7 +182,6 @@ void OceanComponent::ApplyMaterial() {
 	model.SetUVTransform(material.uvOffset, material.uvScale, material.uvRotation);
 	model.SetStylize(material.toonSteps, material.toonSmoothness, material.flatShading, material.pointSampling);
 	model.SetCustomShader(MaterialAsset::ResolveCustomShader(material));
-	transparent_ = !material.depthWrite;
 }
 
 void OceanComponent::EnsureModel() {
@@ -193,13 +196,28 @@ void OceanComponent::EnsureModel() {
 		builtDivisionsZ_ = divisionsZ;
 		materialDirty_ = true;
 	}
-	// Water Color はマテリアルが無いときの色なので、変えたら反映する。
-	if (materialDirty_ || appliedMaterialPath_ != materialPath_ || (materialPath_.empty() && std::memcmp(&appliedWaterColor_, &waterColor_, sizeof(Vector4)) != 0)) {
+	if (materialDirty_ || appliedMaterialPath_ != materialPath_) {
 		ApplyMaterial();
 		appliedMaterialPath_ = materialPath_;
-		appliedWaterColor_ = waterColor_;
 		materialDirty_ = false;
 	}
+}
+
+void OceanComponent::BuildShaderParams(Vector4 (&outParams)[11]) const {
+	// 並びは Ocean.hlsl の先頭のコメントと一致させる。
+	for (int i = 0; i < kWaveCount; ++i) {
+		outParams[i] = waves_[i];
+	}
+	auto rgbw = [](const Vector4& color, float w) { return Vector4{color.x, color.y, color.z, w}; };
+	outParams[4] = rgbw(waterColor_, lighting_);
+	outParams[5] = rgbw(shallowColor_, depthColorDistance_);
+	outParams[6] = rgbw(foamColor_, shoreFoamDistance_);
+	outParams[7] = rgbw(ringColor_, foamLevel_);
+	outParams[8] = {patternSize_, foamAmount_, foamWidth_, ringOffset_};
+	outParams[9] = {distortStrength_, distortLength_, driftSpeed_, usePatternTexture_ ? 1.0f : 0.0f};
+	const GameObject* owner = GetOwner();
+	const float baseHeight = owner ? owner->GetTransform().GetWorldPosition().y : 0.0f;
+	outParams[10] = {baseHeight, shallowAlpha_, driftDirection_, 0.0f};
 }
 
 void OceanComponent::Draw() {
@@ -218,14 +236,31 @@ void OceanComponent::Draw() {
 	}
 
 	EnsureModel();
-	// 波は毎フレーム、この Inspector の値をシェーダーへ渡す(両方のビューで同じ値なので、1つのモデルで描ける)。
-	model_->SetShaderParams(waves_);
-	model_->SetShaderUserValue(foamLevel_);
-	model_->SetShaderUserValue2(owner->GetTransform().GetWorldPosition().y);
+	// 波と見た目は毎フレーム、この Inspector の値をシェーダーへ渡す(両方のビューで同じ値なので、1つのモデルで描ける)。
+	Vector4 params[11];
+	BuildShaderParams(params);
+	model_->SetShaderObjectParams(params, std::size(params));
 	model_->SetShaderTime(waveTime_);
 
-	owner->GetTransform().UpdateMatrix(*camera_);
-	model_->Draw(owner->GetTransform(), *camera_);
+	// 板は、このオブジェクトの子として置いた描画用の Transform で描く。
+	// Follow Camera なら、カメラの真下へ「マスの大きさ単位で」ずらす(細かくずらすと頂点が波の上を滑って、波が泳いで見える)。
+	// 波と模様はワールド座標で決めているので、板が動いても海はその場に留まって見える。
+	if (!drawTransformReady_) {
+		drawTransform_.Initialize();
+		drawTransformReady_ = true;
+	}
+	WorldTransform& ownerTransform = owner->GetTransform();
+	ownerTransform.UpdateWorldMatrix();
+	drawTransform_.parent_ = &ownerTransform;
+	drawTransform_.translation_ = {0.0f, 0.0f, 0.0f};
+	if (followCamera_) {
+		const Vector3 cameraLocal = Transform(camera_->translation_, Inverse(ownerTransform.matWorld_));
+		const float cellX = sizeX_ / static_cast<float>(builtDivisionsX_);
+		const float cellZ = sizeZ_ / static_cast<float>(builtDivisionsZ_);
+		drawTransform_.translation_ = {std::round(cameraLocal.x / cellX) * cellX, 0.0f, std::round(cameraLocal.z / cellZ) * cellZ};
+	}
+	drawTransform_.UpdateMatrix(*camera_);
+	model_->Draw(drawTransform_, *camera_);
 }
 
 } // namespace KujataEngine

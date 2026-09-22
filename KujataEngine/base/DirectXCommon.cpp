@@ -272,6 +272,13 @@ void DirectXCommon::CreateRenderTexture(RenderTexture& target, int32_t width, in
 	target.depthSrvHandleGPU = srvDescriptorHeap_->GetGPUDescriptorHandleForHeapStart();
 	target.depthSrvHandleGPU.ptr += descriptorSizeSRV_ * depthSrvIndex;
 
+	// 深度のコピー(自作シェーダーが半透明の描画中に読む)のSRVスロット。
+	uint32_t depthCopySrvIndex = AllocateSrvIndex();
+	target.depthCopySrvHandleCPU = srvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+	target.depthCopySrvHandleCPU.ptr += descriptorSizeSRV_ * depthCopySrvIndex;
+	target.depthCopySrvHandleGPU = srvDescriptorHeap_->GetGPUDescriptorHandleForHeapStart();
+	target.depthCopySrvHandleGPU.ptr += descriptorSizeSRV_ * depthCopySrvIndex;
+
 	RecreateRenderTextureResources(target);
 }
 
@@ -395,6 +402,45 @@ void DirectXCommon::RecreateRenderTextureResources(RenderTexture& target) {
 	depthSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	depthSrvDesc.Texture2D.MipLevels = 1;
 	device_->CreateShaderResourceView(target.depthResource.Get(), &depthSrvDesc, target.depthSrvHandleCPU);
+
+	// --- 深度のコピー ---
+	// 元と同じ作り(大きさ・フォーマット・フラグ)にしておけば、CopyResource でそのまま写せる。普段はシェーダーから読む状態。
+	target.depthCopyResource.Reset();
+	hr = device_->CreateCommittedResource(
+	    &heapProperties,
+	    D3D12_HEAP_FLAG_NONE,
+	    &depthDesc,
+	    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+	    &depthClearValue,
+	    IID_PPV_ARGS(&target.depthCopyResource));
+	assert(SUCCEEDED(hr));
+	device_->CreateShaderResourceView(target.depthCopyResource.Get(), &depthSrvDesc, target.depthCopySrvHandleCPU);
+}
+
+void DirectXCommon::CaptureSceneDepth() {
+	if (!currentRenderTexture_) {
+		return;
+	}
+	RenderTexture& target = *currentRenderTexture_;
+	D3D12_RESOURCE_BARRIER barriers[2]{};
+	barriers[0].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barriers[0].Transition.pResource = target.depthResource.Get();
+	barriers[0].Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+	barriers[0].Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_SOURCE;
+	barriers[0].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	barriers[1] = barriers[0];
+	barriers[1].Transition.pResource = target.depthCopyResource.Get();
+	barriers[1].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	barriers[1].Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
+	commandList_->ResourceBarrier(2, barriers);
+
+	commandList_->CopyResource(target.depthCopyResource.Get(), target.depthResource.Get());
+
+	// 元に戻す(描画先の設定はバリアでは外れないので、そのまま半透明を描き続けられる)。
+	std::swap(barriers[0].Transition.StateBefore, barriers[0].Transition.StateAfter);
+	std::swap(barriers[1].Transition.StateBefore, barriers[1].Transition.StateAfter);
+	commandList_->ResourceBarrier(2, barriers);
+	sceneDepthCaptured_ = true;
 }
 
 void DirectXCommon::ResizeSceneRenderTarget(int32_t width, int32_t height) { ResizeRenderTexture(sceneRenderTexture_, width, height); }
@@ -649,6 +695,8 @@ void DirectXCommon::BeginRenderTexture(RenderTexture& target) {
 	barriers[2].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 	barriers[2].Transition.StateAfter = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 	commandList_->ResourceBarrier(3, barriers);
+	currentRenderTexture_ = &target;
+	sceneDepthCaptured_ = false;
 
 	// 以降のDraw呼び出しがこのRenderTextureへ描かれるように、描画先を差し替える。
 	// MRT: [0]=通常色 / [1]=エミッション(emissionEnabledなマテリアルのみがSV_TARGET1へ書く)。
@@ -696,6 +744,8 @@ void DirectXCommon::EndRenderTexture(RenderTexture& target) {
 	barriers[2].Transition.pResource = target.depthResource.Get();
 	barriers[2].Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 	commandList_->ResourceBarrier(3, barriers);
+	currentRenderTexture_ = nullptr;
+	sceneDepthCaptured_ = false;
 
 	// この後のImGui描画はSwapChainバックバッファへ出したいので、描画先を戻す。
 	SetBackBufferRenderTarget();

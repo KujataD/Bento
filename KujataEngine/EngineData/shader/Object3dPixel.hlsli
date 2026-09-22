@@ -9,6 +9,9 @@
 Texture2D<float32_t4> gTexture : register(t0);
 // エミッションマップ(自己発光の分布)。未指定のマテリアルには白1x1が入るので常に乗算してよい。
 Texture2D<float32_t4> gEmissiveTexture : register(t2);
+// 不透明物を描き終えた時点の深度(0=近 1=遠)。半透明(マテリアルの Depth Write が OFF、または OceanComponent)の描画中だけ本物で、
+// それ以外は 1(いちばん遠い)。水面の奥にある物までの距離(岸の泡・浅瀬の色)に使う。SceneDepthBehind を見る。
+Texture2D<float32_t> gSceneDepth : register(t3);
 SamplerState gSampler : register(s0);
 // ぼかさずに読むサンプラー(ポイントサンプリング)。マテリアルの pointSampling で選ぶ。
 SamplerState gPointSampler : register(s1);
@@ -134,6 +137,20 @@ float32_t3 FlatNormal(float32_t3 worldPosition)
     float32_t3 normal = normalize(cross(ddx(worldPosition), ddy(worldPosition)));
     float32_t3 toEye = gCamera.worldPosition - worldPosition;
     return (dot(normal, toEye) < 0.0f) ? -normal : normal;
+}
+
+// 深度(0〜1)を、カメラからの奥行き[m](視線の向きの距離)に戻す。
+float32_t LinearDepth(float32_t depth)
+{
+    return gCamera.nearZ * gCamera.farZ / (gCamera.farZ - depth * (gCamera.farZ - gCamera.nearZ));
+}
+
+// このピクセルの奥にある不透明物までの距離[m](視線の向きの奥行きの差)。svPosition は SV_POSITION の値。
+// 半透明として描いているとき(gSceneDepth が本物のとき)だけ意味がある。奥に何も無ければ遠い値(farZ に近い)になる。
+float32_t SceneDepthBehind(float32_t4 svPosition)
+{
+    const float32_t sceneDepth = gSceneDepth.Load(int32_t3(int32_t2(svPosition.xy), 0));
+    return LinearDepth(sceneDepth) - LinearDepth(svPosition.z);
 }
 
 #endif // KUJATA_OBJECT3D_PIXEL_HLSLI

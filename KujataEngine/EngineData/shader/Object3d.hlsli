@@ -25,9 +25,12 @@ struct DirectionalLight
     float32_t3 shadowColor;
 };
 
+// C++側 3d/Camera.h の CameraForGPU と並びを一致させること。
 struct Camera
 {
     float32_t3 worldPosition;
+    float32_t nearZ; // 深度(0〜1)をカメラからの距離に戻すのに使う(LinearDepth)
+    float32_t farZ;
 };
 
 // マテリアルごとの自由なパラメータ(自作シェーダー用)と時間。頂点・ピクセルの両方から読める。
@@ -38,7 +41,8 @@ struct ShaderParams
     float32_t time;       // 起動からの秒数(見た目用。一時停止や時間スケールでは止まらない)
     float32_t curveLength; // SplineRendererComponent の曲線の全長(それ以外は0)。u をこれで割ると根元0〜先端1
     float32_t userValue;   // コンポーネントからオブジェクトごとに渡す自由な値(既定0。意味は各シェーダーが決める)
-    float32_t userValue2;  // 同じく2つめ(OceanComponent は海の基準の高さ=オブジェクトのワールドの Y を入れる)
+    float32_t userValue2;  // 同じく2つめ
+    float32_t4 objectParams[12]; // コンポーネントからオブジェクトごとに渡す値(Model::SetShaderObjectParams。意味は各シェーダーが決める)
 };
 ConstantBuffer<ShaderParams> gShaderParams : register(b5);
 

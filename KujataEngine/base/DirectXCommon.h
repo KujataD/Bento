@@ -28,6 +28,11 @@ struct RenderTexture {
 	// 深度をポストプロセス(フォグ等)からテクスチャとして読むためのSRV。
 	D3D12_CPU_DESCRIPTOR_HANDLE depthSrvHandleCPU{};
 	D3D12_GPU_DESCRIPTOR_HANDLE depthSrvHandleGPU{};
+	// 不透明物を描き終えた時点の深度のコピー(CaptureSceneDepth)。半透明の描画中に自作シェーダーが t3 で読む
+	// (水面の奥にある物までの距離 = 岸の泡・浅瀬の色)。描いている最中の深度そのものは読めないのでコピーする。
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthCopyResource;
+	D3D12_CPU_DESCRIPTOR_HANDLE depthCopySrvHandleCPU{};
+	D3D12_GPU_DESCRIPTOR_HANDLE depthCopySrvHandleGPU{};
 	// ImGui::Imageで読むためのSRV(CPU=作成用/GPU=ImGuiへ渡す)。
 	D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU{};
 	D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU{};
@@ -102,6 +107,16 @@ public:
 	void SetRenderViewIndex(uint32_t index) { renderViewIndex_ = index; }
 
 	uint32_t GetRenderViewIndex() const { return renderViewIndex_; }
+
+	/// <summary>
+	/// 今の描画先の深度を、自作シェーダーから読めるコピーへ写す。Scene が不透明物を描き終えた後(半透明を描く前)に呼ぶ。
+	/// 描画先(BeginSceneRender/BeginGameRender)の外では何もしない。
+	/// </summary>
+	void CaptureSceneDepth();
+	/// <summary>今の描画先で CaptureSceneDepth 済みか(まだなら、深度のコピーは前の中身なので使わない)。</summary>
+	bool HasCapturedSceneDepth() const { return currentRenderTexture_ && sceneDepthCaptured_; }
+	/// <summary>CaptureSceneDepth で写した深度の SRV(R24_UNORM。0=近 1=遠)。</summary>
+	D3D12_GPU_DESCRIPTOR_HANDLE GetCapturedSceneDepthSrvHandle() const { return currentRenderTexture_->depthCopySrvHandleGPU; }
 
 	/// <summary>
 	/// 描いたフレームの番号(PreDrawのたびに1増える)。同じフレームで何度も呼ばれる処理が
@@ -332,6 +347,9 @@ private:
 	uint32_t renderViewIndex_ = kSceneViewIndex;
 	// PreDrawのたびに1増えるフレーム番号。
 	uint64_t frameIndex_ = 0;
+	// 今の描画先(BeginRenderTexture 〜 EndRenderTexture の間だけ)と、その深度をコピーしたか。
+	RenderTexture* currentRenderTexture_ = nullptr;
+	bool sceneDepthCaptured_ = false;
 	// 現在の描画先の大きさ。BeginRenderTextureで更新する。
 	int32_t currentTargetWidth_ = WinApp::kWindowWidth;
 	int32_t currentTargetHeight_ = WinApp::kWindowHeight;

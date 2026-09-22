@@ -14,9 +14,11 @@
 //                      gShaderParams.curveLength(SplineRendererComponent の曲線の全長。それ以外は0)、
 //                      gShaderParams.userValue(ゲームのコードからオブジェクトごとに渡す値。SplineRendererComponent::SetShaderUserValue)
 //                      gShaderParams.userValue2(同じく2つめ。Model::SetShaderUserValue2)
+//                      gShaderParams.objectParams[0..11](コンポーネントからオブジェクトごとに渡す float4。Model::SetShaderObjectParams)
 //   頂点: gTranformationMatrix(WVP / World / WorldInverseTranspose)、DefaultVertex(input)
 //   ピクセル: gMaterial(色・発光・トゥーンの段など)、gTexture / gEmissiveTexture、SampleTexture(tex, uv)、
-//            gDirectionalLight(影の色 shadowColor を含む)、gCamera、pointLights / spotLights、ToonStep、FlatNormal
+//            gDirectionalLight(影の色 shadowColor を含む)、gCamera(位置・nearZ・farZ)、pointLights / spotLights、ToonStep、FlatNormal、
+//            gSceneDepth / SceneDepthBehind(svPosition)(奥にある不透明物までの距離[m]。半透明として描くときだけ。水の岸の泡など)
 #include "Object3d.hlsli"
 
 #ifdef KUJATA_VERTEX_SHADER

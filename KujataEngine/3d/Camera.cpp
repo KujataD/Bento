@@ -37,6 +37,8 @@ void Camera::TransferConstBuffer() {
 	constMap_->cameraPos = translation_;
 	constMap_->pad = 0.0f;
 	cameraForGPUData_->worldPosition = translation_;
+	cameraForGPUData_->nearZ = nearZ;
+	cameraForGPUData_->farZ = farZ;
 }
 
 

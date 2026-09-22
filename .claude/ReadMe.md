@@ -103,6 +103,9 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - 1 ファイルに `PSMain`(色を決める。必須)と `VSMain`(頂点を動かす。省略すると標準の処理)を書く。使える値と関数は `KujataEngine/EngineData/shader/Object3dCustom.hlsli` の先頭に書いてある(時間 `gShaderParams.time`、`ToonStep`、影の色など)
 - 書き間違えて保存しても止まらない。エラーは Console と Inspector に出て、そのあいだは直前に成功した版(無ければ標準)で描く
 - `kujata shader.list` で一覧とコンパイルの成否が分かる
+- ゲームのコードから、オブジェクトごとの値を `Model::SetShaderObjectParams`(float4 × 12。シェーダーは `gShaderParams.objectParams`)で渡せる。マテリアルの Param は同じマテリアルの物で共通、こちらはオブジェクトごと
+- **半透明として描くとき**(マテリアルの Depth Write が OFF)は、奥にある不透明物までの距離が `SceneDepthBehind(input.position)`[m] で分かる(不透明物を描き終えた時点の深度 `gSceneDepth` を読む)。水の岸の泡・浅瀬の色・物との境目を光らせる、などに使う
+- 半透明どうしの描く順番は、ふつうは遠い順。コンポーネントの `GetTransparentQueue()` を小さくすると先に描く(海の面のように、ほかの半透明より奥にある大きな面)
 - エンジン同梱の自作シェーダー(`KujataEngine/EngineData/shader/Custom/`)は、Shader の一覧に `engine:Custom/Ocean.hlsl` のように出て、どのプロジェクトからでも選べる。書き方の例としても読める
 
 ### 線に沿ったチューブ・リボン(SplineRendererComponent)
@@ -121,19 +124,24 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 
 ### 海(OceanComponent)
 
-空のオブジェクトに **OceanComponent** を付けるだけで、波打つ海面が出る(ローポリ・ドット絵向けに、陰・谷の濃さ・山の泡がすべて段で切り替わる)。
+空のオブジェクトに **OceanComponent** を付けるだけで、風のタクト / A Short Hike 風の海が出る(ローポリ・ドット絵向けに、色の変化はすべて段で切り替わる)。
 
-- 海面の高さの基準はこのオブジェクトの位置。広さは Size X / Size Z、細かさは Divisions(長い辺のマスの数。少ないほどローポリ)
-- 波は正弦波を 4 つまで重ねる。1 つずつ Direction(進む向き[度])・Length(波長[m]。0 で使わない)・Height(高さ[m])・Speed(速さ[m/秒])を決める。向きと波長がばらばらな波を重ねると自然になる
-- Foam Level: 波の山のどこから上を泡(白)にするか(0 で泡なし)。Water Color: 海の色
-- 見た目を変えたいときは Material を設定する(色・トゥーンの段・テクスチャなど。Shader が空なら海のシェーダーを使う)。波は Material の Shader Params ではなく、この Inspector の Wave で決まる
-- 波はゲームの時間で進む(時間スケール 0 のヒットストップで波も止まる)。Play を始めるたびに同じところから始まる。Play していないときも見た目だけ動く
+- **形**: 海面の高さの基準はこのオブジェクトの位置。広さは Size X / Size Z、細かさは Divisions(長い辺のマスの数。少ないほどローポリ)
+- **Follow Camera**: 板がカメラの真下へついて来る(果てのない海)。波と模様はその場に留まる。板の端は、Volume の Fog で空の色に溶かすと見えなくなる
+- **色**: Water Color(沖)・Shallow Color(浅瀬)・Foam Color(泡)・Ring Color(泡の下の暗い輪)。**Lighting** は陰の強さ(0 でべた塗り = 風のタクト、1 でトゥーンの面ごとの陰)
+- **泡の模様**(風のタクトの輪): Pattern Size(模様の大きさ[m])・Foam Amount(輪の量)・Foam Width(線の太さ)・Ring Offset(暗い輪のずれ。0 で暗い輪なし)・Distort Strength / Distort Length(模様の揺らぎ)・Drift Speed / Drift Direction(流れ)。模様はワールド座標に貼るので、板が動いてもその場に留まる
+- **波の山の泡**: Crest Foam(波の山のどこから上を泡にするか。0 でなし)
+- **岸と浅瀬**(A Short Hike): 海の下にある物(地面・岩・浮かぶ物)が近いところは Shallow Color になって透け(Shallow Depth[m] より浅いところを段で、Shallow Alpha で透け具合)、水面との境目は泡になる(Shore Foam[m] が泡の幅。少しずつ打ち寄せる)
+- **波**: 正弦波を 4 つまで重ねる。1 つずつ Direction(進む向き[度])・Length(波長[m]。0 で使わない)・Height(高さ[m])・Speed(速さ[m/秒])を決める。見た目の主役は泡の模様なので、うねりは控えめが既定
+- 見た目の元は Material でも変えられる(色は掛け算、トゥーンの段・Flat Shading が効く。**BaseColor テクスチャを入れると、その赤が泡の模様になる**。手描きの泡の模様を使うとき)。Shader が空なら海のシェーダーを使う
+- 波と模様はゲームの時間で進む(時間スケール 0 のヒットストップで止まる)。Play を始めるたびに同じところから始まる。Play していないときも見た目だけ動く
 - **回転は Y 軸まわりだけ、拡大は X・Z だけ**にする(傾けると波が板に沿わない)
 
 **海面の高さを使う**
 
 - 物を浮かべる: **FloatOnWaterComponent** を付ける。Play 中、毎フレームその位置の海面へ Y を合わせ、波の傾きに合わせて傾く(Height Offset で沈み具合、Follow Speed で遅れ(0 でぴったり)、Tilt で傾きの強さ)
-- ゲームのコードから: `OceanComponent::TryGetSurfaceHeight(シーン, x, z, 高さ)`(`components/OceanComponent.h`)。海の上なら true と海面の高さを返す。描かれている面と同じ高さ(頂点の間は三角形の上の高さ)なので、見た目とずれない。着水・水しぶき・泳ぎの判定などに使う
+- ゲームのコードから: `OceanComponent::TryGetSurfaceHeight(シーン, x, z, 高さ)`(`components/OceanComponent.h`)。海の上なら true と海面の高さを返す(Follow Camera ならどこでも海の上)。描かれている面と同じ高さ(頂点の間は三角形の上の高さ)なので、見た目とずれない。着水・水しぶき・泳ぎの判定などに使う
+- 船の航跡は TrailRendererComponent に泡のマテリアルを付けて海面の少し上に引く、着水のしぶきは ParticleSystemComponent の `EmitAt` で出す(どちらも既存の機能)
 
 ### 速い物の当たり判定(SphereCast)
 

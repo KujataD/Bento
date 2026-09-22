@@ -44,6 +44,13 @@ public:
 	virtual bool IsTransparentDraw() const { return false; }
 
 	/// <summary>
+	/// 半透明(IsTransparentDraw が true)の中での描く順番。小さいほど先に描く(同じ値どうしは遠い順)。既定0。
+	/// 水面のように「不透明物の深度を読みたいが、ほかの半透明より奥にある大きな面」は負にして先に描く。
+	/// 半透明を描く前に不透明物の深度がコピーされるので、半透明として描けば自作シェーダーが gSceneDepth を読める。
+	/// </summary>
+	virtual int GetTransparentQueue() const { return 0; }
+
+	/// <summary>
 	/// Inspector表示用のComponent名を取得
 	/// </summary>
 	virtual const char* GetTypeName() const { return "Component"; }
