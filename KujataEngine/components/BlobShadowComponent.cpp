@@ -7,7 +7,9 @@
 #include "../base/DirectXCommon.h"
 #include "../scene/GameObject.h"
 #include "../scene/PhysicsQuery.h"
+#include "../math/MathUtil.h"
 #include "../scene/Scene.h"
+#include "ModelRendererComponent.h"
 #include "OceanComponent.h"
 
 #include <algorithm>
@@ -41,9 +43,9 @@ bool BlobShadowComponent::GroundHeightAt(float x, float z, float& outHeight) con
 			best = hit.point.y - kProbeRadius;
 		}
 	}
-	// 海(描かれている海面と同じ高さ)。
+	// 海(描かれている海面と同じ高さ)。足元が水に浸かっていても(海面が探し始める高さより上でも)水面に落とす。
 	float ocean = 0.0f;
-	if (receiveOcean_ && OceanComponent::TryGetSurfaceHeight(*scene, x, z, ocean) && ocean <= startY_) {
+	if (receiveOcean_ && OceanComponent::TryGetSurfaceHeight(*scene, x, z, ocean)) {
 		best = (std::max)(best, ocean);
 	}
 	if (best == -std::numeric_limits<float>::infinity()) {
@@ -51,6 +53,49 @@ bool BlobShadowComponent::GroundHeightAt(float x, float z, float& outHeight) con
 	}
 	outHeight = best;
 	return true;
+}
+
+float BlobShadowComponent::ComputeDiameter() {
+	GameObject* owner = GetOwner();
+	if (!autoSize_ || !owner) {
+		return size_;
+	}
+	// 付けた物と子のモデルの箱(8つの角)をワールドへ移し、付けた物の位置を中心にした横幅(X・Z の大きい方)を求める。
+	const Vector3 center = owner->GetTransform().GetWorldPosition();
+	float halfWidth = 0.0f;
+	bool found = false;
+	auto visit = [&](auto&& self, GameObject* object) -> void {
+		if (!object || !object->IsActive()) {
+			return;
+		}
+		if (ModelRendererComponent* renderer = object->GetComponent<ModelRendererComponent>()) {
+			const Model* model = renderer->GetModel();
+			if (model && !model->GetVertices().empty()) {
+				auto it = localBoxes_.find(model);
+				if (it == localBoxes_.end() || it->second.vertexCount != model->GetVertices().size()) {
+					LocalBox box{{1.0e9f, 1.0e9f, 1.0e9f}, {-1.0e9f, -1.0e9f, -1.0e9f}, model->GetVertices().size()};
+					for (const VertexData& vertex : model->GetVertices()) {
+						box.min = {(std::min)(box.min.x, vertex.position.x), (std::min)(box.min.y, vertex.position.y), (std::min)(box.min.z, vertex.position.z)};
+						box.max = {(std::max)(box.max.x, vertex.position.x), (std::max)(box.max.y, vertex.position.y), (std::max)(box.max.z, vertex.position.z)};
+					}
+					it = localBoxes_.insert_or_assign(model, box).first;
+				}
+				const Matrix4x4& world = object->GetTransform().matWorld_;
+				for (int i = 0; i < 8; ++i) {
+					const Vector3 corner = {(i & 1) ? it->second.max.x : it->second.min.x, (i & 2) ? it->second.max.y : it->second.min.y,
+					                        (i & 4) ? it->second.max.z : it->second.min.z};
+					const Vector3 p = Transform(corner, world);
+					halfWidth = (std::max)({halfWidth, std::fabs(p.x - center.x), std::fabs(p.z - center.z)});
+				}
+				found = true;
+			}
+		}
+		for (GameObject* child : object->GetChildren()) {
+			self(self, child);
+		}
+	};
+	visit(visit, owner);
+	return found ? halfWidth * 2.0f * autoSizeScale_ : size_;
 }
 
 void BlobShadowComponent::Build() {
@@ -84,7 +129,7 @@ void BlobShadowComponent::Build() {
 	// 2. 地面から離れるほど、小さく・薄くする。
 	const float scale = 1.0f + (sizeAtMax_ - 1.0f) * t;
 	strength_ = opacity_ * (1.0f + (opacityAtMax_ - 1.0f) * t);
-	const float radius = size_ * 0.5f * scale;
+	const float radius = ComputeDiameter() * 0.5f * scale;
 	if (radius <= 0.0f || strength_ <= 0.0f) {
 		return;
 	}

@@ -8,6 +8,7 @@
 #include "../scene/Component.h"
 #include "../scene/SerializedFieldRegistry.h"
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 namespace KujataEngine {
@@ -26,6 +27,8 @@ class Camera;
 ///   4. 地面から離れるほど、小さく・薄くなる(Max Distance で消える)
 ///
 /// 影を受けるのは **Collider を持つ物(トリガーは除く)と海**だけ。見た目だけのモデルには落ちない。
+/// 大きさは既定で、付けた物(と子)のモデルの横幅に合わせる(Auto Size)。影が体より小さいと、体に隠れて見えないため。
+/// 海は、足元が水に浸かっていても(原点が海面より下でも)海面に影を落とす。
 /// </summary>
 class KUJATA_API BlobShadowComponent : public Component {
 public:
@@ -48,7 +51,12 @@ public:
 
 private:
 	KUJATA_SERIALIZED_FIELDS_BEGIN() {
-		KUJATA_REGISTER_FLOAT_NAMED_TIP(size_, "Size", 0.01f, 0.01f, 100.0f, "地面に接しているときの影の直径[m]。付けた物の横幅くらいにする(小さいと体に隠れて見えない)。");
+		KUJATA_REGISTER_BOOL_NAMED_TIP(autoSize_, "Auto Size",
+		    "影の大きさを、付けた物(と子)のモデルの横幅 × Auto Size Scale にする。OFF なら Size を使う。");
+		KUJATA_REGISTER_FLOAT_NAMED_TIP(autoSizeScale_, "Auto Size Scale", 0.01f, 0.0f, 10.0f,
+		    "Auto Size のときの、モデルの横幅に対する倍率。1より大きいと体の外に影の縁が見える(真上から見ても見えやすい)。");
+		KUJATA_REGISTER_FLOAT_NAMED_TIP(size_, "Size", 0.01f, 0.01f, 100.0f,
+		    "Auto Size が OFF のときの、地面に接しているときの影の直径[m]。付けた物の横幅より少し大きくする(小さいと体に隠れて見えない)。");
 		KUJATA_REGISTER_VECTOR4_NAMED_TIP(color_, "Color", 0.01f, 0.0f, 1.0f, "影の色(A は使わない。濃さは Opacity)。暗い海・地面の上でも見えるよう、既定は黒。");
 		KUJATA_REGISTER_FLOAT_NAMED_TIP(opacity_, "Opacity", 0.01f, 0.0f, 1.0f, "地面に接しているときの影の濃さ。");
 		KUJATA_REGISTER_INT_NAMED_TIP(steps_, "Steps", 1.0f, 1, 8, "縁の段の数。1=くっきりした円、2=濃い芯+薄い縁、多いほど縁がなだらか。");
@@ -67,6 +75,8 @@ private:
 		KUJATA_REGISTER_BOOL_NAMED_TIP(showDebug_, "Show Debug", "地面を探す線(黄=見つかった、赤=見つからない)を描く。");
 	}
 
+	KUJATA_FIELD_BOOL(autoSize_, true);
+	KUJATA_FIELD_FLOAT(autoSizeScale_, 1.2f);
 	KUJATA_FIELD_FLOAT(size_, 1.2f);
 	Vector4 color_ = {0.0f, 0.0f, 0.0f, 1.0f};
 	KUJATA_FIELD_FLOAT(opacity_, 0.6f);
@@ -84,8 +94,10 @@ private:
 
 	/// <summary>真下の地面を探し、影の頂点を組み立てる(フレームに1回)。</summary>
 	void Build();
-	/// <summary>(x, z) の真下の地面の高さ。Collider と海面の高い方(地面を探し始める高さより下のものだけ)。</summary>
+	/// <summary>(x, z) の真下の地面の高さ。Collider(地面を探し始める高さより下のもの)と海面の高い方。</summary>
 	bool GroundHeightAt(float x, float z, float& outHeight) const;
+	/// <summary>影の直径(Auto Size ならモデルの横幅 × 倍率)。</summary>
+	float ComputeDiameter();
 
 	// --- 実行時 ---
 	const Camera* camera_ = nullptr;
@@ -100,6 +112,13 @@ private:
 	Vector3 rayEnd_ = {};
 	// 地面を探し始める高さ(ワールドの Y)。
 	float startY_ = 0.0f;
+	// モデルごとのローカルの箱(Auto Size 用。頂点を毎フレーム調べないように覚えておく)。
+	struct LocalBox {
+		Vector3 min;
+		Vector3 max;
+		size_t vertexCount = 0; // 同じアドレスに別のモデルが作られたときに気づくため
+	};
+	std::unordered_map<const Model*, LocalBox> localBoxes_;
 	// 格子の点ごとの高さと、影を描くか(縁の外は描かない)。
 	std::vector<float> pointHeights_;
 	std::vector<bool> pointValid_;
