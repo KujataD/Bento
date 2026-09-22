@@ -150,8 +150,9 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - 影が落ちるのは **Collider を持つ物(トリガーは除く)と海(OceanComponent)**。見た目だけのモデルには落ちない(地面には Collider を付ける)
 - 影は格子の点ごとに真下の地面へ置くので、波・斜面・段差に沿って曲がり、箱や崖の縁で切れる(Edge Drop より下がる場所には描かない)
 - 地面から離れるほど小さく・薄くなり、Max Distance で消える(Size At Max / Opacity At Max)
-- 主な設定: Size(直径)・Color・Opacity・Steps(縁の段。1=くっきりした円、2=濃い芯+薄い縁)・Start Height(地面を探し始める高さ。足元が原点の物は少し上に)・Resolution(格子の細かさ)
+- 主な設定: Size(直径)・Color・Opacity・Steps(縁の段。1=くっきりした円(既定)、2=濃い芯+薄い縁)・Start Height(地面を探し始める高さ。足元が原点の物は少し上に)・Resolution(格子の細かさ)
 - **Show Debug** で地面を探す線が出る(黄=地面が見つかった、赤=見つからない)
+- 影が見えにくいとき: Size を付けた物の横幅くらいにする(小さいと体に隠れる)。暗い地面の上では Opacity を上げる。カメラが地面とほぼ水平だと、床の丸は潰れて細い線にしか見えない(斜め上から見下ろすカメラなら見える)
 - ゲームのコードから `HasGround()` / `GetGroundHeight()` で、真下の地面の高さも分かる(着地の予告などに)
 
 ### 速い物の当たり判定(SphereCast)

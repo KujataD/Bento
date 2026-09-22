@@ -48,13 +48,13 @@ public:
 
 private:
 	KUJATA_SERIALIZED_FIELDS_BEGIN() {
-		KUJATA_REGISTER_FLOAT_NAMED_TIP(size_, "Size", 0.01f, 0.01f, 100.0f, "地面に接しているときの影の直径[m]。");
-		KUJATA_REGISTER_VECTOR4_NAMED_TIP(color_, "Color", 0.01f, 0.0f, 1.0f, "影の色(A は使わない。濃さは Opacity)。");
+		KUJATA_REGISTER_FLOAT_NAMED_TIP(size_, "Size", 0.01f, 0.01f, 100.0f, "地面に接しているときの影の直径[m]。付けた物の横幅くらいにする(小さいと体に隠れて見えない)。");
+		KUJATA_REGISTER_VECTOR4_NAMED_TIP(color_, "Color", 0.01f, 0.0f, 1.0f, "影の色(A は使わない。濃さは Opacity)。暗い海・地面の上でも見えるよう、既定は黒。");
 		KUJATA_REGISTER_FLOAT_NAMED_TIP(opacity_, "Opacity", 0.01f, 0.0f, 1.0f, "地面に接しているときの影の濃さ。");
 		KUJATA_REGISTER_INT_NAMED_TIP(steps_, "Steps", 1.0f, 1, 8, "縁の段の数。1=くっきりした円、2=濃い芯+薄い縁、多いほど縁がなだらか。");
 		KUJATA_REGISTER_FLOAT_NAMED_TIP(maxDistance_, "Max Distance", 0.1f, 0.1f, 1000.0f, "この高さ[m]より地面から離れると影が消える。");
 		KUJATA_REGISTER_FLOAT_NAMED_TIP(sizeAtMax_, "Size At Max", 0.01f, 0.0f, 10.0f, "Max Distance の高さでの大きさの倍率(離れるほど小さくする)。");
-		KUJATA_REGISTER_FLOAT_NAMED_TIP(opacityAtMax_, "Opacity At Max", 0.01f, 0.0f, 1.0f, "Max Distance の高さでの濃さの倍率(0で消えていく)。");
+		KUJATA_REGISTER_FLOAT_NAMED_TIP(opacityAtMax_, "Opacity At Max", 0.01f, 0.0f, 1.0f, "Max Distance の高さでの濃さの倍率(0で消えていく)。高く跳んでも影で位置が分かるよう、既定は少し残す。");
 		KUJATA_REGISTER_FLOAT_NAMED_TIP(startHeight_, "Start Height", 0.01f, -100.0f, 100.0f,
 		    "地面を探し始める高さ(このオブジェクトの位置からの上下[m])。足元が原点の物は少し上(0.1など)にする。");
 		KUJATA_REGISTER_FLOAT_NAMED_TIP(lift_, "Lift", 0.001f, 0.0f, 1.0f, "地面からどれだけ浮かせて描くか[m](地面とのちらつき防止)。");
@@ -67,13 +67,13 @@ private:
 		KUJATA_REGISTER_BOOL_NAMED_TIP(showDebug_, "Show Debug", "地面を探す線(黄=見つかった、赤=見つからない)を描く。");
 	}
 
-	KUJATA_FIELD_FLOAT(size_, 1.0f);
-	Vector4 color_ = {0.02f, 0.05f, 0.12f, 1.0f};
-	KUJATA_FIELD_FLOAT(opacity_, 0.5f);
-	KUJATA_FIELD_INT(steps_, 2);
-	KUJATA_FIELD_FLOAT(maxDistance_, 12.0f);
-	KUJATA_FIELD_FLOAT(sizeAtMax_, 0.4f);
-	KUJATA_FIELD_FLOAT(opacityAtMax_, 0.0f);
+	KUJATA_FIELD_FLOAT(size_, 1.2f);
+	Vector4 color_ = {0.0f, 0.0f, 0.0f, 1.0f};
+	KUJATA_FIELD_FLOAT(opacity_, 0.6f);
+	KUJATA_FIELD_INT(steps_, 1);
+	KUJATA_FIELD_FLOAT(maxDistance_, 20.0f);
+	KUJATA_FIELD_FLOAT(sizeAtMax_, 0.6f);
+	KUJATA_FIELD_FLOAT(opacityAtMax_, 0.4f);
 	KUJATA_FIELD_FLOAT(startHeight_, 0.1f);
 	KUJATA_FIELD_FLOAT(lift_, 0.02f);
 	KUJATA_FIELD_BOOL(receiveColliders_, true);
