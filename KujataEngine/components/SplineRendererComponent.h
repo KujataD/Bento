@@ -31,6 +31,8 @@ class Camera;
 ///
 /// UV は u=曲線に沿った向き(0=最初の点)、v=断面の周(チューブ)または幅(リボン)の向き(0〜1)。
 /// UV Per Unit が 0 なら u は全体で 0〜1、0 より大きければ 1 ユニットあたりその回数だけ繰り返す(流れる模様に使う)。
+/// 自作シェーダーには曲線の全長も gShaderParams.curveLength で渡すので、UV Per Unit = 1(u = 根元からの距離)にしておけば、
+/// 模様は距離で(長さが変わっても速さと間隔が変わらない)、先端の処理は u / curveLength で(根元0〜先端1)決められる。
 /// </summary>
 class KUJATA_API SplineRendererComponent : public Component, public IMaterialTarget {
 public:
@@ -126,6 +128,8 @@ private:
 	std::string appliedMaterialPath_[DirectXCommon::kRenderViewCount];
 	bool materialDirty_[DirectXCommon::kRenderViewCount] = {true, true};
 	bool transparent_ = false;
+	// 曲線の全長(自作シェーダーへ gShaderParams.curveLength として渡す)。
+	float curveLength_ = 0.0f;
 	// 頂点は既にワールド座標なので、描画は常に単位行列で行う。
 	WorldTransform identityTransform_;
 	bool identityReady_ = false;

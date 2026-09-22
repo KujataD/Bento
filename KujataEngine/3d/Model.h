@@ -26,7 +26,8 @@ enum FillMode { kFillModeSolid, kFillModeWireframe };
 struct ShaderParamsData {
 	Vector4 params[4] = {};  // マテリアルの Shader Params(意味は各シェーダーが決める)
 	float time = 0.0f;       // 起動からの秒数(描くたびに書く)
-	float padding[3] = {};
+	float curveLength = 0.0f; // SplineRendererComponent の曲線の全長(それ以外は0)。u を長さで割れば 0〜1 の位置になる
+	float padding[2] = {};
 };
 
 /// <summary>
@@ -129,6 +130,15 @@ public:
 	/// </summary>
 	void SetCustomShader(uint32_t shaderId) { customShaderId_ = shaderId; }
 	uint32_t GetCustomShader() const { return customShaderId_; }
+
+	/// <summary>自作シェーダーへ渡す曲線の全長(gShaderParams.curveLength)。SplineRendererComponent が毎フレーム設定する。</summary>
+	void SetShaderCurveLength(float length) {
+		for (SubMesh& subMesh : subMeshes_) {
+			if (subMesh.shaderParamsMap) {
+				subMesh.shaderParamsMap->curveLength = length;
+			}
+		}
+	}
 
 	/// <summary>自作シェーダーへ渡すパラメータ(float4×4)を全サブメッシュへ設定する。</summary>
 	void SetShaderParams(const Vector4 (&params)[4]) {

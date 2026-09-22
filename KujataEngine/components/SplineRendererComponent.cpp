@@ -154,6 +154,7 @@ void SplineRendererComponent::BuildSamples() {
 		distances[i] = distances[i - 1] + Length(samples_[i].position - samples_[i - 1].position);
 	}
 	const float totalLength = (std::max)(distances.back(), 1.0e-6f);
+	curveLength_ = distances.back();
 	for (size_t i = 0; i < samples_.size(); ++i) {
 		Sample& sample = samples_[i];
 		const float ratio = distances[i] / totalLength;
@@ -333,6 +334,7 @@ void SplineRendererComponent::Draw() {
 		}
 		Model* model = EnsureModel(viewIndex, vertices_.size());
 		model->UpdateDynamicVertices(vertices_);
+		model->SetShaderCurveLength(controlPoints_.size() >= 2 ? curveLength_ : 0.0f);
 	}
 
 	Model* model = models_[viewIndex].get();

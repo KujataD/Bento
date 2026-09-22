@@ -36,6 +36,7 @@ struct ShaderParams
 {
     float32_t4 params[4]; // マテリアルの Shader Params(意味は各シェーダーが決める)
     float32_t time;       // 起動からの秒数(見た目用。一時停止や時間スケールでは止まらない)
+    float32_t curveLength; // SplineRendererComponent の曲線の全長(それ以外は0)。u をこれで割ると根元0〜先端1
 };
 ConstantBuffer<ShaderParams> gShaderParams : register(b5);
 
