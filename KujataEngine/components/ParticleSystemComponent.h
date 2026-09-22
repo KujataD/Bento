@@ -47,6 +47,14 @@ public:
 	/// <summary>個数を指定して一気に出す。</summary>
 	void Burst(int count);
 
+	/// <summary>
+	/// 好きな場所から出す(ワールド座標)。散らし方・広がり・初速・寿命・大きさは設定どおりで、
+	/// 基準方向だけを direction にする(長さは見ない。0なら設定の Emit Direction)。
+	/// inheritVelocity は全部の粒に足す速度(動いている物から出すしぶきに、その物の勢いを持たせる)。
+	/// 水流に沿ったしぶきや、当たった場所の水しぶきのように、発生源が1か所でないものに使う。Strength は掛からない。
+	/// </summary>
+	void EmitAt(const Vector3& worldPosition, const Vector3& direction, int count = 1, const Vector3& inheritVelocity = {0.0f, 0.0f, 0.0f});
+
 	/// <summary>持続発生のON/OFF。Loopingがoffのときは効かない。</summary>
 	void SetEmitting(bool emitting) { emitting_ = emitting; }
 	bool IsEmitting() const { return emitting_; }
@@ -90,6 +98,8 @@ private:
 
 	void EnsureModel();
 	void SpawnOne();
+	// origin から、baseDirection を基準に1粒出す(extraVelocity は速度に足す)。
+	void SpawnAt(const Vector3& origin, const Vector3& baseDirection, const Vector3& extraVelocity);
 	Vector3 SampleEmitPosition(const Vector3& origin) const;
 	Vector3 SampleVelocity(const Vector3& baseDirection) const;
 	float RandomRange(float minValue, float maxValue) const;

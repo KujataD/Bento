@@ -113,6 +113,7 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - 主な設定: Shape(0=Tube / 1=Ribbon)、Start Width / End Width(太さ。途中はなめらかに変わる)、Sides(断面の角の数。少ないほどローポリ)、Subdivisions(点と点の間の分割数。0で折れ線 = 紫電のカクカク)、Caps(筒の両端をふさぐ)、UV Per Unit(模様を流すときの繰り返し)、Material
 - 形はこのオブジェクト自身の Transform には影響されない(点の位置だけで決まる)
 - 当たり判定は持たない(水流の判定は、ゲーム側で水弾の球などで行う)
+- パーティクル(ParticleSystemComponent)は `EmitAt(位置, 向き, 個数, 足す速度)` で好きな場所から出せる。水流に沿ったしぶきや、当たった場所の水しぶきに使う
 
 ### 半透明の描く順番
 

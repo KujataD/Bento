@@ -173,10 +173,21 @@ void ParticleSystemComponent::SpawnOne() {
 	Vector3 origin = transform.GetWorldPosition();
 	// 基準方向はオーナーのローカル指定。向きを変えれば噴射方向も一緒に回る。
 	Vector3 baseDirection = transform.GetRotationQuaternion().RotateVector(emitDirection_);
+	SpawnAt(origin, baseDirection, {0.0f, 0.0f, 0.0f});
+}
 
+void ParticleSystemComponent::EmitAt(const Vector3& worldPosition, const Vector3& direction, int count, const Vector3& inheritVelocity) {
+	const bool hasDirection = Length(direction) > 1.0e-6f;
+	const Vector3 baseDirection = hasDirection ? Normalize(direction) : emitDirection_;
+	for (int index = 0; index < std::clamp(count, 0, 2000); ++index) {
+		SpawnAt(worldPosition, baseDirection, inheritVelocity);
+	}
+}
+
+void ParticleSystemComponent::SpawnAt(const Vector3& origin, const Vector3& baseDirection, const Vector3& extraVelocity) {
 	Particle particle{};
 	particle.position = SampleEmitPosition(origin);
-	particle.velocity = SampleVelocity(baseDirection);
+	particle.velocity = SampleVelocity(baseDirection) + extraVelocity;
 	particle.lifetime = (std::max)(RandomRange(lifetimeMin_, lifetimeMax_), 0.02f);
 	particle.age = 0.0f;
 	// 強さは大きさにも効かせる。数だけ増やすと「粒が多いだけ」で迫力にならない。
