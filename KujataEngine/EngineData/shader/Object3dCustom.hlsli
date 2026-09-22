@@ -1,7 +1,7 @@
 #ifndef KUJATA_OBJECT3D_CUSTOM_HLSLI
 #define KUJATA_OBJECT3D_CUSTOM_HLSLI
 
-// マテリアルで選ぶ自作シェーダー(Data 配下の .hlsl)が最初に include するファイル。
+// マテリアルで選ぶ自作シェーダー(Data 配下の .hlsl)が最初に include するファイル。例はエンジン同梱の EngineData/shader/Custom/Ocean.hlsl。
 //
 // 自作シェーダーは 1 ファイルに次の 2 つを書く:
 //   PixelShaderOutput PSMain(VertexShaderOutput input)   … 必須
@@ -13,6 +13,7 @@
 //   頂点・ピクセル共通: gShaderParams.params[0..3](マテリアルの Shader Params)、gShaderParams.time(秒)、
 //                      gShaderParams.curveLength(SplineRendererComponent の曲線の全長。それ以外は0)、
 //                      gShaderParams.userValue(ゲームのコードからオブジェクトごとに渡す値。SplineRendererComponent::SetShaderUserValue)
+//                      gShaderParams.userValue2(同じく2つめ。Model::SetShaderUserValue2)
 //   頂点: gTranformationMatrix(WVP / World / WorldInverseTranspose)、DefaultVertex(input)
 //   ピクセル: gMaterial(色・発光・トゥーンの段など)、gTexture / gEmissiveTexture、SampleTexture(tex, uv)、
 //            gDirectionalLight(影の色 shadowColor を含む)、gCamera、pointLights / spotLights、ToonStep、FlatNormal

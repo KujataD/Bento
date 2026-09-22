@@ -611,8 +611,19 @@ uint32_t MaterialAsset::ResolveCustomShader(const MaterialAssetData& material) {
 	if (material.shaderPath.empty()) {
 		return 0;
 	}
-	// テクスチャと同じく、相対パスはプロジェクトの Data 基準。
-	return GraphicsPipeline::GetInstance()->AcquireCustomShader(ResolveProjectPath(material.shaderPath));
+	return GraphicsPipeline::GetInstance()->AcquireCustomShader(ResolveShaderPath(material.shaderPath));
+}
+
+std::filesystem::path MaterialAsset::ResolveShaderPath(const std::string& shaderPath) {
+	if (shaderPath.empty()) {
+		return {};
+	}
+	// engine: で始まるものはエンジン同梱(EngineData/shader/ の下)。それ以外はテクスチャと同じく、プロジェクトの Data 基準。
+	constexpr std::string_view kEnginePrefix = "engine:";
+	if (shaderPath.starts_with(kEnginePrefix)) {
+		return GetEngineDataRoot() / "shader" / shaderPath.substr(kEnginePrefix.size());
+	}
+	return ResolveProjectPath(shaderPath);
 }
 
 uint32_t MaterialAsset::ResolveTextureIndex(const MaterialAssetData& material, MaterialTextureSlot slot) {

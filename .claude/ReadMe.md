@@ -103,6 +103,7 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - 1 ファイルに `PSMain`(色を決める。必須)と `VSMain`(頂点を動かす。省略すると標準の処理)を書く。使える値と関数は `KujataEngine/EngineData/shader/Object3dCustom.hlsli` の先頭に書いてある(時間 `gShaderParams.time`、`ToonStep`、影の色など)
 - 書き間違えて保存しても止まらない。エラーは Console と Inspector に出て、そのあいだは直前に成功した版(無ければ標準)で描く
 - `kujata shader.list` で一覧とコンパイルの成否が分かる
+- エンジン同梱の自作シェーダー(`KujataEngine/EngineData/shader/Custom/`)は、Shader の一覧に `engine:Custom/Ocean.hlsl` のように出て、どのプロジェクトからでも選べる。書き方の例としても読める
 
 ### 線に沿ったチューブ・リボン(SplineRendererComponent)
 
@@ -117,6 +118,22 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - 形はこのオブジェクト自身の Transform には影響されない(点の位置だけで決まる)
 - 当たり判定は持たない(水流の判定は、ゲーム側で水弾の球などで行う)
 - パーティクル(ParticleSystemComponent)は `EmitAt(位置, 向き, 個数, 足す速度)` で好きな場所から出せる。水流に沿ったしぶきや、当たった場所の水しぶきに使う
+
+### 海(OceanComponent)
+
+空のオブジェクトに **OceanComponent** を付けるだけで、波打つ海面が出る(ローポリ・ドット絵向けに、陰・谷の濃さ・山の泡がすべて段で切り替わる)。
+
+- 海面の高さの基準はこのオブジェクトの位置。広さは Size X / Size Z、細かさは Divisions(長い辺のマスの数。少ないほどローポリ)
+- 波は正弦波を 4 つまで重ねる。1 つずつ Direction(進む向き[度])・Length(波長[m]。0 で使わない)・Height(高さ[m])・Speed(速さ[m/秒])を決める。向きと波長がばらばらな波を重ねると自然になる
+- Foam Level: 波の山のどこから上を泡(白)にするか(0 で泡なし)。Water Color: 海の色
+- 見た目を変えたいときは Material を設定する(色・トゥーンの段・テクスチャなど。Shader が空なら海のシェーダーを使う)。波は Material の Shader Params ではなく、この Inspector の Wave で決まる
+- 波はゲームの時間で進む(時間スケール 0 のヒットストップで波も止まる)。Play を始めるたびに同じところから始まる。Play していないときも見た目だけ動く
+- **回転は Y 軸まわりだけ、拡大は X・Z だけ**にする(傾けると波が板に沿わない)
+
+**海面の高さを使う**
+
+- 物を浮かべる: **FloatOnWaterComponent** を付ける。Play 中、毎フレームその位置の海面へ Y を合わせ、波の傾きに合わせて傾く(Height Offset で沈み具合、Follow Speed で遅れ(0 でぴったり)、Tilt で傾きの強さ)
+- ゲームのコードから: `OceanComponent::TryGetSurfaceHeight(シーン, x, z, 高さ)`(`components/OceanComponent.h`)。海の上なら true と海面の高さを返す。描かれている面と同じ高さ(頂点の間は三角形の上の高さ)なので、見た目とずれない。着水・水しぶき・泳ぎの判定などに使う
 
 ### 速い物の当たり判定(SphereCast)
 

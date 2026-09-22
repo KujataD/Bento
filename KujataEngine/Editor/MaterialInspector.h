@@ -26,7 +26,7 @@ bool SaveMaterialAsset(const std::filesystem::path& materialPath, const Material
 /// </summary>
 bool CreateCustomShaderFile(const std::string& name, std::string& outRelativePath, std::string& message);
 
-/// <summary>プロジェクトの Data 配下の .hlsl を、Data からの相対パスで列挙する。</summary>
+/// <summary>プロジェクトの Data 配下の .hlsl(Data からの相対パス)と、エンジン同梱の自作シェーダー(engine:Custom/〜)を列挙する。</summary>
 std::vector<std::string> ListCustomShaderFiles();
 
 } // namespace KujataEngine

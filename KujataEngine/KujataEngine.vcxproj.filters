@@ -429,6 +429,12 @@
     <ClCompile Include="components\SplineRendererComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
+    <ClCompile Include="components\FloatOnWaterComponent.cpp">
+      <Filter>KujataEngine\components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\OceanComponent.cpp">
+      <Filter>KujataEngine\components</Filter>
+    </ClCompile>
     <ClCompile Include="components\PointLightComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
@@ -675,6 +681,12 @@
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
     <ClInclude Include="components\SplineRendererComponent.h">
+      <Filter>KujataEngine\components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\FloatOnWaterComponent.h">
+      <Filter>KujataEngine\components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\OceanComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
     <ClInclude Include="components\PointLightComponent.h">
@@ -1052,6 +1064,9 @@
       <Filter>KujataEngine\shader</Filter>
     </None>
     <None Include="EngineData\shader\Object3dCustom.hlsli">
+      <Filter>KujataEngine\shader</Filter>
+    </None>
+    <None Include="EngineData\shader\Custom\Ocean.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </None>
     <None Include="EngineData\shader\Fullscreen.VS.hlsl">

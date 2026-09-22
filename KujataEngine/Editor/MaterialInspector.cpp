@@ -451,6 +451,15 @@ std::vector<std::string> ListCustomShaderFiles() {
 		}
 	}
 	std::sort(files.begin(), files.end());
+
+	// エンジン同梱の自作シェーダー(EngineData/shader/Custom/)。engine: を付けて選べるようにする。
+	const std::filesystem::path engineShaderRoot = GetEngineDataRoot() / "shader";
+	for (auto it = std::filesystem::recursive_directory_iterator(engineShaderRoot / "Custom", errorCode);
+	     !errorCode && it != std::filesystem::recursive_directory_iterator(); it.increment(errorCode)) {
+		if (it->is_regular_file() && it->path().extension() == ".hlsl") {
+			files.push_back("engine:" + std::filesystem::relative(it->path(), engineShaderRoot, errorCode).generic_string());
+		}
+	}
 	return files;
 }
 

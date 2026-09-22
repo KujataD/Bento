@@ -83,6 +83,7 @@ struct MaterialAssetData {
 	// テクスチャをぼかさずに読む(粗いテクスチャをドットのまま見せる)。どのシェーダー方式でも効く。
 	bool pointSampling = false;
 	// 自作シェーダー(Data からの相対パスの .hlsl。空なら標準のシェーダー)。書き方は EngineData/shader/Object3dCustom.hlsli。
+	// "engine:Custom/Ocean.hlsl" のように engine: で始めると、エンジン同梱のシェーダー(EngineData/shader/ の下)を使う。
 	std::string shaderPath;
 	// 自作シェーダーへ渡す自由なパラメータ(float4×4)。意味は各シェーダーが決める(HLSLでは gShaderParams.params[0..3])。
 	Vector4 shaderParams[4] = {};
@@ -147,6 +148,9 @@ public:
 	/// 自作シェーダーを登録して番号を返す(GraphicsPipeline::AcquireCustomShader)。shaderPath が空なら0(標準のシェーダー)。
 	/// </summary>
 	static KUJATA_API uint32_t ResolveCustomShader(const MaterialAssetData& material);
+
+	/// <summary>Shader 欄の文字列をファイルの場所にする(engine: で始まればエンジン同梱、それ以外は Data 基準)。</summary>
+	static KUJATA_API std::filesystem::path ResolveShaderPath(const std::string& shaderPath);
 };
 
 } // namespace KujataEngine

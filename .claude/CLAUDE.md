@@ -81,6 +81,7 @@
 - **アセット参照は 2 層**: assetId(`.meta`)+パス fallback。`.meta` は git 管理必須。ID はセット時に自動補完する。
 - **半透明は深度を書かない**ので、Scene が不透明物をすべて描いた後に、カメラから遠い順に描く(シーンの並び順は関係ない)。深度を書かない描画をするコンポーネントを新しく作ったら、`Component::IsTransparentDraw` で true を返すこと(返さないと、後から描かれる奥の物に上書きされて消える)。
 - **自作シェーダー**(マテリアルの `shaderPath`)は `EngineData/shader/Object3dCustom.hlsli` を include して `PSMain`(必須)/`VSMain`(省略可)を書く。定数のレジスタ(b0〜b5・t0/t2・s0/s1)は `GraphicsPipeline::CreateObject3dRootSignature` と `Object3dPixel.hlsli` / `Object3dVertex.hlsli` / `Object3d.hlsli` で一致させる。コンパイルに失敗してもエンジンは止まらず、直前に成功した版(無ければ標準)で描く。
+- **海の波の式は 2 か所にある**: `EngineData/shader/Custom/Ocean.hlsl` の `WaveHeight`(見た目)と `OceanComponent::EvaluateWaves`(高さの問い合わせ)。片方だけ変えると、浮かぶ物と海面がずれる。
 - **Play の状態持ち越し**: コンポーネントは使い回されるので、非シリアライズ状態は `OnPlayStart` で必ず初期化する。
 - GameModule DLL からエンジン側シンボルを使うには `KUJATA_API` エクスポートが必要(未エクスポートだとリンク不可)。
 - テクスチャ/フォントの読み込みは描画パス外(Prepare)で行うこと。日本語パスでテクスチャ読込が死ぬ罠あり。

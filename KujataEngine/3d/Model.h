@@ -28,7 +28,7 @@ struct ShaderParamsData {
 	float time = 0.0f;       // 起動からの秒数(描くたびに書く)
 	float curveLength = 0.0f; // SplineRendererComponent の曲線の全長(それ以外は0)。u を長さで割れば 0〜1 の位置になる
 	float userValue = 0.0f;   // コンポーネントからシェーダーへ渡す、オブジェクトごとの自由な値(既定0。意味は各シェーダーが決める)
-	float padding = 0.0f;
+	float userValue2 = 0.0f;  // 同じく2つめ(OceanComponent は海の基準の高さを入れる)
 };
 
 /// <summary>
@@ -87,6 +87,13 @@ public:
 	static Model* CreateRing(const std::string& textureFilePath, ShaderModel shaderModel = ShaderModel::kNone, uint32_t subdivision = 48,
 	    float innerRatio = 0.55f);
 
+	/// <summary>
+	/// XZ平面に寝た、細かく分割した板(格子)を作ります。海面など、頂点シェーダーで波打たせる物用。
+	/// 大きさは sizeX × sizeZ(原点が中心)、分割は divisionsX × divisionsZ マス。法線は+Y(上向き)。
+	/// UVは板全体で0〜1(u=+X方向、v=+Z方向)。
+	/// </summary>
+	static Model* CreateGrid(const std::string& textureFilePath, ShaderModel shaderModel, float sizeX, float sizeZ, uint32_t divisionsX, uint32_t divisionsZ);
+
 	static Model* CreateTriangle(const std::string& textureFilePath, ShaderModel shaderModel = ShaderModel::kNone);
 
 	static Model* CreateTetrahedron(const std::string& textureFilePath, ShaderModel shaderModel = ShaderModel::kNone);
@@ -141,11 +148,24 @@ public:
 		}
 	}
 
-	/// <summary>自作シェーダーへ渡す、オブジェクトごとの自由な値(gShaderParams.userValue)。</summary>
+	/// <summary>
+	/// 自作シェーダーへ渡す時間(gShaderParams.time)を決める。負の値(既定)なら起動からの実時間。
+	/// 見た目とゲームの判定を合わせたいとき(海の波と、その上に浮かぶ物など)に、ゲーム側の時間を渡す。
+	/// </summary>
+	void SetShaderTime(float time) { shaderTimeOverride_ = time; }
+
+	/// <summary>自作シェーダーへ渡す、オブジェクトごとの自由な値(gShaderParams.userValue / userValue2)。</summary>
 	void SetShaderUserValue(float value) {
 		for (SubMesh& subMesh : subMeshes_) {
 			if (subMesh.shaderParamsMap) {
 				subMesh.shaderParamsMap->userValue = value;
+			}
+		}
+	}
+	void SetShaderUserValue2(float value) {
+		for (SubMesh& subMesh : subMeshes_) {
+			if (subMesh.shaderParamsMap) {
+				subMesh.shaderParamsMap->userValue2 = value;
 			}
 		}
 	}
@@ -288,6 +308,8 @@ private:
 
 	BlendMode blendMode_ = BlendMode::kNormal;
 	bool doubleSided_ = false;
+	// 自作シェーダーへ渡す時間の上書き(負なら実時間)。
+	float shaderTimeOverride_ = -1.0f;
 	bool depthWrite_ = true;
 	// 自作シェーダーの番号(0=標準のシェーダー)。
 	uint32_t customShaderId_ = 0;

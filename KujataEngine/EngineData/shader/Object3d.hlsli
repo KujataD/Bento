@@ -38,6 +38,7 @@ struct ShaderParams
     float32_t time;       // 起動からの秒数(見た目用。一時停止や時間スケールでは止まらない)
     float32_t curveLength; // SplineRendererComponent の曲線の全長(それ以外は0)。u をこれで割ると根元0〜先端1
     float32_t userValue;   // コンポーネントからオブジェクトごとに渡す自由な値(既定0。意味は各シェーダーが決める)
+    float32_t userValue2;  // 同じく2つめ(OceanComponent は海の基準の高さ=オブジェクトのワールドの Y を入れる)
 };
 ConstantBuffer<ShaderParams> gShaderParams : register(b5);
 

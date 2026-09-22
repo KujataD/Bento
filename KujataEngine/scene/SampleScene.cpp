@@ -12,6 +12,7 @@
 #include "../components/ParticleSystemComponent.h"
 #include "../components/TrailRendererComponent.h"
 #include "../components/SplineRendererComponent.h"
+#include "../components/OceanComponent.h"
 #include "../components/PointLightComponent.h"
 #include "../components/SpotLightComponent.h"
 #include "../components/RotatorComponent.h"
@@ -229,6 +230,9 @@ void SampleScene::ApplyRenderCameraToModelRenderers(const Camera* camera) {
 			}
 			if (SplineRendererComponent* spline = dynamic_cast<SplineRendererComponent*>(component.get())) {
 				spline->SetCamera(camera);
+			}
+			if (OceanComponent* ocean = dynamic_cast<OceanComponent*>(component.get())) {
+				ocean->SetCamera(camera);
 			}
 		}
 	}

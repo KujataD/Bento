@@ -149,7 +149,7 @@ EditorCommandResult CommandMaterialSet(const EditorCommandArgs& args) {
 	return EditorCommandResult::Success(result);
 }
 
-// 自作シェーダーの一覧: Data 配下の .hlsl と、登録済み(どれかのマテリアルが使った)もののコンパイルの状態。
+// 自作シェーダーの一覧: Data 配下の .hlsl(とエンジン同梱の engine:〜)と、登録済み(どれかのマテリアルが使った)もののコンパイルの状態。
 json DescribeShaders() {
 	json shaders = json::array();
 	const std::vector<CustomShaderInfo> infos = GraphicsPipeline::GetInstance()->GetCustomShaderInfos();
@@ -158,7 +158,7 @@ json DescribeShaders() {
 		json entry;
 		entry["path"] = file;
 		entry["loaded"] = false;
-		const std::filesystem::path absolutePath = GetProjectDataRoot() / file;
+		const std::filesystem::path absolutePath = MaterialAsset::ResolveShaderPath(file);
 		for (const CustomShaderInfo& info : infos) {
 			if (std::filesystem::equivalent(info.path, absolutePath, errorCode)) {
 				entry["loaded"] = true;

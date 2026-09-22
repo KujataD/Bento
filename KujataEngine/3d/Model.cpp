@@ -350,6 +350,35 @@ void Model::UpdateDynamicVertices(const std::vector<VertexData>& vertices) {
 	subMesh.vertexCount = count;
 }
 
+Model* Model::CreateGrid(const std::string& textureFilePath, ShaderModel shaderModel, float sizeX, float sizeZ, uint32_t divisionsX, uint32_t divisionsZ) {
+	Model* model = new Model();
+	divisionsX = std::clamp(divisionsX, 1u, 1024u);
+	divisionsZ = std::clamp(divisionsZ, 1u, 1024u);
+
+	std::vector<VertexData> vertices;
+	vertices.reserve(static_cast<size_t>(divisionsX) * divisionsZ * 6);
+	auto makeVertex = [&](uint32_t ix, uint32_t iz) {
+		const float u = static_cast<float>(ix) / static_cast<float>(divisionsX);
+		const float v = static_cast<float>(iz) / static_cast<float>(divisionsZ);
+		return VertexData{.position = {(u - 0.5f) * sizeX, 0.0f, (v - 0.5f) * sizeZ, 1.0f}, .texcoord = {u, v}, .normal = {0.0f, 1.0f, 0.0f}};
+	};
+	// 1マスを三角形2枚にする。上(+Y)から見て時計回り(表)になる並び: (x0,z0)→(x0,z1)→(x1,z0) と (x1,z0)→(x0,z1)→(x1,z1)。
+	for (uint32_t iz = 0; iz < divisionsZ; ++iz) {
+		for (uint32_t ix = 0; ix < divisionsX; ++ix) {
+			vertices.push_back(makeVertex(ix, iz));
+			vertices.push_back(makeVertex(ix, iz + 1));
+			vertices.push_back(makeVertex(ix + 1, iz));
+			vertices.push_back(makeVertex(ix + 1, iz));
+			vertices.push_back(makeVertex(ix, iz + 1));
+			vertices.push_back(makeVertex(ix + 1, iz + 1));
+		}
+	}
+
+	MaterialData defaultMaterial = ModelUtil::CreateTexturedMaterial(textureFilePath, static_cast<int32_t>(shaderModel));
+	model->AddSubMesh(vertices, defaultMaterial);
+	return model;
+}
+
 Model* Model::CreateRing(const std::string& textureFilePath, ShaderModel shaderModel, uint32_t subdivision, float innerRatio) {
 	Model* model = new Model();
 
@@ -558,8 +587,8 @@ void Model::Draw(const WorldTransform& worldTransform, const Camera& camera, Fil
 			GraphicsPipeline::GetInstance()->SetCommandList(PipelineType::kObject3dWireframe, blendMode_);
 		}
 	}
-	// 自作シェーダーに渡す時間(見た目用。一時停止や時間スケールでは止まらない)。
-	const float shaderTime = Time::GetRealTimeSinceStartup();
+	// 自作シェーダーに渡す時間(既定は見た目用の実時間。一時停止や時間スケールでは止まらない)。
+	const float shaderTime = shaderTimeOverride_ >= 0.0f ? shaderTimeOverride_ : Time::GetRealTimeSinceStartup();
 
 	// 全サブメッシュ共通のCBufferは1回だけセットする。
 	// WVP・WorldCBuffer（RootParameter[1]: VertexShader, b0）
