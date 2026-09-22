@@ -11,7 +11,8 @@
 //
 // 使えるもの:
 //   頂点・ピクセル共通: gShaderParams.params[0..3](マテリアルの Shader Params)、gShaderParams.time(秒)、
-//                      gShaderParams.curveLength(SplineRendererComponent の曲線の全長。それ以外は0)
+//                      gShaderParams.curveLength(SplineRendererComponent の曲線の全長。それ以外は0)、
+//                      gShaderParams.userValue(ゲームのコードからオブジェクトごとに渡す値。SplineRendererComponent::SetShaderUserValue)
 //   頂点: gTranformationMatrix(WVP / World / WorldInverseTranspose)、DefaultVertex(input)
 //   ピクセル: gMaterial(色・発光・トゥーンの段など)、gTexture / gEmissiveTexture、SampleTexture(tex, uv)、
 //            gDirectionalLight(影の色 shadowColor を含む)、gCamera、pointLights / spotLights、ToonStep、FlatNormal

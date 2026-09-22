@@ -50,8 +50,9 @@ VertexData MakeVertex(const Vector3& position, float u, float v, const Vector3& 
 } // namespace
 
 void SplineRendererComponent::OnPlayStart() {
-	// 前回の Play でコードから渡された点を持ち越さない(コンポーネントは使い回されるため)。
+	// 前回の Play でコードから渡された点・値を持ち越さない(コンポーネントは使い回されるため)。
 	ClearPoints();
+	shaderUserValue_ = 0.0f;
 }
 
 void SplineRendererComponent::SetPoints(const std::vector<Vector3>& points, const std::vector<float>* widthScales) {
@@ -335,6 +336,7 @@ void SplineRendererComponent::Draw() {
 		Model* model = EnsureModel(viewIndex, vertices_.size());
 		model->UpdateDynamicVertices(vertices_);
 		model->SetShaderCurveLength(controlPoints_.size() >= 2 ? curveLength_ : 0.0f);
+		model->SetShaderUserValue(shaderUserValue_);
 	}
 
 	Model* model = models_[viewIndex].get();

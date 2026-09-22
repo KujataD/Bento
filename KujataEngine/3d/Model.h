@@ -27,7 +27,8 @@ struct ShaderParamsData {
 	Vector4 params[4] = {};  // マテリアルの Shader Params(意味は各シェーダーが決める)
 	float time = 0.0f;       // 起動からの秒数(描くたびに書く)
 	float curveLength = 0.0f; // SplineRendererComponent の曲線の全長(それ以外は0)。u を長さで割れば 0〜1 の位置になる
-	float padding[2] = {};
+	float userValue = 0.0f;   // コンポーネントからシェーダーへ渡す、オブジェクトごとの自由な値(既定0。意味は各シェーダーが決める)
+	float padding = 0.0f;
 };
 
 /// <summary>
@@ -136,6 +137,15 @@ public:
 		for (SubMesh& subMesh : subMeshes_) {
 			if (subMesh.shaderParamsMap) {
 				subMesh.shaderParamsMap->curveLength = length;
+			}
+		}
+	}
+
+	/// <summary>自作シェーダーへ渡す、オブジェクトごとの自由な値(gShaderParams.userValue)。</summary>
+	void SetShaderUserValue(float value) {
+		for (SubMesh& subMesh : subMeshes_) {
+			if (subMesh.shaderParamsMap) {
+				subMesh.shaderParamsMap->userValue = value;
 			}
 		}
 	}

@@ -65,6 +65,13 @@ public:
 	/// <summary>SetPoints で渡した点を捨てる(子オブジェクトの位置に戻る。子が無ければ何も描かない)。</summary>
 	void ClearPoints();
 
+	/// <summary>
+	/// 自作シェーダーへ渡す、この線だけの値(gShaderParams.userValue。既定0)。マテリアルの Shader Params は同じマテリアルの線で
+	/// 共通なので、線ごとに見た目を変えたいとき(例: 先端が物に当たっている線だけ先端を欠けさせない)に使う。意味は各シェーダーが決める。
+	/// </summary>
+	void SetShaderUserValue(float value) { shaderUserValue_ = value; }
+	float GetShaderUserValue() const { return shaderUserValue_; }
+
 	/// <summary>今使っている点の数(SetPoints の点、または子オブジェクトの数)。</summary>
 	size_t GetPointCount() const { return controlPoints_.size(); }
 
@@ -130,6 +137,8 @@ private:
 	bool transparent_ = false;
 	// 曲線の全長(自作シェーダーへ gShaderParams.curveLength として渡す)。
 	float curveLength_ = 0.0f;
+	// 自作シェーダーへ gShaderParams.userValue として渡す値。
+	float shaderUserValue_ = 0.0f;
 	// 頂点は既にワールド座標なので、描画は常に単位行列で行う。
 	WorldTransform identityTransform_;
 	bool identityReady_ = false;
