@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "GraphicsPipeline.h"
 #include "../base/DirectXCommon.h"
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 
@@ -27,20 +28,22 @@ void LineRenderer::Render(const Camera& camera) {
 		return;
 	}
 
-	EnsureConstantBuffer();
-	EnsureVertexCapacity(static_cast<uint32_t>(vertices_.size()));
+	uint32_t viewIndex = DirectXCommon::GetInstance()->GetRenderViewIndex();
+	ViewBuffers& buffers = views_[viewIndex < kViewCount ? viewIndex : 0];
+	EnsureConstantBuffer(buffers);
+	EnsureVertexCapacity(buffers, static_cast<uint32_t>(vertices_.size()));
 
-	std::memcpy(vertexMap_, vertices_.data(), sizeof(LineVertex) * vertices_.size());
+	std::memcpy(buffers.vertexMap, vertices_.data(), sizeof(LineVertex) * vertices_.size());
 
 	// LineRendererはワールド座標をそのまま受け取るため、Worldは単位行列としてVPだけを送る。
-	*wvpMap_ = camera.matView * camera.matProjection;
+	*buffers.wvpMap = camera.matView * camera.matProjection;
 
 	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList();
 	GraphicsPipeline::GetInstance()->SetCommandList(PipelineType::kLine, BlendMode::kNormal);
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
-	commandList->IASetVertexBuffers(0, 1, &vertexBufferView_);
-	commandList->SetGraphicsRootConstantBufferView(0, wvpResource_->GetGPUVirtualAddress());
+	commandList->IASetVertexBuffers(0, 1, &buffers.vertexBufferView);
+	commandList->SetGraphicsRootConstantBufferView(0, buffers.wvpResource->GetGPUVirtualAddress());
 	commandList->DrawInstanced(static_cast<uint32_t>(vertices_.size()), 1, 0, 0);
 
 	Clear();
@@ -50,38 +53,40 @@ void LineRenderer::Clear() {
 	vertices_.clear();
 }
 
-void LineRenderer::EnsureVertexCapacity(uint32_t vertexCount) {
-	if (vertexCount <= vertexCapacity_ && vertexResource_) {
+void LineRenderer::EnsureVertexCapacity(ViewBuffers& buffers, uint32_t vertexCount) {
+	if (vertexCount <= buffers.vertexCapacity && buffers.vertexResource) {
 		return;
 	}
 
-	vertexCapacity_ = vertexCount;
-	vertexResource_.Reset();
-	vertexMap_ = nullptr;
+	// 足りなくなったら倍にして作り直す(毎フレーム少しずつ増えるたびに作り直さないように)。
+	// 作り直すのは、このフレームでまだ使っていないこのビューのバッファだけなので、積んだ描画が消えたバッファを指すことはない。
+	buffers.vertexCapacity = (std::max)(vertexCount, buffers.vertexCapacity * 2);
+	buffers.vertexResource.Reset();
+	buffers.vertexMap = nullptr;
 
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
-	vertexResource_.Attach(dxCommon->CreateBufferResource(sizeof(LineVertex) * vertexCapacity_));
+	buffers.vertexResource.Attach(dxCommon->CreateBufferResource(sizeof(LineVertex) * buffers.vertexCapacity));
 
-	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
-	vertexBufferView_.SizeInBytes = static_cast<UINT>(sizeof(LineVertex) * vertexCapacity_);
-	vertexBufferView_.StrideInBytes = sizeof(LineVertex);
+	buffers.vertexBufferView.BufferLocation = buffers.vertexResource->GetGPUVirtualAddress();
+	buffers.vertexBufferView.SizeInBytes = static_cast<UINT>(sizeof(LineVertex) * buffers.vertexCapacity);
+	buffers.vertexBufferView.StrideInBytes = sizeof(LineVertex);
 
-	HRESULT hr = vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexMap_));
+	HRESULT hr = buffers.vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&buffers.vertexMap));
 	assert(SUCCEEDED(hr));
 }
 
-void LineRenderer::EnsureConstantBuffer() {
-	if (wvpResource_) {
+void LineRenderer::EnsureConstantBuffer(ViewBuffers& buffers) {
+	if (buffers.wvpResource) {
 		return;
 	}
 
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 	size_t constantBufferSize = (sizeof(Matrix4x4) + 0xff) & ~static_cast<size_t>(0xff);
-	wvpResource_.Attach(dxCommon->CreateBufferResource(constantBufferSize));
+	buffers.wvpResource.Attach(dxCommon->CreateBufferResource(constantBufferSize));
 
-	HRESULT hr = wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpMap_));
+	HRESULT hr = buffers.wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&buffers.wvpMap));
 	assert(SUCCEEDED(hr));
-	*wvpMap_ = MakeIdentity();
+	*buffers.wvpMap = MakeIdentity();
 }
 
 void DrawLine(const Vector3& start, const Vector3& end, const Vector4& color) {

@@ -53,18 +53,25 @@ private:
 		Vector4 color;
 	};
 
-	void EnsureVertexCapacity(uint32_t vertexCount);
+	// ビュー(Scene/Game)ごとのGPUバッファ。DirectXCommon::kRenderViewCount と同じ数。
+	// 同じフレームで両方のビューに描くので、1つを共有すると後のビューの中身(そのカメラのWVP・線)で上書きされ、
+	// 先に積んだビューもそれで描かれてずれる。
+	static constexpr uint32_t kViewCount = 2;
+	struct ViewBuffers {
+		uint32_t vertexCapacity = 0;
+		LineVertex* vertexMap = nullptr;
+		Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
+		D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+		Matrix4x4* wvpMap = nullptr;
+		Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource;
+	};
 
-	void EnsureConstantBuffer();
+	void EnsureVertexCapacity(ViewBuffers& buffers, uint32_t vertexCount);
+
+	void EnsureConstantBuffer(ViewBuffers& buffers);
 
 	std::vector<LineVertex> vertices_;
-	uint32_t vertexCapacity_ = 0;
-	LineVertex* vertexMap_ = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
-
-	Matrix4x4* wvpMap_ = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
+	ViewBuffers views_[kViewCount];
 };
 
 /// <summary>

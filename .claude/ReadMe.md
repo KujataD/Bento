@@ -43,6 +43,7 @@ kujata play.start
 kujata wait 60                                          # 60 フレーム進むのを待つ(その間のログも返る)
 kujata undo
 kujata view.screenshot game                              # Game ビューを PNG に(Temp/Screenshots/)。editor でエディタ全体
+kujata view.colliders on                                # 全 Collider の形を線で描く(F1 と同じ)
 kujata state.dump state.json                            # 全オブジェクトの全フィールドを書き出す
 kujata log.tail 20 error                                # 最近のエラーだけ
 kujata prefab.instantiate Prefabs/Enemy.prefab.json     # プレハブを置く(prefab.list で一覧)

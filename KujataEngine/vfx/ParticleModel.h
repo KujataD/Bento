@@ -86,7 +86,7 @@ public:
 
 	// --- get ---
 	uint32_t GetMaxInstance() const { return kMaxInstance; }
-	ID3D12Resource* GetInstancingResource() { return instancingResource_.Get(); }
+	ID3D12Resource* GetInstancingResource() { return instancingResource_[CurrentViewIndex()].Get(); }
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
@@ -100,8 +100,13 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU_{};
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource_;
-	ParticleForGPU* instancingData_;
+	// ビュー(Scene/Game)ごとのインスタンスのバッファ。DirectXCommon::kRenderViewCount と同じ数。
+	// 同じフレームで両方のビューに描くので、1つを共有すると後のビューの中身で上書きされてずれる。
+	static constexpr uint32_t kViewCount = 2;
+	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource_[kViewCount];
+	ParticleForGPU* instancingData_[kViewCount] = {};
+	// 今描いているビューの番号(DirectXCommon::GetRenderViewIndex)。
+	static uint32_t CurrentViewIndex();
 	std::vector<ParticleForGPU> instanceParticles_;
 
 	BlendMode blendMode_ = BlendMode::kNormal;
@@ -111,10 +116,8 @@ private:
 
 	static inline const uint32_t kMaxInstance = 10000;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU_{};
-	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU_{};
-	uint32_t instancingSrvIndex_ = 0;
-	static inline uint32_t sInstancingSrvIndexCounter_ = 64;
+	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU_[kViewCount]{};
+	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU_[kViewCount]{};
 
 	ParticleModel(const ParticleModel&) = delete;
 	ParticleModel& operator=(const ParticleModel&) = delete;

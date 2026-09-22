@@ -14,41 +14,41 @@ InstancingModel::~InstancingModel() { instanceParticles_.clear(); }
 void InstancingModel::Initialize() {
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 
-	// Instancing用のTransformationMatrixリソースを作る
-	instancingResource_ = dxCommon->CreateBufferResource(sizeof(ParticleForGPU) * kMaxInstance);
-
-	// 書き込むためのアドレスを取得
-	instancingResource_->Map(0, nullptr, (void**)&instancingData_);
-
-	// Instancing用SRVを作成
+	// Instancing用のTransformationMatrixリソースを、ビュー(Scene/Game)ごとに作る。
+	// **1つを共有すると、同じフレームで後に描くビューの中身(そのカメラのWVP)で上書きされ**、
+	// GPUが実際に描くとき(フレームの最後)には、先に積んだビューもそのカメラで描かれてずれる。
 	ID3D12DescriptorHeap* srvHeap = dxCommon->GetSrvDescriptorHeap();
 	const UINT descriptorSizeSRV = dxCommon->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	for (uint32_t view = 0; view < kViewCount; ++view) {
+		instancingResource_[view] = dxCommon->CreateBufferResource(sizeof(ParticleForGPU) * kMaxInstance);
+		instancingResource_[view]->Map(0, nullptr, (void**)&instancingData_[view]);
 
-	instancingSrvIndex_ = sInstancingSrvIndexCounter_++;
-	instancingSrvHandleCPU_ = srvHeap->GetCPUDescriptorHandleForHeapStart();
-	instancingSrvHandleCPU_.ptr += descriptorSizeSRV * instancingSrvIndex_;
-	instancingSrvHandleGPU_ = srvHeap->GetGPUDescriptorHandleForHeapStart();
-	instancingSrvHandleGPU_.ptr += descriptorSizeSRV * instancingSrvIndex_;
+		// SRVの置き場所はエンジン共通の割り当てから取る(テクスチャなど他のSRVと取り合わないように)。
+		const uint32_t srvIndex = dxCommon->AllocateSrvIndex();
+		instancingSrvHandleCPU_[view] = srvHeap->GetCPUDescriptorHandleForHeapStart();
+		instancingSrvHandleCPU_[view].ptr += descriptorSizeSRV * srvIndex;
+		instancingSrvHandleGPU_[view] = srvHeap->GetGPUDescriptorHandleForHeapStart();
+		instancingSrvHandleGPU_[view].ptr += descriptorSizeSRV * srvIndex;
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
-	instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
-	instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	instancingSrvDesc.Buffer.FirstElement = 0;
-	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	instancingSrvDesc.Buffer.NumElements = kMaxInstance;
-	instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
+		D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
+		instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+		instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		instancingSrvDesc.Buffer.FirstElement = 0;
+		instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+		instancingSrvDesc.Buffer.NumElements = kMaxInstance;
+		instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
+		dxCommon->GetDevice()->CreateShaderResourceView(instancingResource_[view].Get(), &instancingSrvDesc, instancingSrvHandleCPU_[view]);
 
-	dxCommon->GetDevice()->CreateShaderResourceView(instancingResource_.Get(), &instancingSrvDesc, instancingSrvHandleCPU_);
-		
+		// 単位行列を書き込んでおく
+		for (uint32_t i = 0; i < kMaxInstance; ++i) {
+			instancingData_[view][i].WVP = MakeIdentity();
+			instancingData_[view][i].World = MakeIdentity();
+		}
+	}
+
 	// 毎フレーム push_back するため、先に最大数まで予約して再確保スパイクを防ぐ
 	instanceParticles_.reserve(kMaxInstance);
-
-	// 単位行列を書き込んでおく
-	for (uint32_t i = 0; i < kMaxInstance; ++i) {
-		instancingData_[i].WVP = MakeIdentity();
-		instancingData_[i].World = MakeIdentity();
-	}
 }
 
 InstancingModel* InstancingModel::CreateFromOBJ(const std::string& objname, bool enableLighting) {
@@ -244,7 +244,7 @@ void InstancingModel::Draw() {
 	commandList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
 
 	// Instancing SRV（RootParameter[1]: VS t0 StructuredBuffer）
-	commandList->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU_);
+	commandList->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU_[CurrentViewIndex()]);
 
 	// テクスチャSRV（RootParameter[2]: DescriptorTable）
 	auto handle = TextureManager::GetInstance()->GetSrvHandle(textureIndex_);
@@ -257,7 +257,12 @@ void InstancingModel::Draw() {
 	instanceParticles_.clear();
 }
 
-void InstancingModel::UpdateBuffer() { memcpy(instancingData_, instanceParticles_.data(), sizeof(ParticleForGPU) * instanceParticles_.size()); }
+void InstancingModel::UpdateBuffer() { memcpy(instancingData_[CurrentViewIndex()], instanceParticles_.data(), sizeof(ParticleForGPU) * instanceParticles_.size()); }
+
+uint32_t InstancingModel::CurrentViewIndex() {
+	const uint32_t view = DirectXCommon::GetInstance()->GetRenderViewIndex();
+	return view < kViewCount ? view : 0;
+}
 
 void InstancingModel::CreateVertexBuffer(const std::vector<VertexData>& vertices) {
 	vertexCount_ = static_cast<uint32_t>(vertices.size());

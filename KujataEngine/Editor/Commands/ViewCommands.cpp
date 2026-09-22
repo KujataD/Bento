@@ -4,6 +4,7 @@
 #include "../EditorScreenshot.h"
 #include "../ImGuiManager.h"
 #include "../../base/ProjectPath.h"
+#include "../../scene/Scene.h"
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -83,11 +84,24 @@ EditorCommandResult CommandWindowShow(const EditorCommandArgs& args) {
 
 } // namespace
 
+// 全 Collider の表示(キーボードの F1 と同じ)。値を省略すると切り替え。
+EditorCommandResult CommandViewColliders(const EditorCommandArgs& args) {
+	bool show = !Scene::IsShowAllColliders();
+	if (args.Count() > 0 && !EditorCommandUtil::ParseBool(args.Get(0), show)) {
+		return EditorCommandResult::Failure("on / off で指定してください(省略すると切り替え)。");
+	}
+	Scene::SetShowAllColliders(show);
+	nlohmann::json result;
+	result["showAllColliders"] = show;
+	return EditorCommandResult::Success(result);
+}
+
 void RegisterViewCommands(EditorCommandRegistry& registry) {
 	registry.Register("view.screenshot", "view.screenshot <scene|game|editor> [ファイル]",
 	                  "ビューの描画結果(scene/game)かエディタ全体(editor)を PNG に保存する。既定は <プロジェクト>/Temp/Screenshots/", CommandViewScreenshot);
 	registry.Register("window.show", "window.show [ウィンドウ名] [true|false]",
 	                  "ウィンドウを開いて前面に出す(false で閉じる)。引数なしでウィンドウの一覧と開閉を表示する", CommandWindowShow);
+	registry.Register("view.colliders", "view.colliders [on|off]", "全 Collider の形を Scene / Game ビューに線で描く(F1 と同じ。省略すると切り替え)", CommandViewColliders);
 }
 
 } // namespace KujataEngine
