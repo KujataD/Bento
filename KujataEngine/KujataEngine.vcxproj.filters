@@ -381,6 +381,9 @@
     <ClCompile Include="scene\SceneCollisionSystem.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
+    <ClCompile Include="scene\PhysicsQuery.cpp">
+      <Filter>KujataEngine</Filter>
+    </ClCompile>
     <ClCompile Include="scene\SceneGizmos.cpp">
       <Filter>KujataEngine</Filter>
     </ClCompile>
@@ -909,6 +912,9 @@
       <Filter>KujataEngine</Filter>
     </ClInclude>
     <ClInclude Include="scene\SceneCollisionSystem.h">
+      <Filter>KujataEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\PhysicsQuery.h">
       <Filter>KujataEngine</Filter>
     </ClInclude>
     <ClInclude Include="scene\SceneGizmos.h">

@@ -265,6 +265,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="scene\Scene.cpp" />
     <ClCompile Include="scene\EditorBillboards.cpp" />
     <ClCompile Include="scene\SceneCollisionSystem.cpp" />
+    <ClCompile Include="scene\PhysicsQuery.cpp" />
     <ClCompile Include="scene\SceneGizmos.cpp" />
     <ClCompile Include="scene\ScenePhysics.cpp" />
     <ClCompile Include="scene\SceneRendering.cpp" />
@@ -437,6 +438,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="scene\Scene.h" />
     <ClInclude Include="scene\EditorBillboards.h" />
     <ClInclude Include="scene\SceneCollisionSystem.h" />
+    <ClInclude Include="scene\PhysicsQuery.h" />
     <ClInclude Include="scene\SceneGizmos.h" />
     <ClInclude Include="scene\ScenePhysics.h" />
     <ClInclude Include="shapes\AABB.h" />
