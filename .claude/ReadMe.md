@@ -144,19 +144,6 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - ゲームのコードから: `OceanComponent::TryGetSurfaceHeight(シーン, x, z, 高さ)`(`components/OceanComponent.h`)。海の上なら true と海面の高さを返す(Follow Camera ならどこでも海の上)。描かれている面と同じ高さ(頂点の間は三角形の上の高さ)なので、見た目とずれない。着水・水しぶき・泳ぎの判定などに使う
 - 船の航跡は TrailRendererComponent に泡のマテリアルを付けて海面の少し上に引く、着水のしぶきは ParticleSystemComponent の `EmitAt` で出す(どちらも既存の機能)
 
-### 泡(シャボン玉)
-
-エンジン同梱の泡のシェーダー(`engine:Custom/Bubble.hlsl`)を選んだマテリアルを、球の ModelRenderer に設定するだけで泡になる。テクスチャは使わず、**その面をどの角度から見ているか**だけで色を決めるので、カメラや泡が動くと虹色が移る。
-
-- 既定は**不透明のまま、球の全面に虹色の面を並べる**(Material の Flat Shading を ON にすると面ごとに切り替わって、いちばんローポリらしい)。半透明にしないので、描く順番の問題が出ず、ドットもきれいなまま
-- 色は「画面で見たときの半径」と面の向きで段に分ける。色相も段で丸めるので、ローポリ・ドット絵の中で浮かない
-- 見た目は Param で切り替えられる: **正面の白さ**(0=全面に色がのる / 1=正面は白く縁だけ色づく)、**中を抜く割合**(0=抜かない / 0.5=内側半分を捨てて膜だけ残す。向こう側が見える薄い泡にしたいとき)
-- 縁の白い線(リム)と、ライト側の小さなハイライトの点が泡らしさの決め手
-- 屈折はしない(ドット絵では伝わらないため)
-- 泡ごとに色を変えるには、ModelRendererComponent の **Shader User Value** を 0〜1 でばらばらにする
-- マテリアルの Emission を ON にすると、泡が光ってブルームが乗る
-- 設定はマテリアルの Shader Params(意味は `EngineData/shader/Custom/Bubble.hlsl` の先頭のコメント)
-
 ### 丸影(BlobShadowComponent)
 
 キャラクターや敵に **BlobShadowComponent** を付けるだけで、真下の地面・海面に丸い影が落ちる(風のタクト / A Short Hike の影)。ジャンプ中や空中の敵が「どこの真上にいるか」を分かりやすくするためのもの。
