@@ -5,6 +5,7 @@
 #include "ImGuiManager.h"
 #include "AssetDatabase.h"
 #include "../runtime/AssetResolver.h"
+#include "../runtime/InputActionSystem.h"
 #include "../runtime/PlayState.h"
 #include "../runtime/SceneManager.h"
 #include "../runtime/SelectionProvider.h"
@@ -211,6 +212,12 @@ void EditorApplication::Update() {
 #endif // USE_IMGUI
 
 	if (ShouldUpdateGame() && currentScene_) {
+		// 操作はすべてコマンドを通す。生の入力を読むのはここ(InputActionSystem)だけで、
+		// ゲームのコードは ActionState を読む(.claude/tick-replay.md §6)。
+		// 1. デバイス → 変わったアクションだけコマンドにする 2. コマンドを順に実行してアクションの値を更新
+		InputActionSystem::GetInstance()->CollectFromDevices();
+		InputActionSystem::GetInstance()->Step(currentScene_);
+
 		FrameProfiler::Scope profile(FrameProfiler::kSceneUpdate);
 		currentScene_->Update();
 	}
@@ -407,6 +414,8 @@ void EditorApplication::Start() {
 		if (selectedObject && currentScene_->FindGameObjectByInstanceId(selectedObject->GetInstanceId()) == selectedObject) {
 			playModeSelectedObjectInstanceId_ = selectedObject->GetInstanceId();
 		}
+		// 前の Play の押しっぱなしを持ち越さない。
+		InputActionSystem::GetInstance()->Reset();
 		currentScene_->OnPlayStart();
 	}
 
@@ -431,6 +440,7 @@ void EditorApplication::Stop() {
 	editorMode_ = EditorMode::Edit;
 	SetGamePlaying(false);
 
+	InputActionSystem::GetInstance()->Reset();
 	if (currentScene_) {
 		currentScene_->OnPlayStop();
 		if (!playModeSceneJson_.empty()) {

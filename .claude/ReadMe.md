@@ -157,6 +157,33 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - 影が見えにくいとき: Auto Size Scale を上げる(体に隠れている)。暗い地面の上では Opacity を上げる。カメラが地面とほぼ水平だと、床の丸は潰れて細い線にしか見えない(斜め上から見下ろすカメラなら見える)
 - ゲームのコードから `HasGround()` / `GetGroundHeight()` で、真下の地面の高さも分かる(着地の予告などに)
 
+### 操作(アクション)
+
+キーやボタンを直接読まず、**名前を付けた操作(アクション)**を通す(Unity の Input System と同じ考え方)。ゲームのコードにキーコードが出てこないので、キーの割り当てを変えても、AI に同じ操作をさせても、コードは変わらない。
+
+**割り当て**: `Data/ProjectSettings/InputActions.json`(無ければ既定の Move / Look / Jump / Attack / Dash を使う)
+```json
+{ "actions": [
+  { "name": "Move", "type": "axis2d", "bindings": ["WASD", "LeftStick"] },
+  { "name": "Jump", "type": "button", "bindings": ["Space", "PadA"] }
+] }
+```
+種類は `button` / `axis1d` / `axis2d`。割り当てに書けるもの: キー名(`W` `Space` `Shift` …)・`MouseLeft`・`PadA` などのボタン、`WASD` `Arrows` `LeftStick` `RightStick`(軸2D)、`LeftTrigger` `RightTrigger`、`A:D` のように「マイナス側:プラス側」でキーを2つ(軸1D)。
+
+**ゲームのコードから**
+```cpp
+const ActionState& actions = InputActionSystem::GetInstance()->GetActions();
+Vector2 move = actions.Axis2D("Move");   // -1〜1
+if (actions.Pressed("Jump")) { ... }     // この更新で 0 → 1 になった
+```
+`Held` / `Pressed` / `Released` / `Axis1D` / `Axis2D` がある。**ゲームのコードから `Input::` を直接呼ばない**(生の入力を読むのはエンジンのアクション層だけ)。
+
+**仕組み(コマンドパターン)**: 生の入力は、値が**変わったアクションだけ** `ActionCommand` になって `CommandQueue` に積まれ、更新の頭で「出どころ → 積まれた順」に実行されて `ActionState` を更新する。キーボードでも、AI エージェント(`PushAction`)でも、CUI でも、入口の形が同じになる。後でリプレイ(`.krp`)を作るときは、この列をそのまま記録すればよい(設計は [tick-replay.md](tick-replay.md))。
+
+**確かめる**
+- Window → **Input Actions**: 割り当てと今の値が並ぶ。行のボタンで値を流せる。Device Input を OFF にすると、キーボード・パッドを読まなくなる(コマンドだけで動かせる)
+- CUI: `action.list` で一覧、`action.set Move 1 0` で値を流す(キーを押すのと同じ扱い)
+
 ### 速い物の当たり判定(SphereCast)
 
 `SphereCast(シーン, 前の位置, 今の位置, 半径, 結果, 無視する物)`(`scene/PhysicsQuery.h`)で、球を線分に沿って動かしたときに最初に当たる Collider を調べられる。弾・水弾のように 1 フレームで大きく動く物に使う(点で調べると薄い物をすり抜けるため)。

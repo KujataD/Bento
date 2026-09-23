@@ -66,6 +66,7 @@ constexpr WindowVisibilityEntry kWindowVisibilityEntries[] = {
     {"Animation", &EditorWindowVisibility::animation},
     {"Scenes", &EditorWindowVisibility::scenes},
     {"Rendering", &EditorWindowVisibility::rendering},
+    {"InputActions", &EditorWindowVisibility::inputActions},
 };
 
 constexpr const char* kWindowVisibilitySettingsType = "KujataEditor";
@@ -335,6 +336,9 @@ void ImGuiManager::DrawEditor() {
 	if (windowVisibility_.scenes) {
 		DrawSceneListWindow();
 	}
+	if (windowVisibility_.inputActions) {
+		inputActionWindow_.Draw(&windowVisibility_.inputActions);
+	}
 	if (windowVisibility_.rendering) {
 		renderingWindow_.Draw(&windowVisibility_.rendering);
 	}
@@ -521,6 +525,7 @@ void ImGuiManager::DrawMainMenuBar() {
 		ImGui::MenuItem("Animation", nullptr, &windowVisibility_.animation);
 		ImGui::MenuItem("Scenes", nullptr, &windowVisibility_.scenes);
 		ImGui::MenuItem("Rendering", nullptr, &windowVisibility_.rendering);
+		ImGui::MenuItem("Input Actions", nullptr, &windowVisibility_.inputActions);
 		ImGui::Separator();
 		if (ImGui::MenuItem("Reset Layout")) {
 			dockSpace_.ResetLayout();

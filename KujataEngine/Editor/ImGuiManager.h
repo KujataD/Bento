@@ -10,6 +10,7 @@
 #include "InspectorWindow.h"
 #include "PerformanceWindow.h"
 #include "ProjectWindow.h"
+#include "InputActionWindow.h"
 #include "RenderingWindow.h"
 #include "SceneViewWindow.h"
 #include <string>
@@ -98,6 +99,7 @@ private:
 	GameViewWindow gameView_;
 	PerformanceWindow performanceWindow_;
 	RenderingWindow renderingWindow_;
+	InputActionWindow inputActionWindow_;
 };
 
 } // namespace KujataEngine

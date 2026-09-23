@@ -132,6 +132,9 @@ wait 60
 | 表示 | `view.colliders [on\|off]` | 全 Collider の形を線で描く(F1 と同じ。省略すると切り替え) |
 | 自作シェーダー | `shader.list` | Data 配下の .hlsl と、コンパイルの成否・エラー |
 | | `shader.create [名前]` / `shader.reload` | ひな形を `Data/Shaders/` に作る(Inspector の New) / すべてコンパイルし直す(保存すれば自動でも読み直す) |
+| 操作 | `action.list` | アクションの一覧(割り当てと今の値・待っているコマンドの数) |
+| | `action.set <アクション名> <値> [y の値]` | アクションの値をコマンドで流す(キーを押すのと同じ扱い。Play 中の次の更新で反映) |
+| | `action.reload` / `action.device [on\|off]` | `Data/ProjectSettings/InputActions.json` を読み直す / キーボード・パッドを読むかどうか |
 | 選択 | `select <オブジェクト>` / `select none` | Hierarchy の選択を変える |
 | 編集 | `object.create <名前> [親]` | 空のオブジェクトを作る |
 | | `object.delete <オブジェクト>` | 子ごと削除する |

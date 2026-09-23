@@ -204,6 +204,9 @@
     <ClCompile Include="Editor\Commands\MaterialCommands.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="Editor\Commands\ActionCommands.cpp">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClCompile>
     <ClCompile Include="Editor\Commands\AnimationCommands.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
@@ -270,6 +273,9 @@
     <ClCompile Include="Editor\RenderingWindow.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="Editor\InputActionWindow.cpp">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClCompile>
     <ClCompile Include="Editor\PerformanceWindow.cpp">
       <Filter>KujataEngine\Editor</Filter>
     </ClCompile>
@@ -298,6 +304,9 @@
       <Filter>KujataEngine\3d</Filter>
     </ClCompile>
     <ClCompile Include="input\Input.cpp">
+      <Filter>KujataEngine\input</Filter>
+    </ClCompile>
+    <ClCompile Include="input\InputActions.cpp">
       <Filter>KujataEngine\input</Filter>
     </ClCompile>
     <ClCompile Include="shapes\Rect.cpp">
@@ -346,6 +355,18 @@
       <Filter>KujataEngine\runtime</Filter>
     </ClCompile>
     <ClCompile Include="runtime\PlayState.cpp">
+      <Filter>KujataEngine\runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\SimCommand.cpp">
+      <Filter>KujataEngine\runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\InputActionSystem.cpp">
+      <Filter>KujataEngine\runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\CommandQueue.cpp">
+      <Filter>KujataEngine\runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\ActionState.cpp">
       <Filter>KujataEngine\runtime</Filter>
     </ClCompile>
     <ClCompile Include="runtime\SceneManager.cpp">
@@ -776,6 +797,18 @@
     <ClInclude Include="runtime\PlayState.h">
       <Filter>KujataEngine\runtime</Filter>
     </ClInclude>
+    <ClInclude Include="runtime\SimCommand.h">
+      <Filter>KujataEngine\runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\InputActionSystem.h">
+      <Filter>KujataEngine\runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\CommandQueue.h">
+      <Filter>KujataEngine\runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\ActionState.h">
+      <Filter>KujataEngine\runtime</Filter>
+    </ClInclude>
     <ClInclude Include="runtime\SceneManager.h">
       <Filter>KujataEngine\runtime</Filter>
     </ClInclude>
@@ -821,6 +854,9 @@
     <ClInclude Include="Editor\RenderingWindow.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
+    <ClInclude Include="Editor\InputActionWindow.h">
+      <Filter>KujataEngine\Editor</Filter>
+    </ClInclude>
     <ClInclude Include="Editor\PerformanceWindow.h">
       <Filter>KujataEngine\Editor</Filter>
     </ClInclude>
@@ -846,6 +882,9 @@
       <Filter>KujataEngine\3d</Filter>
     </ClInclude>
     <ClInclude Include="input\Input.h">
+      <Filter>KujataEngine\input</Filter>
+    </ClInclude>
+    <ClInclude Include="input\InputActions.h">
       <Filter>KujataEngine\input</Filter>
     </ClInclude>
     <ClInclude Include="shapes\Rect.h">

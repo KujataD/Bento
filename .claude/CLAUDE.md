@@ -84,6 +84,7 @@
 - **自作シェーダーの `gSceneDepth`(t3)は、半透明の描画中だけ本物**。Scene が不透明物を描き終えたところで深度をコピーし(`DirectXCommon::CaptureSceneDepth`)、それ以外の描画では白(=いちばん遠い)が入る。不透明物の深度を読みたいコンポーネントは `IsTransparentDraw` を true にする(深度は書いてもよい。先に描くなら `GetTransparentQueue` を負に)。
 - **シェーダーと並びを合わせる C++ の構造体**: `ShaderParamsData`(3d/Model.h)↔ `ShaderParams`、`CameraForGPU`(3d/Camera.h)↔ `Camera`(どちらも EngineData/shader/Object3d.hlsli)。
 - **海の波の式は 2 か所にある**: `EngineData/shader/Custom/Ocean.hlsl` の `WaveHeight`(見た目)と `OceanComponent::EvaluateWaves`(高さの問い合わせ)。片方だけ変えると、浮かぶ物と海面がずれる。
+- **操作は必ずアクション層を通す**: ゲームのコードから `Input::`(生のキー・パッド)を直接読まない。`InputActionSystem::GetInstance()->GetActions()` の `ActionState`(`Held` / `Pressed` / `Axis2D` 等)を読む。生の入力を読むのは `InputActionSystem::CollectFromDevices` の中だけで、そこから `ActionCommand` を `CommandQueue` へ積み、更新の頭で実行してアクションの値を更新する(キーボード・AI・CUI・将来のリプレイで入口の形をそろえるため)。デバッグカメラなど Presentation 層は今までどおり `Input::` でよい。
 - **Play の状態持ち越し**: コンポーネントは使い回されるので、非シリアライズ状態は `OnPlayStart` で必ず初期化する。
 - GameModule DLL からエンジン側シンボルを使うには `KUJATA_API` エクスポートが必要(未エクスポートだとリンク不可)。
 - テクスチャ/フォントの読み込みは描画パス外(Prepare)で行うこと。日本語パスでテクスチャ読込が死ぬ罠あり。

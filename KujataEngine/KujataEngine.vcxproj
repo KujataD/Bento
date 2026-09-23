@@ -183,6 +183,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Editor\Commands\ViewCommands.cpp" />
     <ClCompile Include="Editor\Commands\PrefabCommands.cpp" />
     <ClCompile Include="Editor\Commands\MaterialCommands.cpp" />
+    <ClCompile Include="Editor\Commands\ActionCommands.cpp" />
     <ClCompile Include="Editor\Commands\AnimationCommands.cpp" />
     <ClCompile Include="Editor\PrefabEditing.cpp" />
     <ClCompile Include="Editor\AnimationEditing.cpp" />
@@ -207,6 +208,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Editor\GameViewWindow.cpp" />
     <ClCompile Include="Editor\PerformanceWindow.cpp" />
     <ClCompile Include="Editor\RenderingWindow.cpp" />
+    <ClCompile Include="Editor\InputActionWindow.cpp" />
     <ClCompile Include="Editor\SceneViewWindow.cpp" />
     <ClCompile Include="Editor\SceneJsonImporter.cpp" />
     <ClCompile Include="3d\AxisIndicator.cpp" />
@@ -240,6 +242,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="postprocess\VolumeStack.cpp" />
     <ClCompile Include="components\VolumeComponent.cpp" />
     <ClCompile Include="input\Input.cpp" />
+    <ClCompile Include="input\InputActions.cpp" />
     <ClCompile Include="KujataEngine.cpp" />
     <ClCompile Include="math\Easing.cpp" />
     <ClCompile Include="math\MathUtil.cpp" />
@@ -252,6 +255,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="runtime\GameModuleLoader.cpp" />
     <ClCompile Include="runtime\AnimationRecordingState.cpp" />
     <ClCompile Include="runtime\PlayState.cpp" />
+    <ClCompile Include="runtime\SimCommand.cpp" />
+    <ClCompile Include="runtime\InputActionSystem.cpp" />
+    <ClCompile Include="runtime\CommandQueue.cpp" />
+    <ClCompile Include="runtime\ActionState.cpp" />
     <ClCompile Include="runtime\SceneManager.cpp" />
     <ClCompile Include="runtime\AssetResolver.cpp" />
     <ClCompile Include="runtime\EngineContext.cpp" />
@@ -371,6 +378,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Editor\GameViewWindow.h" />
     <ClInclude Include="Editor\PerformanceWindow.h" />
     <ClInclude Include="Editor\RenderingWindow.h" />
+    <ClInclude Include="Editor\InputActionWindow.h" />
     <ClInclude Include="Editor\SceneViewWindow.h" />
     <ClInclude Include="Editor\SceneJsonImporter.h" />
     <ClInclude Include="..\externals\ImGuizmo-1.9\src\ImGuizmo.h" />
@@ -405,6 +413,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="postprocess\VolumeStack.h" />
     <ClInclude Include="components\VolumeComponent.h" />
     <ClInclude Include="input\Input.h" />
+    <ClInclude Include="input\InputActions.h" />
     <ClInclude Include="KujataEngine.h" />
     <ClInclude Include="KujataEngineEditor.h" />
     <ClInclude Include="math\Easing.h" />
@@ -421,6 +430,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="runtime\KujataApi.h" />
     <ClInclude Include="runtime\AnimationRecordingState.h" />
     <ClInclude Include="runtime\PlayState.h" />
+    <ClInclude Include="runtime\SimCommand.h" />
+    <ClInclude Include="runtime\InputActionSystem.h" />
+    <ClInclude Include="runtime\CommandQueue.h" />
+    <ClInclude Include="runtime\ActionState.h" />
     <ClInclude Include="runtime\SceneManager.h" />
     <ClInclude Include="runtime\AssetResolver.h" />
     <ClInclude Include="runtime\EngineContext.h" />
