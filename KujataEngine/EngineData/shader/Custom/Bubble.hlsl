@@ -9,7 +9,8 @@
 //   Param 0 = (色相の始まり(0〜1), 縁までに色相が回る回数, 段の数(2以上), 縁での鮮やかさ(0〜1。正面は白く、縁へ行くほど色づく))
 //   Param 1 = (明るさ, リム(縁の白)の太さ(0〜1), リムの強さ(0〜1), ハイライトの強さ(0〜1))
 //   Param 2 = (ハイライトの大きさ(0〜1), 色相が時間で回る速さ(1秒あたり), 下側の暗さ(1=暗くしない), 縁の鋭さ(1で素直))
-//   Param 3 = (面の向きで色相が回る量(0〜1くらい), 中を抜く割合(0〜1。0.5なら内側半分が抜けて膜だけ残る), (未使用) ×2)
+//   Param 3 = (面の向きで色相が回る量(0〜1くらい), 中を抜く割合(0〜1。0で抜かない、0.5なら内側半分が抜けて膜だけ残る),
+//              正面の白さ(0=全面に色がのる / 1=正面は白く縁だけ色づく), (未使用))
 // gShaderParams.userValue = この泡だけの色相のずれ(0〜1)。ModelRendererComponent の Shader User Value が入る。
 #include "Object3dCustom.hlsli"
 
@@ -50,7 +51,10 @@ PixelShaderOutput PSMain(VertexShaderOutput input)
     const float32_t hueRaw = frac(hueParams.x + band * hueParams.y + directional * gShaderParams.params[3].x + gShaderParams.userValue +
                                   gShaderParams.time * extraParams.y);
     const float32_t hue = floor(hueRaw * steps) / steps;
-    float32_t3 color = HsvToRgb(hue, saturate(hueParams.w) * band, max(lookParams.x, 0.0f));
+    // 「正面をどれだけ白くするか」(0=全面に同じ濃さで色がのる / 1=正面は白く、縁だけ色づく)。
+    const float32_t centerWhite = saturate(gShaderParams.params[3].z);
+    const float32_t colorAmount = lerp(1.0f, band, centerWhite);
+    float32_t3 color = HsvToRgb(hue, saturate(hueParams.w) * colorAmount, max(lookParams.x, 0.0f));
 
     // 中を抜く(泡の膜だけを残す)。半透明にしなくても向こう側が見えるので、ドットも描く順番もきれいなまま。
     // ハイライトの点は中に浮かせたいので、抜く前に判定して残す。
