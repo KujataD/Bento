@@ -280,6 +280,7 @@ void ModelRendererComponent::Draw() {
 	}
 
 	model_->SetDoubleSided(doubleSided_);
+	model_->SetShaderUserValue(shaderUserValue_);
 	model_->Draw(owner->GetTransform(), *camera_);
 }
 
@@ -373,6 +374,9 @@ void ModelRendererComponent::DrawInspector() {
 
 	InspectorUI::Checkbox("Double Sided", &doubleSided_);
 
+	InspectorUI::DragFloat("Shader User Value", &shaderUserValue_, 0.01f);
+	InspectorUI::ItemTooltip("自作シェーダーへ渡す、このオブジェクトだけの値(gShaderParams.userValue)。同じマテリアルでも1つずつ見た目を変えたいときに使う(泡の色相のずれなど)。");
+
 
 	InspectorUI::TextUnformatted("--- Billboard ---");
 	InspectorUI::Checkbox("Billboard Enabled", &billboardEnabled_);
@@ -398,6 +402,7 @@ void ModelRendererComponent::WriteJson(nlohmann::json& json) const {
 	json["materialPath"] = materialPath_;
 	json["billboardEnabled"] = billboardEnabled_;
 	json["doubleSided"] = doubleSided_;
+	json["shaderUserValue"] = shaderUserValue_;
 	json["billboardFaceMode"] = billboardFaceMode_;
 	json["cameraLocalZ"] = cameraLocalZ_;
 
@@ -441,6 +446,9 @@ void ModelRendererComponent::ReadJson(const nlohmann::json& json) {
 
 	if (json.contains("billboardEnabled") && json.at("billboardEnabled").is_boolean()) {
 		billboardEnabled_ = json.at("billboardEnabled").get<bool>();
+	}
+	if (json.contains("shaderUserValue") && json.at("shaderUserValue").is_number()) {
+		shaderUserValue_ = json.at("shaderUserValue").get<float>();
 	}
 	if (json.contains("doubleSided") && json.at("doubleSided").is_boolean()) {
 		doubleSided_ = json.at("doubleSided").get<bool>();

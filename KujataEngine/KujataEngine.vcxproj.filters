@@ -1075,6 +1075,9 @@
     <None Include="EngineData\shader\Custom\Ocean.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </None>
+    <None Include="EngineData\shader\Custom\Bubble.hlsl">
+      <Filter>KujataEngine\shader</Filter>
+    </None>
     <None Include="EngineData\shader\Custom\BlobShadow.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </None>

@@ -103,6 +103,7 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - 1 ファイルに `PSMain`(色を決める。必須)と `VSMain`(頂点を動かす。省略すると標準の処理)を書く。使える値と関数は `KujataEngine/EngineData/shader/Object3dCustom.hlsli` の先頭に書いてある(時間 `gShaderParams.time`、`ToonStep`、影の色など)
 - 書き間違えて保存しても止まらない。エラーは Console と Inspector に出て、そのあいだは直前に成功した版(無ければ標準)で描く
 - `kujata shader.list` で一覧とコンパイルの成否が分かる
+- 同じマテリアルでも1つずつ見た目を変えたいときは、ModelRendererComponent の **Shader User Value**(Inspector か `SetShaderUserValue`)。シェーダーは `gShaderParams.userValue` で受け取る(泡の色相のずれなど)
 - ゲームのコードから、オブジェクトごとの値を `Model::SetShaderObjectParams`(float4 × 12。シェーダーは `gShaderParams.objectParams`)で渡せる。マテリアルの Param は同じマテリアルの物で共通、こちらはオブジェクトごと
 - **半透明として描くとき**(マテリアルの Depth Write が OFF)は、奥にある不透明物までの距離が `SceneDepthBehind(input.position)`[m] で分かる(不透明物を描き終えた時点の深度 `gSceneDepth` を読む)。水の岸の泡・浅瀬の色・物との境目を光らせる、などに使う
 - 半透明どうしの描く順番は、ふつうは遠い順。コンポーネントの `GetTransparentQueue()` を小さくすると先に描く(海の面のように、ほかの半透明より奥にある大きな面)
@@ -142,6 +143,18 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - 物を浮かべる: **FloatOnWaterComponent** を付ける。Play 中、毎フレームその位置の海面へ Y を合わせ、波の傾きに合わせて傾く(Height Offset で沈み具合、Follow Speed で遅れ(0 でぴったり)、Tilt で傾きの強さ)
 - ゲームのコードから: `OceanComponent::TryGetSurfaceHeight(シーン, x, z, 高さ)`(`components/OceanComponent.h`)。海の上なら true と海面の高さを返す(Follow Camera ならどこでも海の上)。描かれている面と同じ高さ(頂点の間は三角形の上の高さ)なので、見た目とずれない。着水・水しぶき・泳ぎの判定などに使う
 - 船の航跡は TrailRendererComponent に泡のマテリアルを付けて海面の少し上に引く、着水のしぶきは ParticleSystemComponent の `EmitAt` で出す(どちらも既存の機能)
+
+### 泡(シャボン玉)
+
+エンジン同梱の泡のシェーダー(`engine:Custom/Bubble.hlsl`)を選んだマテリアルを、球の ModelRenderer に設定するだけで泡になる。テクスチャは使わず、**その面をどの角度から見ているか**だけで色を決めるので、カメラや泡が動くと虹色が移る。
+
+- **中を抜いて膜だけ描く**(Param 3 の「中を抜く割合」)。半透明にしなくても向こう側が見えるので、ドットも描く順番もきれいなまま
+- 色は「画面で見たときの半径」で段に分け、**正面は白く、縁へ行くほど色づく**(実物のシャボン玉と同じ)。色相も段で丸めるので、ローポリ・ドット絵の中で浮かない
+- 縁の白い線(リム)と、ライト側の小さなハイライトの点が泡らしさの決め手
+- 屈折はしない(ドット絵では伝わらないため)
+- 泡ごとに色を変えるには、ModelRendererComponent の **Shader User Value** を 0〜1 でばらばらにする
+- マテリアルの Emission を ON にすると、泡が光ってブルームが乗る
+- 設定はマテリアルの Shader Params(意味は `EngineData/shader/Custom/Bubble.hlsl` の先頭のコメント)
 
 ### 丸影(BlobShadowComponent)
 

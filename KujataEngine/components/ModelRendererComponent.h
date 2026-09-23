@@ -95,6 +95,13 @@ public:
 	bool IsTransparentDraw() const override { return !material_.depthWrite; }
 
 	/// <summary>
+	/// 自作シェーダーへ渡す、このオブジェクトだけの値(gShaderParams.userValue)。同じマテリアルでも1つずつ見た目を変えたいときに使う
+	/// (例: 泡のシェーダーの色相のずれ)。意味は各シェーダーが決める。
+	/// </summary>
+	void SetShaderUserValue(float value) { shaderUserValue_ = value; }
+	float GetShaderUserValue() const { return shaderUserValue_; }
+
+	/// <summary>
 	/// アニメーション可能チャンネル(emissiveIntensity/emissiveColor.r,g,b)を公開する。
 	/// AnimationWindowでカーブを打つと発光の明滅などが作れる。
 	/// </summary>
@@ -207,6 +214,8 @@ private:
 	bool billboardEnabled_ = false;
 	// 両面描画(背面カリングなし)。バリア球など内側からも見せたいものに使う。
 	bool doubleSided_ = false;
+	// 自作シェーダーへ渡す、このオブジェクトだけの値(gShaderParams.userValue)。
+	float shaderUserValue_ = 0.0f;
 	int billboardFaceMode_ = 0;
 	float cameraLocalZ_ = 1.0f;
 	// ランタイム発光上書き(演出用の一時値。シリアライズしない)。

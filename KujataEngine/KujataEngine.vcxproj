@@ -475,6 +475,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <None Include="EngineData\shader\Object3dVertex.hlsli" />
     <None Include="EngineData\shader\Object3dCustom.hlsli" />
     <None Include="EngineData\shader\Custom\Ocean.hlsl" />
+    <None Include="EngineData\shader\Custom\Bubble.hlsl" />
     <None Include="EngineData\shader\Custom\BlobShadow.hlsl" />
     <None Include="shader\Object3d.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
