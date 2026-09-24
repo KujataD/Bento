@@ -361,8 +361,9 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# 3Dモデルの.obj(Resources以下は除外)
+# 3Dモデルの.obj(Resources と Data 以下は除外。ゲームのモデルは Data の下に置くため)
 !**/Resources/**/*.obj
+!**/Data/**/*.obj
 
 ## ---- KujataEngine 固有の生成物 ----
 ## いずれも自動生成されるフォルダ。削除してもビルド/実行し直せば復元される。
