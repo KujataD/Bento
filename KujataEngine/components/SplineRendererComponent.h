@@ -72,6 +72,17 @@ public:
 	void SetShaderUserValue(float value) { shaderUserValue_ = value; }
 	float GetShaderUserValue() const { return shaderUserValue_; }
 
+	/// <summary>
+	/// 自作シェーダーへ渡す、この線だけの float4(gShaderParams.objectParams[0..11])。先頭から count 個。
+	/// マテリアルを作らずに、コンポーネントの設定だけで見た目を決めたいときに使う(例: WaterSprayComponent の水流)。
+	/// </summary>
+	void SetShaderObjectParams(const Vector4* values, size_t count);
+
+	/// <summary>
+	/// Material を使わないときの自作シェーダー(engine:Custom/Water.hlsl など)。Material を設定すればそちらが優先。
+	/// </summary>
+	void SetShaderPath(const std::string& shaderPath);
+
 	/// <summary>今使っている点の数(SetPoints の点、または子オブジェクトの数)。</summary>
 	size_t GetPointCount() const { return controlPoints_.size(); }
 
@@ -87,6 +98,8 @@ private:
 		KUJATA_REGISTER_FLOAT_NAMED_TIP(uvPerUnit_, "UV Per Unit", 0.01f, 0.0f, 100.0f,
 		    "u 方向の繰り返し。0で全体が 0〜1、0より大きいと 1 ユニットあたりその回数(模様を流すとき)。");
 		KUJATA_REGISTER_STRING_NAMED_TIP(materialPath_, "Material", "描くのに使うマテリアル(Project からドラッグでも設定できる)。");
+		KUJATA_REGISTER_STRING_NAMED_TIP(shaderPath_, "Shader",
+		    "Material を使わないときの自作シェーダー(例: engine:Custom/Water.hlsl)。Material を設定すればそちらが優先。");
 	}
 
 	KUJATA_FIELD_INT(shape_, 0);
@@ -97,6 +110,7 @@ private:
 	KUJATA_FIELD_BOOL(caps_, true);
 	KUJATA_FIELD_FLOAT(uvPerUnit_, 0.0f);
 	KUJATA_FIELD_STRING(materialPath_, "");
+	KUJATA_FIELD_STRING(shaderPath_, "");
 
 	// 曲線上の1点(組み立ての途中で使う)。
 	struct Sample {
@@ -139,6 +153,11 @@ private:
 	float curveLength_ = 0.0f;
 	// 自作シェーダーへ gShaderParams.userValue として渡す値。
 	float shaderUserValue_ = 0.0f;
+	// 自作シェーダーへ gShaderParams.objectParams として渡す値(コンポーネントから毎フレーム入れる)。
+	Vector4 shaderObjectParams_[12] = {};
+	size_t shaderObjectParamCount_ = 0;
+	// ApplyMaterial したときの Shader(変わったら読み直す)。
+	std::string appliedShaderPath_;
 	// 頂点は既にワールド座標なので、描画は常に単位行列で行う。
 	WorldTransform identityTransform_;
 	bool identityReady_ = false;

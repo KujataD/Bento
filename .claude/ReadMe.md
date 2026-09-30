@@ -116,7 +116,8 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - 点の渡し方
   - **子オブジェクトの位置**(並び順)。エディタで形を作って確かめるとき
   - **ゲームのコード**から `SetPoints(点の配列, 太さの倍率の配列(省略可))` で毎フレーム渡す(ワールド座標)。渡すと子の位置は使わない(`ClearPoints` で戻る)
-- 主な設定: Shape(0=Tube / 1=Ribbon)、Start Width / End Width(太さ。途中はなめらかに変わる)、Sides(断面の角の数。少ないほどローポリ)、Subdivisions(点と点の間の分割数。0で折れ線 = 紫電のカクカク)、Caps(筒の両端をふさぐ)、UV Per Unit(模様を流すときの繰り返し)、Material
+- 主な設定: Shape(0=Tube / 1=Ribbon)、Start Width / End Width(太さ。途中はなめらかに変わる)、Sides(断面の角の数。少ないほどローポリ)、Subdivisions(点と点の間の分割数。0で折れ線 = 紫電のカクカク)、Caps(筒の両端をふさぐ)、UV Per Unit(模様を流すときの繰り返し)、Material、Shader(Material を使わないときの自作シェーダー。例 `engine:Custom/Water.hlsl`)
+- ゲームのコードから `SetShaderObjectParams(値, 個数)` で、その線だけの float4 をシェーダーへ渡せる(`gShaderParams.objectParams`)。マテリアルを作らずに見た目を決めたいときに使う(WaterSprayComponent の水流がこれ)
 - ゲームのコードから `SetShaderUserValue(値)` で、その線だけの値を自作シェーダーへ渡せる(`gShaderParams.userValue`)。マテリアルの Shader Params は同じマテリアルの線で共通なので、線ごとに見た目を変えたいときに使う(例: 先端が物に当たっている水流だけ、先端を欠けさせない)
 - 自作シェーダーには曲線の全長が `gShaderParams.curveLength` で渡る。**模様を流すときは UV Per Unit を 1**(u = 根元からの距離[m])にして、模様は距離で、先端の処理は `u / curveLength`(根元0〜先端1)で決める。u を全体で 0〜1(UV Per Unit = 0)にして模様を流すと、線の長さが変わるたびに模様の速さと間隔が変わり、伸び縮みしてがくがく見える
 - 形はこのオブジェクト自身の Transform には影響されない(点の位置だけで決まる)
@@ -143,6 +144,20 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - 物を浮かべる: **FloatOnWaterComponent** を付ける。Play 中、毎フレームその位置の海面へ Y を合わせ、波の傾きに合わせて傾く(Height Offset で沈み具合、Follow Speed で遅れ(0 でぴったり)、Tilt で傾きの強さ)
 - ゲームのコードから: `OceanComponent::TryGetSurfaceHeight(シーン, x, z, 高さ)`(`components/OceanComponent.h`)。海の上なら true と海面の高さを返す(Follow Camera ならどこでも海の上)。描かれている面と同じ高さ(頂点の間は三角形の上の高さ)なので、見た目とずれない。着水・水しぶき・泳ぎの判定などに使う
 - 船の航跡は TrailRendererComponent に泡のマテリアルを付けて海面の少し上に引く、着水のしぶきは ParticleSystemComponent の `EmitAt` で出す(どちらも既存の機能)
+
+### 放水(WaterSprayComponent)
+
+**WaterSprayComponent を付けるだけ**で、そのオブジェクトの位置(ノズル)から水が出る。水鉄砲・ホース・ボスの水ブレスなど。
+水流を描く子オブジェクトも、水の見た目(`engine:Custom/Water.hlsl`)も自分で用意するので、マテリアルは要らない。
+
+- **仕組み**: 水弾を一定の間隔で撃ち出し、その位置を曲線(SplineRendererComponent)でつないで水流に見せる。水弾は実行中だけ GameObject として作られ(Hierarchy の「WaterDrops (名前)」の下)、選べば Inspector・CUI で位置や速度を見られる
+- **出し方**(Fire Mode): Action(アクションを押している間。既定は `Attack`)/ Always(ずっと)/ Code(`SetFiring(true)`)
+- **狙い方**(Aim Mode): Forward(このオブジェクトの前)/ Target(Aim Target に入れたオブジェクト)/ Mouse(Game ビューのマウス。**リプレイには残らない**)/ Code(`SetAimDirection` / `SetAimPoint`)。Aim Spread で狙いをばらけさせられる
+- **当たり判定**: 水弾1つ1つを半径 Hit Radius の球として、前の位置から今の位置まで動かして調べる(速くてもすり抜けない)。相手はトリガーでない Collider を付けた物なら何でもよい。当たった水弾はそこで消え、Hit Flash を入れると当たった物が点滅する。当たった点は `TryGetLastHitPoint` で取れる
+- **水面**: 海(OceanComponent)があれば、その場所の海面で水弾が消えてしぶきを上げる(無ければ Kill Height)
+- **しぶき**: 同じオブジェクトに ParticleSystemComponent があれば、当たった所・水面・流れに沿った飛沫を出す(Splash Count / Droplet Rate)
+- **見た目**: Water Color / Foam Color / Rim Color・Toon Steps・Flat Shading・Wobble(太さのうねり)・Stripe(流れる泡の筋)・Tip Dissolve(先端が面ごとに欠けて消える)。物に当たっている間は先端が欠けない
+- 見た目を作り込みたいときは、子に SplineRenderer を置いてマテリアルを設定すればそちらが使われる(子があれば自動では作らない)
 
 ### 丸影(BlobShadowComponent)
 

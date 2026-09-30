@@ -456,6 +456,9 @@
     <ClCompile Include="components\OceanComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
+    <ClCompile Include="components\WaterSprayComponent.cpp">
+      <Filter>KujataEngine\components</Filter>
+    </ClCompile>
     <ClCompile Include="components\BlobShadowComponent.cpp">
       <Filter>KujataEngine\components</Filter>
     </ClCompile>
@@ -711,6 +714,12 @@
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
     <ClInclude Include="components\OceanComponent.h">
+      <Filter>KujataEngine\components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\WaterSprayComponent.h">
+      <Filter>KujataEngine\components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\WaterDropComponent.h">
       <Filter>KujataEngine\components</Filter>
     </ClInclude>
     <ClInclude Include="components\BlobShadowComponent.h">
@@ -1112,6 +1121,9 @@
       <Filter>KujataEngine\shader</Filter>
     </None>
     <None Include="EngineData\shader\Custom\Ocean.hlsl">
+      <Filter>KujataEngine\shader</Filter>
+    </None>
+    <None Include="EngineData\shader\Custom\Water.hlsl">
       <Filter>KujataEngine\shader</Filter>
     </None>
     <None Include="EngineData\shader\Custom\BlobShadow.hlsl">
