@@ -1,6 +1,7 @@
 #include "EditorApplication.h"
 #include "EditorCommandServer.h"
 #include "EditorConsole.h"
+#include "GameProjectSync.h"
 #include "EditorScreenshot.h"
 #include "ImGuiManager.h"
 #include "AssetDatabase.h"
@@ -140,6 +141,9 @@ void EditorApplication::Initialize() {
 
 	editorMode_ = EditorMode::Edit;
 	AddConsoleLog("Editor Mode: Edit");
+
+	// エクスプローラーなどで足したソースも、Visual Studio の一覧とビルドに入るようにする。
+	SyncGameProjectFiles();
 
 	// 起動時は固定配置のGameModule.dllを読み込み、Component登録と初期Scene生成を行う。
 	// 以降のHotReloadでは一時ビルドDLLへ差し替える。
@@ -598,6 +602,15 @@ void EditorApplication::SetCurrentScene(std::unique_ptr<Scene> scene) {
 	SetCurrentSceneRaw(rawScene, nullptr);
 }
 
+void EditorApplication::SyncGameProjectFiles() {
+	const GameProjectSync::Result result = GameProjectSync::Sync();
+	if (!result.succeeded) {
+		EditorConsole::GetInstance()->AddLog("[Project] " + result.message, EditorLogLevel::Warning);
+	} else if (result.changed) {
+		EditorConsole::GetInstance()->AddLog("[Project] " + result.message, EditorLogLevel::Info);
+	}
+}
+
 bool EditorApplication::ReloadGameModule() {
 	if (editorMode_ == EditorMode::PrefabEdit) {
 		AddConsoleLog("[HotReload] Close Prefab Edit Mode before reload.");
@@ -608,6 +621,9 @@ bool EditorApplication::ReloadGameModule() {
 		AddConsoleLog("[HotReload] Stop play mode before reload.");
 		Stop();
 	}
+
+	// 足した・消したソースをプロジェクトに反映してからビルドする。
+	SyncGameProjectFiles();
 
 	// 固定のGameModule/bin出力を上書きせず、世代ごとの一時DLLを作る。
 	// DLL/PDBがデバッガやOSに掴まれても、次の世代へ逃がせるようにするため。

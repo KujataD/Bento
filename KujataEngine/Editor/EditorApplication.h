@@ -78,6 +78,9 @@ public:
 
 	bool ReloadGameModule();
 
+	/// <summary>プロジェクトの中の .cpp / .h を GameModule.vcxproj に並べ直す(GameProjectSync)。</summary>
+	void SyncGameProjectFiles();
+
 	Scene* GetCurrentScene() const;
 
 	// 起動時に最初に読み込むシーン名(ProjectSettings/StartupScene.txt)。未設定なら空。

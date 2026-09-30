@@ -1,50 +1,68 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="ソース ファイル">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="ヘッダー ファイル">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="リソース ファイル">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="imgui">
-      <UniqueIdentifier>{c6cc6781-82d6-4b67-9819-0074bbcf487e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ImGuizmo">
-      <UniqueIdentifier>{67d74850-0802-48bb-8a07-63839b40c7db}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="KujataEngine">
-      <UniqueIdentifier>{adc5439f-48ee-4f7e-a2e9-720c59671c23}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="math">
-      <UniqueIdentifier>{c8544584-8cd7-4840-a924-a5a135a7deb5}</UniqueIdentifier>
+    <Filter Include="2d">
+      <UniqueIdentifier>{2537381b-99e7-4b90-a00f-9d66824cc414}</UniqueIdentifier>
     </Filter>
     <Filter Include="3d">
       <UniqueIdentifier>{f7c9f7a4-c510-49d6-92fa-7c0b88f81981}</UniqueIdentifier>
     </Filter>
-    <Filter Include="2d">
-      <UniqueIdentifier>{2537381b-99e7-4b90-a00f-9d66824cc414}</UniqueIdentifier>
+    <Filter Include="assets">
+      <UniqueIdentifier>{b1819ac8-7f61-43e1-a565-df0cb53a59d2}</UniqueIdentifier>
     </Filter>
     <Filter Include="base">
       <UniqueIdentifier>{8d857e10-8c82-40ca-a86f-1c24f096b20e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="shader">
-      <UniqueIdentifier>{76e52043-7741-4d1d-9347-3e978724e376}</UniqueIdentifier>
+    <Filter Include="components">
+      <UniqueIdentifier>{a2868ec1-0c72-4d5d-8b0f-e5503cc1603f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="audio">
-      <UniqueIdentifier>{c9b53e20-ad3e-4fdd-b3bf-074a577782c5}</UniqueIdentifier>
+    <Filter Include="Editor">
+      <UniqueIdentifier>{e7b43ca6-a8f5-4d84-a27f-a67608eb0f49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\Commands">
+      <UniqueIdentifier>{95620F6E-2F9A-5C9D-A8A3-273C918A8982}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EngineData">
+      <UniqueIdentifier>{E154B53B-BCE5-5C66-B906-A5E4ECD78F35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EngineData\shader">
+      <UniqueIdentifier>{4E88A670-7691-527E-BB8A-3FDE495CAE1B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EngineData\shader\Custom">
+      <UniqueIdentifier>{23ABC58F-58E4-566F-A09C-EEB73550ABC0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals">
+      <UniqueIdentifier>{943A7731-551A-5A26-9477-6A63AD90712B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\imgui">
+      <UniqueIdentifier>{C95F4E62-8A16-5B26-A64A-B8D3B3CB5334}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\ImGuizmo-1.9">
+      <UniqueIdentifier>{CA8ED12C-2AF1-5FE8-A987-4E49467B3A03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\imsearch">
+      <UniqueIdentifier>{603DF7B0-7001-54A8-821E-F0BB86BAFE00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="externals\stb">
+      <UniqueIdentifier>{CD2835FA-BCEA-5DDD-83D5-F0354DF7829F}</UniqueIdentifier>
     </Filter>
     <Filter Include="input">
       <UniqueIdentifier>{bba9aba5-b068-4ac9-9b46-d796a5ec1803}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\GameObject">
-      <UniqueIdentifier>{ebbac2a2-863a-40d1-bc25-cfbf51048c52}</UniqueIdentifier>
+    <Filter Include="math">
+      <UniqueIdentifier>{c8544584-8cd7-4840-a924-a5a135a7deb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="postprocess">
+      <UniqueIdentifier>{3f6d9a15-52c4-4de1-9a7b-6b1f28a4c901}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="runtime">
+      <UniqueIdentifier>{034d85de-0d5f-4a2e-b90b-76fd6ee7e5f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scene">
+      <UniqueIdentifier>{83A8C48D-B4BB-5BFA-A3CF-BE88BE1FB828}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader">
+      <UniqueIdentifier>{76e52043-7741-4d1d-9347-3e978724e376}</UniqueIdentifier>
     </Filter>
     <Filter Include="shapes">
       <UniqueIdentifier>{4ce3014d-950b-41ee-9a0a-c94ca6731cb0}</UniqueIdentifier>
@@ -52,1114 +70,1153 @@
     <Filter Include="vfx">
       <UniqueIdentifier>{ae19aad8-f3e4-4adc-83d4-4c5a704702bd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Editor">
-      <UniqueIdentifier>{e7b43ca6-a8f5-4d84-a27f-a67608eb0f49}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="components">
-      <UniqueIdentifier>{a2868ec1-0c72-4d5d-8b0f-e5503cc1603f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="runtime">
-      <UniqueIdentifier>{034d85de-0d5f-4a2e-b90b-76fd6ee7e5f4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="assets">
-      <UniqueIdentifier>{b1819ac8-7f61-43e1-a565-df0cb53a59d2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="postprocess">
-      <UniqueIdentifier>{3f6d9a15-52c4-4de1-9a7b-6b1f28a4c901}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="postprocess\PostEffectPipeline.cpp">
-      <Filter>KujataEngine\postprocess</Filter>
-    </ClCompile>
-    <ClCompile Include="postprocess\PostProcess.cpp">
-      <Filter>KujataEngine\postprocess</Filter>
-    </ClCompile>
-    <ClCompile Include="..\externals\imgui\imgui.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\externals\imgui\imgui_demo.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\externals\imgui\imgui_draw.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\externals\imgui\imgui_impl_dx12.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\externals\imgui\imgui_tables.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\externals\imgui\imgui_widgets.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\externals\imgui\imgui_impl_win32.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\externals\ImGuizmo-1.9\src\ImGuizmo.cpp">
-      <Filter>ImGuizmo</Filter>
-    </ClCompile>
-    <ClCompile Include="math\Matrix3x3.cpp">
-      <Filter>KujataEngine\math</Filter>
-    </ClCompile>
-    <ClCompile Include="math\Matrix4x4.cpp">
-      <Filter>KujataEngine\math</Filter>
-    </ClCompile>
-    <ClCompile Include="math\Vector2.cpp">
-      <Filter>KujataEngine\math</Filter>
-    </ClCompile>
-    <ClCompile Include="math\Vector3.cpp">
-      <Filter>KujataEngine\math</Filter>
-    </ClCompile>
-    <ClCompile Include="3d\Camera.cpp">
-      <Filter>KujataEngine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="3d\GraphicsPipeline.cpp">
-      <Filter>KujataEngine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="3d\LineRenderer.cpp">
-      <Filter>KujataEngine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="3d\Model.cpp">
-      <Filter>KujataEngine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="3d\ModelUtil.cpp">
-      <Filter>KujataEngine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="3d\WorldTransform.cpp">
-      <Filter>KujataEngine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\ImGuiManager.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="base\AudioManager.cpp">
-      <Filter>KujataEngine\base</Filter>
-    </ClCompile>
-    <ClCompile Include="base\DirectXCommon.cpp">
-      <Filter>KujataEngine\base</Filter>
-    </ClCompile>
-    <ClCompile Include="base\WinApp.cpp">
-      <Filter>KujataEngine\base</Filter>
-    </ClCompile>
-    <ClCompile Include="KujataEngine.cpp">
-      <Filter>KujataEngine</Filter>
+    <ClCompile Include="KujataEngine.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="2d\FontAtlas.cpp">
+      <Filter>2d</Filter>
     </ClCompile>
     <ClCompile Include="2d\Sprite2DRenderer.cpp">
-      <Filter>KujataEngine\2d</Filter>
+      <Filter>2d</Filter>
     </ClCompile>
     <ClCompile Include="2d\SpriteQuad.cpp">
-      <Filter>KujataEngine\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="assets\AnimationClipAsset.cpp">
-      <Filter>KujataEngine\assets</Filter>
-    </ClCompile>
-    <ClCompile Include="assets\MaterialAsset.cpp">
-      <Filter>KujataEngine\assets</Filter>
-    </ClCompile>
-    <ClCompile Include="assets\NoiseTexture.cpp">
-      <Filter>KujataEngine\assets</Filter>
-    </ClCompile>
-    <ClCompile Include="components\AnimatorComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\AnimationWindow.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\AssetDatabase.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorApplication.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorCommand.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorCommands.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorCommandServer.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\Commands\EditorCommandUtil.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\Commands\CoreCommands.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\Commands\SceneCommands.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\Commands\SchemaCommands.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\Commands\ViewCommands.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\Commands\PrefabCommands.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\Commands\MaterialCommands.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\Commands\ActionCommands.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\Commands\AnimationCommands.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\PrefabEditing.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\AnimationEditing.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorLog.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorScreenshot.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\GameModuleHotReloader.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="base\ProjectPath.cpp">
-      <Filter>KujataEngine\base</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorConsole.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorDockSpace.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorImGuiUtil.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorSelection.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorStyle.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\EditorUndoManager.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\InspectorUI.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\PrefabAsset.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\ProjectAssetClassifier.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\ProjectWindow.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\HierarchyWindow.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\InspectorWindow.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\MaterialInspector.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\GameViewWindow.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\RenderingWindow.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\InputActionWindow.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\PerformanceWindow.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\SceneViewWindow.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\SceneJsonExporter.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor\SceneJsonImporter.cpp">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="base\FrameProfiler.cpp">
-      <Filter>KujataEngine\base</Filter>
-    </ClCompile>
-    <ClCompile Include="base\Logger.cpp">
-      <Filter>KujataEngine\base</Filter>
-    </ClCompile>
-    <ClCompile Include="base\StringUtil.cpp">
-      <Filter>KujataEngine\base</Filter>
-    </ClCompile>
-    <ClCompile Include="3d\DirectionalLight.cpp">
-      <Filter>KujataEngine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="3d\DebugCamera.cpp">
-      <Filter>KujataEngine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="input\Input.cpp">
-      <Filter>KujataEngine\input</Filter>
-    </ClCompile>
-    <ClCompile Include="input\InputActions.cpp">
-      <Filter>KujataEngine\input</Filter>
-    </ClCompile>
-    <ClCompile Include="shapes\Rect.cpp">
-      <Filter>KujataEngine\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="math\Random.cpp">
-      <Filter>KujataEngine\math</Filter>
-    </ClCompile>
-    <ClCompile Include="math\Easing.cpp">
-      <Filter>KujataEngine\math</Filter>
-    </ClCompile>
-    <ClCompile Include="shapes\AABB.cpp">
-      <Filter>KujataEngine\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="shapes\ShapeDraw.cpp">
-      <Filter>KujataEngine\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="shapes\ShapeUtil.cpp">
-      <Filter>KujataEngine\shapes</Filter>
-    </ClCompile>
-    <ClCompile Include="base\TextureManager.cpp">
-      <Filter>KujataEngine\base</Filter>
-    </ClCompile>
-    <ClCompile Include="vfx\ParticleEmitter.cpp">
-      <Filter>KujataEngine\vfx</Filter>
-    </ClCompile>
-    <ClCompile Include="vfx\ParticleModel.cpp">
-      <Filter>KujataEngine\vfx</Filter>
-    </ClCompile>
-    <ClCompile Include="vfx\ParticleField.cpp">
-      <Filter>KujataEngine\vfx</Filter>
-    </ClCompile>
-    <ClCompile Include="3d\PointLight.cpp">
-      <Filter>KujataEngine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="3d\SpotLight.cpp">
-      <Filter>KujataEngine\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\Component.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="runtime\GameModuleLoader.cpp">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="runtime\AnimationRecordingState.cpp">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="runtime\PlayState.cpp">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="runtime\SimCommand.cpp">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="runtime\InputActionSystem.cpp">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="runtime\CommandQueue.cpp">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="runtime\ActionState.cpp">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="runtime\SceneManager.cpp">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="runtime\TagRegistry.cpp">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="runtime\AssetResolver.cpp">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="runtime\EngineContext.cpp">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="runtime\SelectionProvider.cpp">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\ComponentFactory.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\GameObject.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\RayCast.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\Scene.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\EditorBillboards.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\SceneCollisionSystem.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\PhysicsQuery.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\SceneGizmos.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\ScenePhysics.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\SceneRendering.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\SceneSerialization.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="components\BuiltinComponents.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\CameraComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\ColliderComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\DebugCameraComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\DirectionalLightComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\OrbitCameraComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\ModelRendererComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\NoiseTextureComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\ParticleSystemComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\TrailRendererComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\SplineRendererComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\FloatOnWaterComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\OceanComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\WaterSprayComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\BlobShadowComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\PointLightComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\AudioSourceComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\RotatorComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\SpriteRendererComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="components\TransformComponent.cpp">
-      <Filter>KujataEngine\components</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\SampleScene.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="math\MathUtil.cpp">
-      <Filter>KujataEngine\math</Filter>
-    </ClCompile>
-    <ClCompile Include="math\Noise.cpp">
-      <Filter>KujataEngine\math</Filter>
-    </ClCompile>
-    <ClCompile Include="3d\AxisIndicator.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="shapes\Collider.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="shapes\CollisionManager.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="3d\FollowCamera.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="base\GlobalVariables.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="vfx\InstancingModel.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="3d\RailCameraController.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="base\Time.cpp">
-      <Filter>KujataEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\externals\imsearch\imsearch.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="2d\UIRenderer.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="2d\UIQuad.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\MovementUtil.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="components\CanvasComponent.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="components\RectTransformComponent.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="components\ImageComponent.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="components\TextComponent.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="components\ButtonComponent.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>2d</Filter>
     </ClCompile>
     <ClCompile Include="2d\UICanvasRenderer.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>2d</Filter>
     </ClCompile>
     <ClCompile Include="2d\UIEventSystem.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>2d</Filter>
     </ClCompile>
     <ClCompile Include="2d\UINavigationSystem.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>2d</Filter>
     </ClCompile>
-    <ClCompile Include="2d\FontAtlas.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="2d\UIQuad.cpp">
+      <Filter>2d</Filter>
     </ClCompile>
-    <ClCompile Include="runtime\UIInput.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="2d\UIRenderer.cpp">
+      <Filter>2d</Filter>
     </ClCompile>
-    <ClCompile Include="runtime\AppControl.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="3d\AxisIndicator.cpp">
+      <Filter>3d</Filter>
     </ClCompile>
-    <ClCompile Include="runtime\UIEventBus.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="3d\Camera.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="3d\DebugCamera.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="3d\DirectionalLight.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="3d\FollowCamera.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="3d\GraphicsPipeline.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="3d\LineRenderer.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="3d\Model.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="3d\ModelUtil.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="3d\PointLight.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="3d\RailCameraController.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="3d\SpotLight.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="3d\WorldTransform.cpp">
+      <Filter>3d</Filter>
+    </ClCompile>
+    <ClCompile Include="assets\AnimationClipAsset.cpp">
+      <Filter>assets</Filter>
+    </ClCompile>
+    <ClCompile Include="assets\MaterialAsset.cpp">
+      <Filter>assets</Filter>
+    </ClCompile>
+    <ClCompile Include="assets\NoiseTexture.cpp">
+      <Filter>assets</Filter>
+    </ClCompile>
+    <ClCompile Include="base\AudioManager.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\DirectXCommon.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\FrameProfiler.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\GlobalVariables.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\Logger.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\ProjectPath.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\StringUtil.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\TextureManager.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\Time.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\WinApp.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="components\AnimatorComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\AudioSourceComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\BlobShadowComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\BuiltinComponents.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\ButtonComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\CameraComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\CanvasComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\ColliderComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\DebugCameraComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\DirectionalLightComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\FloatOnWaterComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\ImageComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\ModelRendererComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\NoiseTextureComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\OceanComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\WaterSprayComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\OrbitCameraComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\ParticleSystemComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\PointLightComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\RectTransformComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\RotatorComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\SplineRendererComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\SpotLightComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\SpriteRendererComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\TextComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\TrailRendererComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\TransformComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="components\VolumeComponent.cpp">
+      <Filter>components</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\AnimationEditing.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\AnimationWindow.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\AssetDatabase.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorApplication.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorCommand.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorCommands.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorCommandServer.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorConsole.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorDockSpace.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorImGuiUtil.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorLog.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorScreenshot.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorSelection.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorStyle.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorUndoManager.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\FolderCreation.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\GameModuleHotReloader.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\GameProjectSync.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\GameViewWindow.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\HierarchyWindow.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\ImGuiManager.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\InputActionEditing.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\InspectorUI.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\InspectorWindow.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\LightObjectFactory.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\MaterialInspector.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\PerformanceWindow.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\PrefabAsset.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\PrefabEditing.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\PrimitiveObjectFactory.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\ProjectAssetClassifier.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\ProjectSettingsWindow.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\ProjectWindow.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\SceneJsonExporter.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\SceneJsonImporter.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\SceneViewWindow.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\ScriptCreation.cpp">
+      <Filter>Editor</Filter>
     </ClCompile>
     <ClCompile Include="Editor\UIObjectFactory.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\ActionCommands.cpp">
+      <Filter>Editor\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\AnimationCommands.cpp">
+      <Filter>Editor\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\CoreCommands.cpp">
+      <Filter>Editor\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\EditorCommandUtil.cpp">
+      <Filter>Editor\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\MaterialCommands.cpp">
+      <Filter>Editor\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\PrefabCommands.cpp">
+      <Filter>Editor\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\SceneCommands.cpp">
+      <Filter>Editor\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\SchemaCommands.cpp">
+      <Filter>Editor\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\ScriptCommands.cpp">
+      <Filter>Editor\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Commands\ViewCommands.cpp">
+      <Filter>Editor\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="..\externals\imgui\imgui.cpp">
+      <Filter>externals\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\externals\imgui\imgui_demo.cpp">
+      <Filter>externals\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\externals\imgui\imgui_draw.cpp">
+      <Filter>externals\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\externals\imgui\imgui_impl_dx12.cpp">
+      <Filter>externals\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\externals\imgui\imgui_impl_win32.cpp">
+      <Filter>externals\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\externals\imgui\imgui_tables.cpp">
+      <Filter>externals\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\externals\imgui\imgui_widgets.cpp">
+      <Filter>externals\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\externals\ImGuizmo-1.9\src\ImGuizmo.cpp">
+      <Filter>externals\ImGuizmo-1.9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\externals\imsearch\imsearch.cpp">
+      <Filter>externals\imsearch</Filter>
+    </ClCompile>
+    <ClCompile Include="input\Input.cpp">
+      <Filter>input</Filter>
+    </ClCompile>
+    <ClCompile Include="input\InputActions.cpp">
+      <Filter>input</Filter>
+    </ClCompile>
+    <ClCompile Include="math\Easing.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\MathUtil.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\Matrix3x3.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\Matrix4x4.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\Noise.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\Random.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\Vector2.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\Vector3.cpp">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="postprocess\PostEffectPipeline.cpp">
+      <Filter>postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="postprocess\PostProcess.cpp">
+      <Filter>postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="postprocess\VolumeProfile.cpp">
+      <Filter>postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="postprocess\VolumeStack.cpp">
+      <Filter>postprocess</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\ActionState.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\AnimationRecordingState.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\AppControl.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\AssetResolver.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\CommandQueue.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\EngineContext.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\GameModuleLoader.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\InputActionSystem.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\PlayState.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\SceneManager.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\SelectionProvider.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\SimCommand.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\TagRegistry.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\UIEventBus.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="runtime\UIInput.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\Component.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\ComponentFactory.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\EditorBillboards.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\GameObject.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\MovementUtil.cpp">
+      <Filter>scene</Filter>
     </ClCompile>
     <ClCompile Include="scene\ObjectRef.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\PhysicsQuery.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\RayCast.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\SampleScene.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\Scene.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\SceneCollisionSystem.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\SceneGizmos.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\ScenePhysics.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\SceneRendering.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\SceneSerialization.cpp">
+      <Filter>scene</Filter>
     </ClCompile>
     <ClCompile Include="scene\UnityAction.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>scene</Filter>
     </ClCompile>
     <ClCompile Include="scene\UnityActionUI.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="shapes\AABB.cpp">
+      <Filter>shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="shapes\Collider.cpp">
+      <Filter>shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="shapes\CollisionManager.cpp">
+      <Filter>shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="shapes\Rect.cpp">
+      <Filter>shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="shapes\ShapeDraw.cpp">
+      <Filter>shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="shapes\ShapeUtil.cpp">
+      <Filter>shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="vfx\InstancingModel.cpp">
+      <Filter>vfx</Filter>
+    </ClCompile>
+    <ClCompile Include="vfx\ParticleEmitter.cpp">
+      <Filter>vfx</Filter>
+    </ClCompile>
+    <ClCompile Include="vfx\ParticleField.cpp">
+      <Filter>vfx</Filter>
+    </ClCompile>
+    <ClCompile Include="vfx\ParticleModel.cpp">
+      <Filter>vfx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="postprocess\PostEffectPipeline.h">
-      <Filter>KujataEngine\postprocess</Filter>
-    </ClInclude>
-    <ClInclude Include="postprocess\PostProcess.h">
-      <Filter>KujataEngine\postprocess</Filter>
-    </ClInclude>
-    <ClInclude Include="..\externals\imgui\imconfig.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\externals\imgui\imgui.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\externals\imgui\imgui_impl_dx12.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\externals\imgui\imgui_internal.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\externals\imgui\imstb_rectpack.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\externals\imgui\imstb_textedit.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\externals\imgui\imstb_truetype.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\externals\imgui\imgui_impl_win32.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="math\Matrix3x3.h">
-      <Filter>KujataEngine\math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\Matrix4x4.h">
-      <Filter>KujataEngine\math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\Vector2.h">
-      <Filter>KujataEngine\math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\Vector3.h">
-      <Filter>KujataEngine\math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\Vector4.h">
-      <Filter>KujataEngine\math</Filter>
-    </ClInclude>
-    <ClInclude Include="3d\Camera.h">
-      <Filter>KujataEngine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="3d\DirectionalLight.h">
-      <Filter>KujataEngine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="3d\GraphicsPipeline.h">
-      <Filter>KujataEngine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="3d\LineRenderer.h">
-      <Filter>KujataEngine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="3d\Model.h">
-      <Filter>KujataEngine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="3d\ModelUtil.h">
-      <Filter>KujataEngine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="3d\WorldTransform.h">
-      <Filter>KujataEngine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\ImGuiManager.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="base\AudioManager.h">
-      <Filter>KujataEngine\base</Filter>
-    </ClInclude>
-    <ClInclude Include="base\DirectXCommon.h">
-      <Filter>KujataEngine\base</Filter>
-    </ClInclude>
-    <ClInclude Include="base\WinApp.h">
-      <Filter>KujataEngine\base</Filter>
-    </ClInclude>
-    <ClInclude Include="KujataEngine.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="KujataEngineEditor.h">
-      <Filter>KujataEngine</Filter>
+    <ClInclude Include="KujataEngine.h" />
+    <ClInclude Include="KujataEngineEditor.h" />
+    <ClInclude Include="2d\FontAtlas.h">
+      <Filter>2d</Filter>
     </ClInclude>
     <ClInclude Include="2d\Sprite2DRenderer.h">
-      <Filter>KujataEngine\2d</Filter>
+      <Filter>2d</Filter>
     </ClInclude>
     <ClInclude Include="2d\SpriteQuad.h">
-      <Filter>KujataEngine\2d</Filter>
-    </ClInclude>
-    <ClInclude Include="assets\AnimationClipAsset.h">
-      <Filter>KujataEngine\assets</Filter>
-    </ClInclude>
-    <ClInclude Include="assets\MaterialAsset.h">
-      <Filter>KujataEngine\assets</Filter>
-    </ClInclude>
-    <ClInclude Include="assets\NoiseTexture.h">
-      <Filter>KujataEngine\assets</Filter>
-    </ClInclude>
-    <ClInclude Include="components\AnimatorComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\BuiltinComponents.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\CameraComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\ColliderComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\DebugCameraComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\DirectionalLightComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\OrbitCameraComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="math\Quaternion.h">
-      <Filter>KujataEngine\math</Filter>
-    </ClInclude>
-    <ClInclude Include="components\ModelRendererComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\NoiseTextureComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\ParticleSystemComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\TrailRendererComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\SplineRendererComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\FloatOnWaterComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\OceanComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\WaterSprayComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\WaterDropComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\BlobShadowComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\PointLightComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\RigidbodyComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\AudioSourceComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\RotatorComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\SpriteRendererComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="components\TransformComponent.h">
-      <Filter>KujataEngine\components</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\AnimationWindow.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\AssetDatabase.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorApplication.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorCommand.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorCommandServer.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\Commands\EditorCommandUtil.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\PrefabEditing.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\AnimationEditing.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorLog.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorScreenshot.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\GameModuleHotReloader.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="base\ProjectPath.h">
-      <Filter>KujataEngine\base</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorConsole.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorDockSpace.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorImGuiUtil.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorSelection.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorStyle.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\EditorUndoManager.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\InspectorUI.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\AnimationRecordingState.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\PlayState.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\SimCommand.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\InputActionSystem.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\CommandQueue.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\ActionState.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\SceneManager.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\TagRegistry.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\AssetResolver.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\EngineContext.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\IAssetResolver.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\ISelectionProvider.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\SelectionProvider.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\PrefabAsset.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\ProjectAssetClassifier.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\ProjectWindow.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\HierarchyWindow.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\InspectorWindow.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\MaterialInspector.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\GameViewWindow.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\RenderingWindow.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\InputActionWindow.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\PerformanceWindow.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\SceneViewWindow.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\SceneJsonExporter.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\SceneJsonImporter.h">
-      <Filter>KujataEngine\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="base\FrameProfiler.h">
-      <Filter>KujataEngine\base</Filter>
-    </ClInclude>
-    <ClInclude Include="base\Logger.h">
-      <Filter>KujataEngine\base</Filter>
-    </ClInclude>
-    <ClInclude Include="base\StringUtil.h">
-      <Filter>KujataEngine\base</Filter>
-    </ClInclude>
-    <ClInclude Include="3d\DebugCamera.h">
-      <Filter>KujataEngine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="input\Input.h">
-      <Filter>KujataEngine\input</Filter>
-    </ClInclude>
-    <ClInclude Include="input\InputActions.h">
-      <Filter>KujataEngine\input</Filter>
-    </ClInclude>
-    <ClInclude Include="shapes\Rect.h">
-      <Filter>KujataEngine\shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="math\Random.h">
-      <Filter>KujataEngine\math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\Easing.h">
-      <Filter>KujataEngine\math</Filter>
-    </ClInclude>
-    <ClInclude Include="shapes\AABB.h">
-      <Filter>KujataEngine\shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="shapes\ShapeDraw.h">
-      <Filter>KujataEngine\shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="shapes\ShapeUtil.h">
-      <Filter>KujataEngine\shapes</Filter>
-    </ClInclude>
-    <ClInclude Include="base\TextureManager.h">
-      <Filter>KujataEngine\base</Filter>
-    </ClInclude>
-    <ClInclude Include="vfx\Particle.h">
-      <Filter>KujataEngine\vfx</Filter>
-    </ClInclude>
-    <ClInclude Include="vfx\ParticleEmitter.h">
-      <Filter>KujataEngine\vfx</Filter>
-    </ClInclude>
-    <ClInclude Include="vfx\ParticleModel.h">
-      <Filter>KujataEngine\vfx</Filter>
-    </ClInclude>
-    <ClInclude Include="vfx\ParticleField.h">
-      <Filter>KujataEngine\vfx</Filter>
-    </ClInclude>
-    <ClInclude Include="3d\PointLight.h">
-      <Filter>KujataEngine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="3d\SpotLight.h">
-      <Filter>KujataEngine\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\Component.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\IEditorBillboard.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\IMaterialTarget.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\IRaycastTarget.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\ISceneCamera.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\GameModule.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\GameModuleLoader.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime\KujataApi.h">
-      <Filter>KujataEngine\runtime</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\ComponentFactory.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\GameObject.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\RayCast.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\SampleScene.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\Scene.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\EditorBillboards.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\SceneCollisionSystem.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\PhysicsQuery.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\SceneGizmos.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\ScenePhysics.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\externals\ImGuizmo-1.9\src\ImGuizmo.h">
-      <Filter>ImGuizmo</Filter>
-    </ClInclude>
-    <ClInclude Include="math\MathUtil.h">
-      <Filter>KujataEngine\math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\Noise.h">
-      <Filter>KujataEngine\math</Filter>
-    </ClInclude>
-    <ClInclude Include="base\Time.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="3d\AxisIndicator.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="shapes\Collider.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="shapes\CollisionManager.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="3d\FollowCamera.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="base\GlobalVariables.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="vfx\InstancingModel.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="3d\RailCameraController.h">
-      <Filter>KujataEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\externals\imsearch\imsearch.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="..\externals\imsearch\imsearch_internal.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="2d\UIRenderer.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="2d\UIQuad.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="scene\MovementUtil.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="components\CanvasComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="components\RectTransformComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="components\ImageComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>2d</Filter>
     </ClInclude>
     <ClInclude Include="2d\UICanvasRenderer.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="2d\UIRect.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="2d\FontAtlas.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>2d</Filter>
     </ClInclude>
     <ClInclude Include="2d\UIEventSystem.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>2d</Filter>
     </ClInclude>
     <ClInclude Include="2d\UINavigationSystem.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>2d</Filter>
     </ClInclude>
-    <ClInclude Include="components\TextComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="2d\UIQuad.h">
+      <Filter>2d</Filter>
+    </ClInclude>
+    <ClInclude Include="2d\UIRect.h">
+      <Filter>2d</Filter>
+    </ClInclude>
+    <ClInclude Include="2d\UIRenderer.h">
+      <Filter>2d</Filter>
+    </ClInclude>
+    <ClInclude Include="3d\AxisIndicator.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="3d\Camera.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="3d\DebugCamera.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="3d\DirectionalLight.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="3d\FollowCamera.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="3d\GraphicsPipeline.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="3d\LineRenderer.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="3d\Model.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="3d\ModelUtil.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="3d\PointLight.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="3d\RailCameraController.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="3d\SpotLight.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="3d\WorldTransform.h">
+      <Filter>3d</Filter>
+    </ClInclude>
+    <ClInclude Include="assets\AnimationClipAsset.h">
+      <Filter>assets</Filter>
+    </ClInclude>
+    <ClInclude Include="assets\MaterialAsset.h">
+      <Filter>assets</Filter>
+    </ClInclude>
+    <ClInclude Include="assets\NoiseTexture.h">
+      <Filter>assets</Filter>
+    </ClInclude>
+    <ClInclude Include="base\AudioManager.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\DirectXCommon.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\FrameProfiler.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\GlobalVariables.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\Logger.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\ProjectPath.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\StringUtil.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\TextureManager.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\Time.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\WinApp.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="components\AnimatorComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\AudioSourceComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\BlobShadowComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\BuiltinComponents.h">
+      <Filter>components</Filter>
     </ClInclude>
     <ClInclude Include="components\ButtonComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>components</Filter>
     </ClInclude>
-    <ClInclude Include="runtime\UIInput.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="components\CameraComponent.h">
+      <Filter>components</Filter>
     </ClInclude>
-    <ClInclude Include="runtime\AppControl.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="components\CanvasComponent.h">
+      <Filter>components</Filter>
     </ClInclude>
-    <ClInclude Include="runtime\UIEventBus.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="components\ColliderComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\DebugCameraComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\DirectionalLightComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\FloatOnWaterComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\ImageComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\ModelRendererComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\NoiseTextureComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\OceanComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\WaterSprayComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\WaterDropComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\OrbitCameraComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\ParticleSystemComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\PointLightComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\RectTransformComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\RigidbodyComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\RotatorComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\SplineRendererComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\SpotLightComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\SpriteRendererComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\TextComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\TrailRendererComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\TransformComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="components\VolumeComponent.h">
+      <Filter>components</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\AnimationEditing.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\AnimationWindow.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\AssetDatabase.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorApplication.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorCommand.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorCommandServer.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorConsole.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorDockSpace.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorImGuiUtil.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorLog.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorScreenshot.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorSelection.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorStyle.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorUndoManager.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\FolderCreation.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\GameModuleHotReloader.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\GameProjectSync.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\GameViewWindow.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\HierarchyWindow.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ImGuiManager.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\InputActionEditing.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\InspectorWindow.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\LightObjectFactory.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\MaterialInspector.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\PerformanceWindow.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\PrefabAsset.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\PrefabEditing.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\PrimitiveObjectFactory.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ProjectAssetClassifier.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ProjectSettingsWindow.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ProjectWindow.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\SceneJsonExporter.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\SceneJsonImporter.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\SceneViewWindow.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ScriptCreation.h">
+      <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="Editor\UIObjectFactory.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Commands\EditorCommandUtil.h">
+      <Filter>Editor\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="..\externals\imgui\imconfig.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\externals\imgui\imgui.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\externals\imgui\imgui_impl_dx12.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\externals\imgui\imgui_impl_win32.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\externals\imgui\imgui_internal.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\externals\imgui\imstb_rectpack.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\externals\imgui\imstb_textedit.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\externals\imgui\imstb_truetype.h">
+      <Filter>externals\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\externals\ImGuizmo-1.9\src\ImGuizmo.h">
+      <Filter>externals\ImGuizmo-1.9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\externals\imsearch\imsearch.h">
+      <Filter>externals\imsearch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\externals\imsearch\imsearch_internal.h">
+      <Filter>externals\imsearch</Filter>
     </ClInclude>
     <ClInclude Include="..\externals\stb\stb_truetype.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>externals\stb</Filter>
+    </ClInclude>
+    <ClInclude Include="input\Input.h">
+      <Filter>input</Filter>
+    </ClInclude>
+    <ClInclude Include="input\InputActions.h">
+      <Filter>input</Filter>
+    </ClInclude>
+    <ClInclude Include="math\Easing.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\MathUtil.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\Matrix3x3.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\Matrix4x4.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\Noise.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\Quaternion.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\Random.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\Vector2.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\Vector3.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\Vector4.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="postprocess\PostEffectPipeline.h">
+      <Filter>postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="postprocess\PostProcess.h">
+      <Filter>postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="postprocess\VolumeProfile.h">
+      <Filter>postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="postprocess\VolumeStack.h">
+      <Filter>postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\ActionState.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\AnimationRecordingState.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\AppControl.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\AssetResolver.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\CommandQueue.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\EngineContext.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\GameModule.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\GameModuleLoader.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\IAssetResolver.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\InputActionSystem.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\InspectorUI.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\ISelectionProvider.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\KujataApi.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\PlayState.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\SceneManager.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\SelectionProvider.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\SimCommand.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\TagRegistry.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\UIEventBus.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="runtime\UIInput.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\Component.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\ComponentFactory.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\EditorBillboards.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\GameComponentRegistry.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\GameObject.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\IEditorBillboard.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\IMaterialTarget.h">
+      <Filter>scene</Filter>
     </ClInclude>
     <ClInclude Include="scene\InvokableMethod.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\IRaycastTarget.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\ISceneCamera.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\MovementUtil.h">
+      <Filter>scene</Filter>
     </ClInclude>
     <ClInclude Include="scene\ObjectRef.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\PhysicsQuery.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\RayCast.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\SampleScene.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\Scene.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\SceneCollisionSystem.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\SceneGizmos.h">
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\ScenePhysics.h">
+      <Filter>scene</Filter>
     </ClInclude>
     <ClInclude Include="scene\UnityAction.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>scene</Filter>
     </ClInclude>
     <ClInclude Include="scene\UnityActionUI.h">
-      <Filter>ヘッダー ファイル</Filter>
+      <Filter>scene</Filter>
+    </ClInclude>
+    <ClInclude Include="shapes\AABB.h">
+      <Filter>shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="shapes\Collider.h">
+      <Filter>shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="shapes\CollisionManager.h">
+      <Filter>shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="shapes\Rect.h">
+      <Filter>shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="shapes\ShapeDraw.h">
+      <Filter>shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="shapes\ShapeUtil.h">
+      <Filter>shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="vfx\InstancingModel.h">
+      <Filter>vfx</Filter>
+    </ClInclude>
+    <ClInclude Include="vfx\Particle.h">
+      <Filter>vfx</Filter>
+    </ClInclude>
+    <ClInclude Include="vfx\ParticleEmitter.h">
+      <Filter>vfx</Filter>
+    </ClInclude>
+    <ClInclude Include="vfx\ParticleField.h">
+      <Filter>vfx</Filter>
+    </ClInclude>
+    <ClInclude Include="vfx\ParticleModel.h">
+      <Filter>vfx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\externals\imgui\LICENSE.txt">
-      <Filter>imgui</Filter>
-    </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shader\Object3d.hlsli">
-      <Filter>KujataEngine\shader</Filter>
-    </None>
-    <None Include="shader\Particle.hlsli">
-      <Filter>KujataEngine\shader</Filter>
-    </None>
-    <None Include="EngineData\shader\PostEffect.hlsli" />
-    <None Include="EngineData\shader\Fog.PS.hlsl">
-      <Filter>KujataEngine\shader</Filter>
-    </None>
-    <None Include="EngineData\shader\Object3dPixel.hlsli">
-      <Filter>KujataEngine\shader</Filter>
-    </None>
-    <None Include="EngineData\shader\Object3dVertex.hlsli">
-      <Filter>KujataEngine\shader</Filter>
-    </None>
-    <None Include="EngineData\shader\Object3dCustom.hlsli">
-      <Filter>KujataEngine\shader</Filter>
-    </None>
-    <None Include="EngineData\shader\Custom\Ocean.hlsl">
-      <Filter>KujataEngine\shader</Filter>
-    </None>
-    <None Include="EngineData\shader\Custom\Water.hlsl">
-      <Filter>KujataEngine\shader</Filter>
-    </None>
-    <None Include="EngineData\shader\Custom\BlobShadow.hlsl">
-      <Filter>KujataEngine\shader</Filter>
-    </None>
-    <None Include="EngineData\shader\Fullscreen.VS.hlsl">
-      <Filter>KujataEngine\shader</Filter>
-    </None>
-    <None Include="EngineData\shader\Line.PS.hlsl">
-      <Filter>KujataEngine\shader</Filter>
-    </None>
-    <None Include="EngineData\shader\Line.VS.hlsl">
-      <Filter>KujataEngine\shader</Filter>
-    </None>
-    <None Include="EngineData\shader\Tonemap.PS.hlsl">
-      <Filter>KujataEngine\shader</Filter>
+    <None Include="EngineData\shader\BloomDownsample.PS.hlsl">
+      <Filter>EngineData\shader</Filter>
     </None>
     <None Include="EngineData\shader\BloomUpsample.PS.hlsl">
-      <Filter>KujataEngine\shader</Filter>
+      <Filter>EngineData\shader</Filter>
     </None>
-    <None Include="EngineData\shader\BloomDownsample.PS.hlsl">
-      <Filter>KujataEngine\shader</Filter>
+    <None Include="EngineData\shader\Fog.PS.hlsl">
+      <Filter>EngineData\shader</Filter>
+    </None>
+    <None Include="EngineData\shader\Fullscreen.VS.hlsl">
+      <Filter>EngineData\shader</Filter>
+    </None>
+    <None Include="EngineData\shader\Line.PS.hlsl">
+      <Filter>EngineData\shader</Filter>
+    </None>
+    <None Include="EngineData\shader\Line.VS.hlsl">
+      <Filter>EngineData\shader</Filter>
+    </None>
+    <None Include="EngineData\shader\Object3dCustom.hlsli">
+      <Filter>EngineData\shader</Filter>
+    </None>
+    <None Include="EngineData\shader\Object3dPixel.hlsli">
+      <Filter>EngineData\shader</Filter>
+    </None>
+    <None Include="EngineData\shader\Object3dVertex.hlsli">
+      <Filter>EngineData\shader</Filter>
+    </None>
+    <None Include="EngineData\shader\PostEffect.hlsli">
+      <Filter>EngineData\shader</Filter>
+    </None>
+    <None Include="EngineData\shader\Tonemap.PS.hlsl">
+      <Filter>EngineData\shader</Filter>
+    </None>
+    <None Include="EngineData\shader\Custom\BlobShadow.hlsl">
+      <Filter>EngineData\shader\Custom</Filter>
+    </None>
+    <None Include="EngineData\shader\Custom\Ocean.hlsl">
+      <Filter>EngineData\shader\Custom</Filter>
+    </None>
+    <None Include="EngineData\shader\Custom\Water.hlsl">
+      <Filter>EngineData\shader\Custom</Filter>
+    </None>
+    <None Include="shader\Object3d.hlsli">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\Particle.hlsli">
+      <Filter>shader</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="shader\Object3d.PS.hlsl">
-      <Filter>KujataEngine\shader</Filter>
+      <Filter>shader</Filter>
     </FxCompile>
     <FxCompile Include="shader\Object3d.VS.hlsl">
-      <Filter>KujataEngine\shader</Filter>
+      <Filter>shader</Filter>
     </FxCompile>
     <FxCompile Include="shader\Particle.PS.hlsl">
-      <Filter>KujataEngine\shader</Filter>
+      <Filter>shader</Filter>
     </FxCompile>
     <FxCompile Include="shader\Particle.VS.hlsl">
-      <Filter>KujataEngine\shader</Filter>
+      <Filter>shader</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\externals\imgui\LICENSE.txt">
+      <Filter>externals\imgui</Filter>
+    </Text>
   </ItemGroup>
 </Project>

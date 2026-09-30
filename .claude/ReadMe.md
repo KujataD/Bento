@@ -62,7 +62,18 @@ kujata material.set Materials/Toon.material.json shaderModel 8  # マテリア�
 
 - ウィンドウのドッキング配置・位置・大きさと、各ウィンドウを開いているか閉じているか(Window メニュー)は `KujataEngine/imgui.ini` に保存され、次回起動時に戻る(人ごとに違うので git 管理外)
 - 初期配置に戻すときは Window → Reset Layout。`imgui.ini` を消して起動しても初期配置になる
+- プロジェクトの設定は Edit → **Project Settings** にまとめてある(Unity と同じ)。左の一覧で Input Actions / Scenes / Rendering を選ぶ。CUI では `window.show InputActions` のようにページ名で開ける
 - Inspector のコンポーネントの項目(Transform など)は最初は閉じている。見出しをクリックで開く
+
+### スクリプト(コンポーネント)を作る
+
+- Project ウィンドウで、フォルダを右クリック(または空いた所を右クリック)→ **Create → Script** → クラス名を入れて Create
+- `<名前>Component.h` / `.cpp` ができる(名前が `Component` で終わっていなければ付け足す)。できたらそのまま GameModule をビルドし直すので、すぐ Add Component に出る
+- ひな形には、保存する項目(`KUJATA_FIELD_*` と `KUJATA_REGISTER_*_TIP`)、他のオブジェクトへの参照(`KUJATA_FIELD_OBJECT_REF`)、`OnPlayStart` / `Update` の書き方が入っている
+- 登録は `.cpp` の末尾の `KUJATA_REGISTER_GAME_COMPONENT(型名);` の 1 行で済む(`GameModule.cpp` に書き足さなくてよい)。手で書いたコンポーネントも、この 1 行を書けば登録される
+- `DirectXGame/` の中ならどのフォルダに置いてもよい(サブフォルダも可。`Data`・`Temp`・`GameModule/bin` は除く)。エディタがスクリプトの作成・DLL の読み直し(Reload DLL)・起動のたびに、プロジェクトの中の .cpp / .h を `GameModule.vcxproj` に並べ直す(フィルターはフォルダと同じ階層)。エクスプローラーで足した・消したファイルも、このとき反映される。VS で開いているときは「再読み込み」を押す
+- フォルダも同じ右クリック → **Create → Folder** で作れる(CUI は `folder.create <パス>`)。フォルダをまたいでヘッダを読むときは `#include "../Player/Foo.h"` のように相対パスで書く
+- CUI: `script.create <名前> [フォルダ]`(フォルダはプロジェクト基準。既定は `GameComponents`。無ければ作る)
 
 ### エディタの見た目
 
@@ -176,14 +187,19 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 
 キーやボタンを直接読まず、**名前を付けた操作(アクション)**を通す(Unity の Input System と同じ考え方)。ゲームのコードにキーコードが出てこないので、キーの割り当てを変えても、AI に同じ操作をさせても、コードは変わらない。
 
-**割り当て**: `Data/ProjectSettings/InputActions.json`(無ければ既定の Move / Look / Jump / Attack / Dash を使う)
+**作る・割り当てる**: Edit → Project Settings → **Input Actions**。変えるとその場で `Data/ProjectSettings/InputActions.json` に保存される(ファイルが無いうちは既定の Move / Look / Jump / Attack / Dash を使う)
+- 下の欄に名前を入れて **Add Action**。見出しの右クリックで Move Up / Move Down / Delete
+- Type で種類を選び、**+ Binding** で割り当てを足して、一覧から選ぶ(種類に合う名前だけが出る)。軸1D は **+ Keys (- / +)** でキーを2つ選べる
+- CUI では `action.add` / `action.bind` などで同じことができる(下の「確かめる」)
+
+ファイルの形:
 ```json
 { "actions": [
   { "name": "Move", "type": "axis2d", "bindings": ["WASD", "LeftStick"] },
   { "name": "Jump", "type": "button", "bindings": ["Space", "PadA"] }
 ] }
 ```
-種類は `button` / `axis1d` / `axis2d`。割り当てに書けるもの: キー名(`W` `Space` `Shift` …)・`MouseLeft`・`PadA` などのボタン、`WASD` `Arrows` `LeftStick` `RightStick`(軸2D)、`LeftTrigger` `RightTrigger`、`A:D` のように「マイナス側:プラス側」でキーを2つ(軸1D)。
+種類は `button` / `axis1d` / `axis2d`。割り当てに書けるもの: キー名(`W` `Space` `Shift` …)・`MouseLeft`・`PadA` などのボタン(パッドの肩・トリガー・スティック押し込みは `PadL1`(LB)`PadL2`(LT)`PadL3` / `PadR1` `PadR2` `PadR3`。L2 / R2 は少し引けば押した扱い)、`WASD` `Arrows` `LeftStick` `RightStick`(軸2D)、`LeftTrigger` `RightTrigger`、`A:D` のように「マイナス側:プラス側」でキーを2つ(軸1D)。
 
 **ゲームのコードから**
 ```cpp
@@ -196,8 +212,8 @@ if (actions.Pressed("Jump")) { ... }     // この更新で 0 → 1 になった
 **仕組み(コマンドパターン)**: 生の入力は、値が**変わったアクションだけ** `ActionCommand` になって `CommandQueue` に積まれ、更新の頭で「出どころ → 積まれた順」に実行されて `ActionState` を更新する。キーボードでも、AI エージェント(`PushAction`)でも、CUI でも、入口の形が同じになる。後でリプレイ(`.krp`)を作るときは、この列をそのまま記録すればよい(設計は [tick-replay.md](tick-replay.md))。
 
 **確かめる**
-- Window → **Input Actions**: 割り当てと今の値が並ぶ。行のボタンで値を流せる。Device Input を OFF にすると、キーボード・パッドを読まなくなる(コマンドだけで動かせる)
-- CUI: `action.list` で一覧、`action.set Move 1 0` で値を流す(キーを押すのと同じ扱い)
+- CUI: `action.list` で一覧と今の値、`action.set Move 1 0` で値を流す(キーを押すのと同じ扱い)、`action.device off` でキーボード・パッドを読まなくする
+- CUI での編集: `action.add <名前> [button|axis1d|axis2d]`・`action.remove`・`action.rename`・`action.type`・`action.bind <名前> <割り当て>`・`action.unbind`。使える割り当ての名前は `action.bindings`
 
 ### 速い物の当たり判定(SphereCast)
 
@@ -223,7 +239,7 @@ git clone https://github.com/KujataD/KujataEngine MyGame
 2. GitHub で空のリポジトリを作り、`origin` として登録して push する
 3. `DirectXGame/Game.props` の `KujataExeName`(exe 名)と `DirectXGame/Data/ProjectSettings/Project.json`(ウィンドウタイトル)を書き換える
 4. `DirectXGame/README.md` をそのゲームの説明に書き換える
-5. ゲームのコードは `DirectXGame/GameComponents/` に書き、`DirectXGame/GameModule/GameModule.cpp` で登録する
+5. ゲームのコードは `DirectXGame/GameComponents/` に書く(Project の Create → Script で作れる)。登録は `.cpp` の末尾の `KUJATA_REGISTER_GAME_COMPONENT(型名);`
 
 **プロジェクトのパスに日本語を含めないこと**(テクスチャの読み込みが失敗する)。
 

@@ -33,6 +33,9 @@ public:
 
 	KUJATA_API const std::vector<InputActionDef>& GetDefinitions();
 
+	/// <summary>定義を置き換えて `InputActions.json` に保存する(エディタの編集用)。</summary>
+	KUJATA_API bool SaveDefinitions(const std::vector<InputActionDef>& actions, std::string* outMessage = nullptr);
+
 	/// <summary>アクションの今の値。**ゲームのコードはここを読む**。</summary>
 	KUJATA_API ActionState& GetActions();
 

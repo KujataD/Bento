@@ -64,9 +64,7 @@ constexpr WindowVisibilityEntry kWindowVisibilityEntries[] = {
     {"Console", &EditorWindowVisibility::console},
     {"Performance", &EditorWindowVisibility::performance},
     {"Animation", &EditorWindowVisibility::animation},
-    {"Scenes", &EditorWindowVisibility::scenes},
-    {"Rendering", &EditorWindowVisibility::rendering},
-    {"InputActions", &EditorWindowVisibility::inputActions},
+    {"ProjectSettings", &EditorWindowVisibility::projectSettings},
 };
 
 constexpr const char* kWindowVisibilitySettingsType = "KujataEditor";
@@ -254,6 +252,13 @@ void ImGuiManager::ExportCurrentSceneJson() {
 }
 
 bool ImGuiManager::ShowWindow(const std::string& name, bool visible) {
+	// Project Settings のページ名なら、そのページを開く。
+	if (ProjectSettingsWindow::Page page; ProjectSettingsWindow::TryParsePage(name, page)) {
+		if (visible) {
+			projectSettingsWindow_.SetPage(page);
+		}
+		return ShowWindow("ProjectSettings", visible);
+	}
 	for (const WindowVisibilityEntry& item : kWindowVisibilityEntries) {
 		if (name != item.name) {
 			continue;
@@ -262,7 +267,7 @@ bool ImGuiManager::ShowWindow(const std::string& name, bool visible) {
 #ifdef USE_IMGUI
 		if (visible) {
 			// 同じノードに重なったタブの後ろにあっても、前に出して見えるようにする。
-			ImGui::SetWindowFocus(item.name);
+			ImGui::SetWindowFocus(item.flag == &EditorWindowVisibility::projectSettings ? ProjectSettingsWindow::GetWindowTitle() : item.name);
 		}
 #endif // USE_IMGUI
 		return true;
@@ -333,14 +338,8 @@ void ImGuiManager::DrawEditor() {
 		// 非表示中は録画/プレビュー/Add Keyframeコンテキストを解除しておく。
 		animationWindow_.NotifyHidden();
 	}
-	if (windowVisibility_.scenes) {
-		DrawSceneListWindow();
-	}
-	if (windowVisibility_.inputActions) {
-		inputActionWindow_.Draw(&windowVisibility_.inputActions);
-	}
-	if (windowVisibility_.rendering) {
-		renderingWindow_.Draw(&windowVisibility_.rendering);
+	if (windowVisibility_.projectSettings) {
+		projectSettingsWindow_.Draw(&windowVisibility_.projectSettings);
 	}
 
 	// 表示状態が変わったら(Windowメニュー・閉じるボタン)その場でiniへ書く。
@@ -351,82 +350,6 @@ void ImGuiManager::DrawEditor() {
 		savedWindowVisibility_ = windowVisibility_;
 		ImGui::SaveIniSettingsToDisk(ImGui::GetIO().IniFilename);
 	}
-#endif // USE_IMGUI
-}
-
-void ImGuiManager::DrawSceneListWindow() {
-#ifdef USE_IMGUI
-	if (!ImGui::Begin("Scenes", &windowVisibility_.scenes)) {
-		ImGui::End();
-		return;
-	}
-
-	const std::filesystem::path sceneRoot = GetProjectDataRoot() / "SceneJson";
-
-	// 起動時に読み込む最初のシーン(左のラジオで設定)。
-	const std::string startupScene = EditorApplication::GetInstance()->GetStartupSceneName();
-
-	ImGui::TextDisabled("Radio = startup scene / Name = open (ChangeScene)");
-	ImGui::Separator();
-
-	// SceneJson/<name>/<name>.scene.json を持つフォルダを列挙して一覧表示する。
-	if (std::filesystem::exists(sceneRoot)) {
-		std::error_code errorCode;
-		for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(sceneRoot, errorCode)) {
-			if (errorCode) {
-				break;
-			}
-			if (!entry.is_directory()) {
-				continue;
-			}
-			const std::string sceneName = entry.path().filename().string();
-			const std::filesystem::path sceneFile = entry.path() / (sceneName + ".scene.json");
-			if (!std::filesystem::exists(sceneFile)) {
-				continue;
-			}
-
-			ImGui::PushID(sceneName.c_str());
-			// ラジオボタンで「起動シーン」を設定する(Unityの Build Settings 先頭シーン相当)。
-			const bool isStartup = (sceneName == startupScene);
-			if (ImGui::RadioButton("##startup", isStartup)) {
-				EditorApplication::GetInstance()->SetStartupSceneName(sceneName);
-			}
-			if (ImGui::IsItemHovered()) {
-				ImGui::SetTooltip("Set as startup scene");
-			}
-			ImGui::SameLine();
-			// 名前クリックでそのシーンを開く(次フレーム境界で切替: 編集中は開くだけ, Play中はInitialize→OnPlayStart)。
-			if (ImGui::Selectable(sceneName.c_str())) {
-				ChangeScene(sceneName);
-			}
-			ImGui::PopID();
-		}
-	} else {
-		ImGui::TextDisabled("(no SceneJson folder)");
-	}
-
-	ImGui::Separator();
-
-	// 新規シーン作成: 空の <name>.scene.json を作ってそのまま開く。
-	static char newSceneName[128] = "";
-	ImGui::SetNextItemWidth(160.0f);
-	ImGui::InputText("##NewSceneName", newSceneName, sizeof(newSceneName));
-	ImGui::SameLine();
-	if (ImGui::Button("Create New") && newSceneName[0] != '\0') {
-		const std::string sceneName = newSceneName;
-		const std::filesystem::path sceneDir = sceneRoot / sceneName;
-		std::error_code errorCode;
-		std::filesystem::create_directories(sceneDir, errorCode);
-		const std::filesystem::path sceneFile = sceneDir / (sceneName + ".scene.json");
-		if (!std::filesystem::exists(sceneFile)) {
-			std::ofstream ofs(sceneFile);
-			ofs << "{\n  \"assetType\": \"Scene\",\n  \"name\": \"" << sceneName << "\",\n  \"gameObjects\": []\n}\n";
-		}
-		ChangeScene(sceneName);
-		newSceneName[0] = '\0';
-	}
-
-	ImGui::End();
 #endif // USE_IMGUI
 }
 
@@ -498,6 +421,10 @@ void ImGuiManager::DrawMainMenuBar() {
 				AddConsoleLog("[Undo] Redo.");
 			}
 		}
+		ImGui::Separator();
+		if (ImGui::MenuItem("Project Settings...")) {
+			ShowWindow("ProjectSettings", true);
+		}
 		ImGui::EndMenu();
 	}
 
@@ -523,9 +450,6 @@ void ImGuiManager::DrawMainMenuBar() {
 		ImGui::MenuItem("Console", nullptr, &windowVisibility_.console);
 		ImGui::MenuItem("Performance", nullptr, &windowVisibility_.performance);
 		ImGui::MenuItem("Animation", nullptr, &windowVisibility_.animation);
-		ImGui::MenuItem("Scenes", nullptr, &windowVisibility_.scenes);
-		ImGui::MenuItem("Rendering", nullptr, &windowVisibility_.rendering);
-		ImGui::MenuItem("Input Actions", nullptr, &windowVisibility_.inputActions);
 		ImGui::Separator();
 		if (ImGui::MenuItem("Reset Layout")) {
 			dockSpace_.ResetLayout();

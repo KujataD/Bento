@@ -40,15 +40,17 @@ const std::unordered_map<std::string, unsigned char>& GetKeyTable() {
 	return table;
 }
 
-// 割り当てに書けるパッドのボタンの名前と XInput のビット。
+// 割り当てに書けるパッドのボタンの名前と XInput のビット(L2 / R2 はトリガーなので別扱い。ReadButton)。
 const std::unordered_map<std::string, WORD>& GetPadTable() {
 	static const std::unordered_map<std::string, WORD> table = {
 	    {"PadA", XINPUT_GAMEPAD_A},
 	    {"PadB", XINPUT_GAMEPAD_B},
 	    {"PadX", XINPUT_GAMEPAD_X},
 	    {"PadY", XINPUT_GAMEPAD_Y},
-	    {"PadL", XINPUT_GAMEPAD_LEFT_SHOULDER},
-	    {"PadR", XINPUT_GAMEPAD_RIGHT_SHOULDER},
+	    {"PadL1", XINPUT_GAMEPAD_LEFT_SHOULDER},
+	    {"PadR1", XINPUT_GAMEPAD_RIGHT_SHOULDER},
+	    {"PadL3", XINPUT_GAMEPAD_LEFT_THUMB},
+	    {"PadR3", XINPUT_GAMEPAD_RIGHT_THUMB},
 	    {"PadStart", XINPUT_GAMEPAD_START},
 	    {"PadBack", XINPUT_GAMEPAD_BACK},
 	    {"PadUp", XINPUT_GAMEPAD_DPAD_UP},
@@ -58,6 +60,15 @@ const std::unordered_map<std::string, WORD>& GetPadTable() {
 	};
 	return table;
 }
+
+// エディタの選択肢に出すパッドのボタンの並び(表は unordered_map なので並びを別に持つ)。
+constexpr const char* kPadButtonOrder[] = {
+    "PadA", "PadB", "PadX", "PadY", "PadL1", "PadR1", "PadL2", "PadR2", "PadL3", "PadR3",
+    "PadStart", "PadBack", "PadUp", "PadDown", "PadLeft", "PadRight",
+};
+
+// L2 / R2 をボタンとして読むときの、押したとみなす引き具合(XInput の推奨値 30/255)。
+constexpr float kTriggerButtonThreshold = XINPUT_GAMEPAD_TRIGGER_THRESHOLD / 255.0f;
 
 int32_t Quantize(float value) {
 	const float clamped = std::clamp(value, -1.0f, 1.0f);
@@ -72,6 +83,11 @@ bool ReadButton(const std::string& name, int32_t& outValue) {
 	}
 	if (const auto pad = GetPadTable().find(name); pad != GetPadTable().end()) {
 		outValue = Input::GetControllerButton(pad->second) ? kActionAxisMax : 0;
+		return true;
+	}
+	if (name == "PadL2" || name == "PadR2") {
+		const float trigger = (name == "PadL2") ? Input::GetLeftTrigger() : Input::GetRightTrigger();
+		outValue = (trigger > kTriggerButtonThreshold) ? kActionAxisMax : 0;
 		return true;
 	}
 	if (name == "MouseLeft" || name == "MouseRight" || name == "MouseMiddle") {
@@ -130,6 +146,92 @@ std::vector<InputActionDef> InputActionAsset::CreateDefault() {
 	    {"Attack", InputActionType::Button, {"MouseLeft", "PadX"}},
 	    {"Dash", InputActionType::Button, {"Shift", "PadB"}},
 	};
+}
+
+std::vector<std::string> InputActionAsset::GetBindingNames(InputActionType type) {
+	std::vector<std::string> names;
+	switch (type) {
+	case InputActionType::Axis2D:
+		names = {"WASD", "Arrows", "LeftStick", "RightStick"};
+		break;
+	case InputActionType::Axis1D:
+		names = {"LeftTrigger", "RightTrigger"};
+		break;
+	case InputActionType::Button:
+	default: {
+		// 表は unordered_map なので、選択肢の並びを決めるために並べ替える。
+		std::vector<std::string> keys;
+		for (const auto& [name, code] : GetKeyTable()) {
+			keys.push_back(name);
+		}
+		std::sort(keys.begin(), keys.end(), [](const std::string& a, const std::string& b) {
+			// 1文字のキー(A〜Z・0〜9)を先に、長い名前を後に並べる。
+			if ((a.size() == 1) != (b.size() == 1)) {
+				return a.size() == 1;
+			}
+			return a < b;
+		});
+		names = std::move(keys);
+		names.insert(names.end(), {"MouseLeft", "MouseRight", "MouseMiddle"});
+		names.insert(names.end(), std::begin(kPadButtonOrder), std::end(kPadButtonOrder));
+		break;
+	}
+	}
+	return names;
+}
+
+bool InputActionAsset::IsButtonName(const std::string& name) {
+	return GetKeyTable().contains(name) || GetPadTable().contains(name) || name == "PadL2" || name == "PadR2" || name == "MouseLeft" ||
+	       name == "MouseRight" || name == "MouseMiddle";
+}
+
+std::string InputActionAsset::GetBindingLabel(const std::string& binding) {
+	// パッドは機種で呼び名が違うので、Xbox の名前を並べて出す。
+	static const std::unordered_map<std::string, const char*> suffixes = {
+	    {"PadL1", "LB"}, {"PadR1", "RB"}, {"PadL2", "LT"}, {"PadR2", "RT"}, {"PadL3", "LS Click"}, {"PadR3", "RS Click"},
+	    {"PadStart", "Menu"}, {"PadBack", "View"}, {"LeftTrigger", "LT"}, {"RightTrigger", "RT"},
+	};
+	if (const auto it = suffixes.find(binding); it != suffixes.end()) {
+		return binding + " (" + it->second + ")";
+	}
+	return binding;
+}
+
+bool InputActionAsset::IsValidBinding(InputActionType type, const std::string& binding) {
+	if (type == InputActionType::Button) {
+		return IsButtonName(binding);
+	}
+	if (type == InputActionType::Axis1D) {
+		if (const size_t separator = binding.find(':'); separator != std::string::npos) {
+			return IsButtonName(binding.substr(0, separator)) && IsButtonName(binding.substr(separator + 1));
+		}
+	}
+	const std::vector<std::string> names = GetBindingNames(type);
+	return std::find(names.begin(), names.end(), binding) != names.end();
+}
+
+bool InputActionAsset::Save(const std::filesystem::path& path, const std::vector<InputActionDef>& actions, std::string& outMessage) {
+	// 人が読む・差分を見るファイルなので、キーを name → type → bindings の順に書く。
+	nlohmann::ordered_json root;
+	root["actions"] = nlohmann::ordered_json::array();
+	for (const InputActionDef& action : actions) {
+		nlohmann::ordered_json entry;
+		entry["name"] = action.name;
+		entry["type"] = ToString(action.type);
+		entry["bindings"] = action.bindings;
+		root["actions"].push_back(std::move(entry));
+	}
+
+	std::error_code errorCode;
+	std::filesystem::create_directories(path.parent_path(), errorCode);
+	std::ofstream file(path, std::ios::trunc);
+	if (!file.is_open()) {
+		outMessage = "InputActions.json に書き込めません: " + path.string();
+		return false;
+	}
+	file << root.dump(2) << '\n';
+	outMessage = "保存しました: " + path.string();
+	return true;
 }
 
 bool InputActionAsset::Load(const std::filesystem::path& path, std::vector<InputActionDef>& outActions, std::string& outMessage) {

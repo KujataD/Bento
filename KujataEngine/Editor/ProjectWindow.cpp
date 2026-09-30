@@ -3,8 +3,12 @@
 
 #include "AssetDatabase.h"
 #include "EditorApplication.h"
+#include "EditorConsole.h"
+#include "FolderCreation.h"
+#include "ScriptCreation.h"
 #include "PrefabAsset.h"
 #include "../base/ProjectPath.h"
+#include "../base/StringUtil.h"
 #include "EditorSelection.h"
 #include "../assets/AnimationClipAsset.h"
 #include "../assets/MaterialAsset.h"
@@ -87,11 +91,18 @@ void ProjectWindow::Draw(bool* pOpen) {
 
 	if (ImGui::BeginPopupContextWindow("ProjectWindowContext", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
 		if (ImGui::BeginMenu("Create")) {
+			if (ImGui::MenuItem("Folder")) {
+				BeginCreate(CreateKind::Folder, currentDirectory_);
+			}
+			ImGui::Separator();
 			if (ImGui::MenuItem("Material")) {
 				CreateMaterialInCurrentDirectory();
 			}
 			if (ImGui::MenuItem("Animation Clip")) {
 				CreateAnimationClipInCurrentDirectory();
+			}
+			if (ImGui::MenuItem("Script")) {
+				BeginCreate(CreateKind::Script, currentDirectory_);
 			}
 			ImGui::EndMenu();
 		}
@@ -99,8 +110,14 @@ void ProjectWindow::Draw(bool* pOpen) {
 	}
 
 	DrawRenameMaterialPopup();
+	DrawCreatePopup();
 
 	ImGui::End();
+
+	if (requestReloadGameModule_) {
+		requestReloadGameModule_ = false;
+		EditorApplication::GetInstance()->ReloadGameModule();
+	}
 }
 
 std::filesystem::path ProjectWindow::DetectProjectRoot() const {
@@ -146,7 +163,7 @@ std::string ProjectWindow::GetCurrentRelativePathText() const {
 	if (relative == ".") {
 		return "(ProjectDir)";
 	}
-	return relative.generic_string();
+	return StringUtil::ToString(relative.generic_wstring());
 }
 
 void ProjectWindow::Refresh() {
@@ -178,7 +195,8 @@ void ProjectWindow::Refresh() {
 		// 実ファイル操作やExplorer起動には絶対パスを使う。
 		item.absolutePath = NormalizePath(entry.path());
 		// UI上の表示名はファイル名だけにする。
-		item.displayName = entry.path().filename().string();
+		// ImGui は UTF-8 で表示するので、string()(ANSI)ではなく UTF-8 へ変える(日本語の名前が化けないように)。
+		item.displayName = StringUtil::ToString(entry.path().filename().wstring());
 		item.isDirectory = entry.is_directory(error);
 		// フォルダ/画像/通常ファイルの分類と、使用するアイコン方針を取得する。
 		item.viewInfo = classifier_->Classify(item.absolutePath);
@@ -351,6 +369,67 @@ void ProjectWindow::DrawRenameMaterialPopup() {
 	ImGui::EndPopup();
 }
 
+void ProjectWindow::BeginCreate(CreateKind kind, const std::filesystem::path& directory) {
+	createKind_ = kind;
+	createDirectory_ = directory;
+	createNameBuffer_.fill(0);
+	strncpy_s(createNameBuffer_.data(), createNameBuffer_.size(), kind == CreateKind::Script ? "NewComponent" : "New Folder", _TRUNCATE);
+	createErrorMessage_.clear();
+	requestOpenCreatePopup_ = true;
+}
+
+void ProjectWindow::DrawCreatePopup() {
+	constexpr const char* kPopupName = "Create##ProjectCreate";
+	if (requestOpenCreatePopup_) {
+		ImGui::OpenPopup(kPopupName);
+		requestOpenCreatePopup_ = false;
+	}
+	if (!ImGui::BeginPopupModal(kPopupName, nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+		return;
+	}
+
+	ImGui::TextUnformatted(createKind_ == CreateKind::Script ? "Class Name" : "Folder Name");
+	ImGui::SetNextItemWidth(260.0f);
+	if (ImGui::IsWindowAppearing()) {
+		ImGui::SetKeyboardFocusHere();
+	}
+	const bool enterPressed = ImGui::InputText("##CreateName", createNameBuffer_.data(), createNameBuffer_.size(), ImGuiInputTextFlags_EnterReturnsTrue);
+	if (!createErrorMessage_.empty()) {
+		ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.2f, 1.0f), "%s", createErrorMessage_.c_str());
+	}
+
+	if ((ImGui::Button("Create") || enterPressed) && CommitCreate()) {
+		ImGui::CloseCurrentPopup();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Cancel")) {
+		ImGui::CloseCurrentPopup();
+	}
+	ImGui::EndPopup();
+}
+
+bool ProjectWindow::CommitCreate() {
+	if (createKind_ == CreateKind::Folder) {
+		const FolderCreation::Result result = FolderCreation::CreateFolder(createDirectory_, createNameBuffer_.data());
+		if (!result.succeeded) {
+			createErrorMessage_ = result.message;
+			return false;
+		}
+		Refresh();
+		return true;
+	}
+
+	const ScriptCreation::Result result = ScriptCreation::CreateComponentScript(createDirectory_, createNameBuffer_.data());
+	if (!result.succeeded) {
+		createErrorMessage_ = result.message;
+		return false;
+	}
+	EditorConsole::GetInstance()->AddLog("[Script] " + result.message, EditorLogLevel::Info);
+	Refresh();
+	requestReloadGameModule_ = true;
+	return true;
+}
+
 bool ProjectWindow::CommitRenameMaterial() {
 	if (renameMaterialTargetPath_.empty()) {
 		renameMaterialErrorMessage_ = "Rename target is empty.";
@@ -493,6 +572,19 @@ void ProjectWindow::DrawItem(ProjectItem& item, int itemIndex) {
 			}
 			if (ImGui::MenuItem("Instantiate Prefab")) {
 				InstantiatePrefabItem(item.absolutePath);
+			}
+			ImGui::Separator();
+		}
+
+		if (item.isDirectory) {
+			if (ImGui::BeginMenu("Create")) {
+				if (ImGui::MenuItem("Folder")) {
+					BeginCreate(CreateKind::Folder, item.absolutePath);
+				}
+				if (ImGui::MenuItem("Script")) {
+					BeginCreate(CreateKind::Script, item.absolutePath);
+				}
+				ImGui::EndMenu();
 			}
 			ImGui::Separator();
 		}
