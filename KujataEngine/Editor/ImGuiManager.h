@@ -10,8 +10,7 @@
 #include "InspectorWindow.h"
 #include "PerformanceWindow.h"
 #include "ProjectWindow.h"
-#include "InputActionWindow.h"
-#include "RenderingWindow.h"
+#include "ProjectSettingsWindow.h"
 #include "SceneViewWindow.h"
 #include <string>
 #include <utility>
@@ -47,7 +46,8 @@ public:
 
 	/// <summary>
 	/// Windowメニューのウィンドウを開く/閉じる(CUIの window.show)。開くときは前面(ドッキング中ならそのタブ)に出す。
-	/// nameはウィンドウ名(Scene / Game / Hierarchy / Inspector / Project / Console / Performance / Animation / Scenes / Rendering)。
+	/// nameはウィンドウ名(Scene / Game / Hierarchy / Inspector / Project / Console / Performance / Animation / ProjectSettings)。
+	/// InputActions / Scenes / Rendering は Project Settings のそのページを開く。
 	/// 知らない名前ならfalse。
 	/// </summary>
 	bool ShowWindow(const std::string& name, bool visible);
@@ -76,9 +76,6 @@ private:
 	/// </summary>
 	void DrawToolbar();
 
-	// Unity風のシーン一覧・切替(ChangeScene)・新規作成を行うウィンドウ。
-	void DrawSceneListWindow();
-
 	/// <summary>
 	/// ウィンドウの表示状態をimgui.iniへ読み書きするハンドラを登録する。最初のNewFrameより前に呼ぶこと。
 	/// </summary>
@@ -98,8 +95,7 @@ private:
 	SceneViewWindow sceneView_;
 	GameViewWindow gameView_;
 	PerformanceWindow performanceWindow_;
-	RenderingWindow renderingWindow_;
-	InputActionWindow inputActionWindow_;
+	ProjectSettingsWindow projectSettingsWindow_;
 };
 
 } // namespace KujataEngine

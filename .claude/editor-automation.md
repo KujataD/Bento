@@ -116,7 +116,7 @@ wait 60
 | | `log.file` | 今回の起動のログファイル(JSON Lines)の場所 |
 | | `state.dump [ファイル]` | エディタの状態と全オブジェクトの全フィールド(差分を取って変化を確かめる用) |
 | 確認 | `view.screenshot <scene\|game\|editor> [ファイル]` | ビューの描画結果、またはエディタ全体を PNG に保存する(§5.1) |
-| | `window.show [ウィンドウ名] [true\|false]` | ウィンドウを開いて前面に出す / 閉じる。引数なしで一覧 |
+| | `window.show [ウィンドウ名] [true\|false]` | ウィンドウを開いて前面に出す / 閉じる。引数なしで一覧。`InputActions` / `Scenes` / `Rendering` は Project Settings のそのページを開く |
 | プレハブ | `prefab.list` | プレハブファイルの一覧(`prefab.instantiate` にそのまま渡せる Data 基準のパス) |
 | | `prefab.create <オブジェクト>` | 子階層ごとプレハブとして保存し、インスタンスにする(Hierarchy の Create Prefab) |
 | | `prefab.instantiate <パス> [親]` | プレハブを配置して選択する(Project からのドラッグ&ドロップ) |
@@ -135,6 +135,12 @@ wait 60
 | 操作 | `action.list` | アクションの一覧(割り当てと今の値・待っているコマンドの数) |
 | | `action.set <アクション名> <値> [y の値]` | アクションの値をコマンドで流す(キーを押すのと同じ扱い。Play 中の次の更新で反映) |
 | | `action.reload` / `action.device [on\|off]` | `Data/ProjectSettings/InputActions.json` を読み直す / キーボード・パッドを読むかどうか |
+| | `action.add <名前> [button\|axis1d\|axis2d]` / `action.remove <名前>` / `action.rename <名前> <新しい名前>` | アクションを足す / 消す / 名前を変える(Project Settings の Input Actions と同じ処理。その場で保存) |
+| | `action.type <名前> <種類>` / `action.bind <名前> <割り当て>` / `action.unbind <名前> <割り当て>` | 種類を変える(合わない割り当ては外れる) / 割り当てを足す / 外す |
+| | `action.bindings` | 種類ごとに使える割り当ての名前 |
+| スクリプト | `script.create <名前> [フォルダ]` | コンポーネントのひな形(.h / .cpp)を作り、GameModule をビルドし直す(Project の Create → Script と同じ)。フォルダはプロジェクト基準、既定は `GameComponents` |
+| | `project.sync` | プロジェクトの中の .cpp / .h を `GameModule.vcxproj` と `.filters` に並べ直す(変わったときだけ書く。スクリプトの作成・DLL の読み直し・起動のときにも自動で行う) |
+| | `folder.create <パス>` | プロジェクトの中にフォルダを作る(Project の Create → Folder と同じ。例 `folder.create GameComponents/Player`) |
 | 選択 | `select <オブジェクト>` / `select none` | Hierarchy の選択を変える |
 | 編集 | `object.create <名前> [親]` | 空のオブジェクトを作る |
 | | `object.delete <オブジェクト>` | 子ごと削除する |
@@ -207,7 +213,7 @@ wait 60
 |  | 実装中に CUI で見つかって直した既存の不具合: 折りたたまれた親の子を選ぶと Hierarchy が選択を外す / Windows のメッセージを 1 フレーム 1 件しか処理せず入力が遅れる / 最初の編集の Undo ラベルが "Initial" のまま |
 | 2(済) | `view.screenshot`、`window.show`、`state.dump`、ログの JSON Lines 出力と Console の色分け・絞り込み、完了を待つコマンドの仕組み(`EditorCommandResult::poll`) |
 | 3(済) | ログの重さの明示、プレハブ(`prefab.*`)とアニメーション(`animation.*`)のコマンド化。処理を `PrefabEditing` / `AnimationEditing` に移して UI と共通にした |
-|  | 残り: シーンの切り替え(Scenes ウィンドウ)・マテリアルの編集・UI 編集モードのコマンド化、古いログ(ホットリロード等)への重さの付与 |
+|  | 残り: シーンの切り替え(Project Settings の Scenes)・マテリアルの編集・UI 編集モードのコマンド化、古いログ(ホットリロード等)への重さの付与 |
 | 4(済) | 型情報: `SerializedFieldRegistry` の `Mode::DescribeSchema` と `schema.get`、`field.set` の範囲チェック |
 |  | 残り: 手書きのコンポーネント(18 個)を登録簿へ移す(移せば型・範囲・説明が正確になり、Inspector と JSON の手書きも減る) |
 | 5 | MCP サーバー(`kujata` と同じパイプを使う)、コマンドパレット(Ctrl+P)、Undo の履歴ウィンドウ、CUI で変えたオブジェクトの強調表示 |

@@ -16,9 +16,7 @@ struct EditorWindowVisibility {
 	bool console = true;
 	bool performance = true;
 	bool animation = true;
-	bool scenes = false;
-	bool rendering = false;
-	bool inputActions = false;
+	bool projectSettings = false;
 
 	bool operator==(const EditorWindowVisibility&) const = default;
 };

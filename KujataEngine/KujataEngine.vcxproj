@@ -150,6 +150,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="components\SplineRendererComponent.cpp" />
     <ClCompile Include="components\FloatOnWaterComponent.cpp" />
     <ClCompile Include="components\OceanComponent.cpp" />
+    <ClCompile Include="components\WaterSprayComponent.cpp" />
     <ClCompile Include="components\BlobShadowComponent.cpp" />
     <ClCompile Include="components\OrbitCameraComponent.cpp" />
     <ClCompile Include="scene\MovementUtil.cpp" />
@@ -184,6 +185,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Editor\Commands\PrefabCommands.cpp" />
     <ClCompile Include="Editor\Commands\MaterialCommands.cpp" />
     <ClCompile Include="Editor\Commands\ActionCommands.cpp" />
+    <ClCompile Include="Editor\Commands\ScriptCommands.cpp" />
     <ClCompile Include="Editor\Commands\AnimationCommands.cpp" />
     <ClCompile Include="Editor\PrefabEditing.cpp" />
     <ClCompile Include="Editor\AnimationEditing.cpp" />
@@ -207,8 +209,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Editor\SceneJsonExporter.cpp" />
     <ClCompile Include="Editor\GameViewWindow.cpp" />
     <ClCompile Include="Editor\PerformanceWindow.cpp" />
-    <ClCompile Include="Editor\RenderingWindow.cpp" />
-    <ClCompile Include="Editor\InputActionWindow.cpp" />
+    <ClCompile Include="Editor\ProjectSettingsWindow.cpp" />
+    <ClCompile Include="Editor\InputActionEditing.cpp" />
+    <ClCompile Include="Editor\ScriptCreation.cpp" />
+    <ClCompile Include="Editor\FolderCreation.cpp" />
+    <ClCompile Include="Editor\GameProjectSync.cpp" />
     <ClCompile Include="Editor\SceneViewWindow.cpp" />
     <ClCompile Include="Editor\SceneJsonImporter.cpp" />
     <ClCompile Include="3d\AxisIndicator.cpp" />
@@ -325,6 +330,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="components\SplineRendererComponent.h" />
     <ClInclude Include="components\FloatOnWaterComponent.h" />
     <ClInclude Include="components\OceanComponent.h" />
+    <ClInclude Include="components\WaterSprayComponent.h" />
+    <ClInclude Include="components\WaterDropComponent.h" />
     <ClInclude Include="components\BlobShadowComponent.h" />
     <ClInclude Include="components\OrbitCameraComponent.h" />
     <ClInclude Include="scene\MovementUtil.h" />
@@ -377,8 +384,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Editor\SceneJsonExporter.h" />
     <ClInclude Include="Editor\GameViewWindow.h" />
     <ClInclude Include="Editor\PerformanceWindow.h" />
-    <ClInclude Include="Editor\RenderingWindow.h" />
-    <ClInclude Include="Editor\InputActionWindow.h" />
+    <ClInclude Include="Editor\ProjectSettingsWindow.h" />
+    <ClInclude Include="Editor\InputActionEditing.h" />
+    <ClInclude Include="Editor\ScriptCreation.h" />
+    <ClInclude Include="Editor\FolderCreation.h" />
+    <ClInclude Include="Editor\GameProjectSync.h" />
     <ClInclude Include="Editor\SceneViewWindow.h" />
     <ClInclude Include="Editor\SceneJsonImporter.h" />
     <ClInclude Include="..\externals\ImGuizmo-1.9\src\ImGuizmo.h" />
@@ -447,6 +457,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="scene\IRaycastTarget.h" />
     <ClInclude Include="scene\ISceneCamera.h" />
     <ClInclude Include="scene\ComponentFactory.h" />
+    <ClInclude Include="scene\GameComponentRegistry.h" />
     <ClInclude Include="scene\GameObject.h" />
     <ClInclude Include="scene\InvokableMethod.h" />
     <ClInclude Include="scene\ObjectRef.h" />
@@ -488,6 +499,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <None Include="EngineData\shader\Object3dVertex.hlsli" />
     <None Include="EngineData\shader\Object3dCustom.hlsli" />
     <None Include="EngineData\shader\Custom\Ocean.hlsl" />
+    <None Include="EngineData\shader\Custom\Water.hlsl" />
     <None Include="EngineData\shader\Custom\BlobShadow.hlsl" />
     <None Include="shader\Object3d.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

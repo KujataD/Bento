@@ -64,6 +64,17 @@ void SplineRendererComponent::SetPoints(const std::vector<Vector3>& points, cons
 	codePointsSet_ = true;
 }
 
+void SplineRendererComponent::SetShaderObjectParams(const Vector4* values, size_t count) {
+	if (!values) {
+		shaderObjectParamCount_ = 0;
+		return;
+	}
+	shaderObjectParamCount_ = (std::min)(count, std::size(shaderObjectParams_));
+	std::copy(values, values + shaderObjectParamCount_, shaderObjectParams_);
+}
+
+void SplineRendererComponent::SetShaderPath(const std::string& shaderPath) { shaderPath_ = shaderPath; }
+
 void SplineRendererComponent::ClearPoints() {
 	codePoints_.clear();
 	codeWidthScales_.clear();
@@ -287,6 +298,10 @@ void SplineRendererComponent::ApplyMaterial(Model& model) {
 	model.SetEmissiveBloom(material.bloomIntensity, material.bloomThreshold, material.bloomSoftKnee);
 	model.SetUVTransform(material.uvOffset, material.uvScale, material.uvRotation);
 	model.SetStylize(material.toonSteps, material.toonSmoothness, material.flatShading, material.pointSampling);
+	// Material が無いときは、Shader だけを差し替える(マテリアルのファイルを作らずに使えるように)。
+	if (materialPath_.empty() && !shaderPath_.empty()) {
+		material.shaderPath = shaderPath_;
+	}
 	model.SetCustomShader(MaterialAsset::ResolveCustomShader(material));
 	model.SetShaderParams(material.shaderParams);
 	// リボンは裏から見えることがある(急に曲がるところ)ので両面にする。チューブは閉じているので表だけ。
@@ -303,9 +318,10 @@ Model* SplineRendererComponent::EnsureModel(uint32_t viewIndex, size_t vertexCou
 		model.reset(Model::CreateDynamic(capacity, "", ShaderModel::kNone));
 		materialDirty_[viewIndex] = true;
 	}
-	if (materialDirty_[viewIndex] || appliedMaterialPath_[viewIndex] != materialPath_) {
+	if (materialDirty_[viewIndex] || appliedMaterialPath_[viewIndex] != materialPath_ || appliedShaderPath_ != shaderPath_) {
 		ApplyMaterial(*model);
 		appliedMaterialPath_[viewIndex] = materialPath_;
+		appliedShaderPath_ = shaderPath_;
 		materialDirty_[viewIndex] = false;
 	}
 	return model.get();
@@ -337,6 +353,9 @@ void SplineRendererComponent::Draw() {
 		model->UpdateDynamicVertices(vertices_);
 		model->SetShaderCurveLength(controlPoints_.size() >= 2 ? curveLength_ : 0.0f);
 		model->SetShaderUserValue(shaderUserValue_);
+		if (shaderObjectParamCount_ > 0) {
+			model->SetShaderObjectParams(shaderObjectParams_, shaderObjectParamCount_);
+		}
 	}
 
 	Model* model = models_[viewIndex].get();

@@ -16,6 +16,8 @@
 #include "OceanComponent.h"
 #include "FloatOnWaterComponent.h"
 #include "BlobShadowComponent.h"
+#include "WaterSprayComponent.h"
+#include "WaterDropComponent.h"
 #include "OrbitCameraComponent.h"
 #include "PointLightComponent.h"
 #include "RectTransformComponent.h"
@@ -47,6 +49,8 @@ void RegisterBuiltinComponents() {
 	factory.RegisterComponent<OceanComponent>();
 	factory.RegisterComponent<FloatOnWaterComponent>();
 	factory.RegisterComponent<BlobShadowComponent>();
+	factory.RegisterComponent<WaterSprayComponent>();
+	factory.RegisterComponent<WaterDropComponent>();
 	// world空間2D(Sprite方式)。スクリーン空間UIはCanvas方式のImageComponent側。
 	factory.RegisterComponent<SpriteRendererComponent>();
 	factory.RegisterComponent<CameraComponent>();

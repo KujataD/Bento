@@ -56,6 +56,23 @@ const std::vector<InputActionDef>& InputActionSystem::GetDefinitions() {
 	return actions_;
 }
 
+bool InputActionSystem::SaveDefinitions(const std::vector<InputActionDef>& actions, std::string* outMessage) {
+	std::string message;
+	const bool succeeded = InputActionAsset::Save(InputActionAsset::GetDefaultPath(), actions, message);
+	if (succeeded) {
+		actions_ = actions;
+		lastDeviceValues_.clear();
+		sourceDescription_ = message;
+		loaded_ = true;
+	} else {
+		Logger::Log("[InputAction] " + message);
+	}
+	if (outMessage) {
+		*outMessage = message;
+	}
+	return succeeded;
+}
+
 ActionState& InputActionSystem::GetActions() { return actions0_; }
 
 CommandQueue& InputActionSystem::GetQueue() { return queue_; }

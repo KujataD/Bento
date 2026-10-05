@@ -81,6 +81,7 @@
 
 #include "scene/Component.h"
 #include "scene/ComponentFactory.h"
+#include "scene/GameComponentRegistry.h"
 #include "scene/GameObject.h"
 #include "scene/InvokableMethod.h"
 #include "scene/ObjectRef.h"

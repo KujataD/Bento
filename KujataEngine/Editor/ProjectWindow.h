@@ -87,6 +87,15 @@ private:
 	/// 入力されたMaterial名をファイル名とJSONへ反映します。
 	/// </summary>
 	bool CommitRenameMaterial();
+
+	// Create > Script / Folder: 名前を聞くポップアップを開き、directory の中に作る。
+	enum class CreateKind {
+		Script,
+		Folder,
+	};
+	void BeginCreate(CreateKind kind, const std::filesystem::path& directory);
+	void DrawCreatePopup();
+	bool CommitCreate();
 	void DrawToolbar();
 	void DrawItem(ProjectItem& item, int itemIndex);
 	bool TryResolveTexture(ProjectItem& item);
@@ -119,6 +128,14 @@ private:
 	uint32_t modelPreviewSize_ = 96;
 	bool initialized_ = false;
 	bool requestOpenRenameMaterialPopup_ = false;
+
+	CreateKind createKind_ = CreateKind::Script;
+	std::filesystem::path createDirectory_;
+	std::array<char, 128> createNameBuffer_{};
+	std::string createErrorMessage_;
+	bool requestOpenCreatePopup_ = false;
+	// 作ったスクリプトを使えるよう、ウィンドウを描き終えてから DLL をビルドし直す。
+	bool requestReloadGameModule_ = false;
 };
 
 } // namespace KujataEngine

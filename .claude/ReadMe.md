@@ -62,7 +62,18 @@ kujata material.set Materials/Toon.material.json shaderModel 8  # マテリア�
 
 - ウィンドウのドッキング配置・位置・大きさと、各ウィンドウを開いているか閉じているか(Window メニュー)は `KujataEngine/imgui.ini` に保存され、次回起動時に戻る(人ごとに違うので git 管理外)
 - 初期配置に戻すときは Window → Reset Layout。`imgui.ini` を消して起動しても初期配置になる
+- プロジェクトの設定は Edit → **Project Settings** にまとめてある(Unity と同じ)。左の一覧で Input Actions / Scenes / Rendering を選ぶ。CUI では `window.show InputActions` のようにページ名で開ける
 - Inspector のコンポーネントの項目(Transform など)は最初は閉じている。見出しをクリックで開く
+
+### スクリプト(コンポーネント)を作る
+
+- Project ウィンドウで、フォルダを右クリック(または空いた所を右クリック)→ **Create → Script** → クラス名を入れて Create
+- `<名前>Component.h` / `.cpp` ができる(名前が `Component` で終わっていなければ付け足す)。できたらそのまま GameModule をビルドし直すので、すぐ Add Component に出る
+- ひな形には、保存する項目(`KUJATA_FIELD_*` と `KUJATA_REGISTER_*_TIP`)、他のオブジェクトへの参照(`KUJATA_FIELD_OBJECT_REF`)、`OnPlayStart` / `Update` の書き方が入っている
+- 登録は `.cpp` の末尾の `KUJATA_REGISTER_GAME_COMPONENT(型名);` の 1 行で済む(`GameModule.cpp` に書き足さなくてよい)。手で書いたコンポーネントも、この 1 行を書けば登録される
+- `DirectXGame/` の中ならどのフォルダに置いてもよい(サブフォルダも可。`Data`・`Temp`・`GameModule/bin` は除く)。エディタがスクリプトの作成・DLL の読み直し(Reload DLL)・起動のたびに、プロジェクトの中の .cpp / .h を `GameModule.vcxproj` に並べ直す(フィルターはフォルダと同じ階層)。エクスプローラーで足した・消したファイルも、このとき反映される。VS で開いているときは「再読み込み」を押す
+- フォルダも同じ右クリック → **Create → Folder** で作れる(CUI は `folder.create <パス>`)。フォルダをまたいでヘッダを読むときは `#include "../Player/Foo.h"` のように相対パスで書く
+- CUI: `script.create <名前> [フォルダ]`(フォルダはプロジェクト基準。既定は `GameComponents`。無ければ作る)
 
 ### エディタの見た目
 
@@ -116,7 +127,8 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - 点の渡し方
   - **子オブジェクトの位置**(並び順)。エディタで形を作って確かめるとき
   - **ゲームのコード**から `SetPoints(点の配列, 太さの倍率の配列(省略可))` で毎フレーム渡す(ワールド座標)。渡すと子の位置は使わない(`ClearPoints` で戻る)
-- 主な設定: Shape(0=Tube / 1=Ribbon)、Start Width / End Width(太さ。途中はなめらかに変わる)、Sides(断面の角の数。少ないほどローポリ)、Subdivisions(点と点の間の分割数。0で折れ線 = 紫電のカクカク)、Caps(筒の両端をふさぐ)、UV Per Unit(模様を流すときの繰り返し)、Material
+- 主な設定: Shape(0=Tube / 1=Ribbon)、Start Width / End Width(太さ。途中はなめらかに変わる)、Sides(断面の角の数。少ないほどローポリ)、Subdivisions(点と点の間の分割数。0で折れ線 = 紫電のカクカク)、Caps(筒の両端をふさぐ)、UV Per Unit(模様を流すときの繰り返し)、Material、Shader(Material を使わないときの自作シェーダー。例 `engine:Custom/Water.hlsl`)
+- ゲームのコードから `SetShaderObjectParams(値, 個数)` で、その線だけの float4 をシェーダーへ渡せる(`gShaderParams.objectParams`)。マテリアルを作らずに見た目を決めたいときに使う(WaterSprayComponent の水流がこれ)
 - ゲームのコードから `SetShaderUserValue(値)` で、その線だけの値を自作シェーダーへ渡せる(`gShaderParams.userValue`)。マテリアルの Shader Params は同じマテリアルの線で共通なので、線ごとに見た目を変えたいときに使う(例: 先端が物に当たっている水流だけ、先端を欠けさせない)
 - 自作シェーダーには曲線の全長が `gShaderParams.curveLength` で渡る。**模様を流すときは UV Per Unit を 1**(u = 根元からの距離[m])にして、模様は距離で、先端の処理は `u / curveLength`(根元0〜先端1)で決める。u を全体で 0〜1(UV Per Unit = 0)にして模様を流すと、線の長さが変わるたびに模様の速さと間隔が変わり、伸び縮みしてがくがく見える
 - 形はこのオブジェクト自身の Transform には影響されない(点の位置だけで決まる)
@@ -144,6 +156,20 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 - ゲームのコードから: `OceanComponent::TryGetSurfaceHeight(シーン, x, z, 高さ)`(`components/OceanComponent.h`)。海の上なら true と海面の高さを返す(Follow Camera ならどこでも海の上)。描かれている面と同じ高さ(頂点の間は三角形の上の高さ)なので、見た目とずれない。着水・水しぶき・泳ぎの判定などに使う
 - 船の航跡は TrailRendererComponent に泡のマテリアルを付けて海面の少し上に引く、着水のしぶきは ParticleSystemComponent の `EmitAt` で出す(どちらも既存の機能)
 
+### 放水(WaterSprayComponent)
+
+**WaterSprayComponent を付けるだけ**で、そのオブジェクトの位置(ノズル)から水が出る。水鉄砲・ホース・ボスの水ブレスなど。
+水流を描く子オブジェクトも、水の見た目(`engine:Custom/Water.hlsl`)も自分で用意するので、マテリアルは要らない。
+
+- **仕組み**: 水弾を一定の間隔で撃ち出し、その位置を曲線(SplineRendererComponent)でつないで水流に見せる。水弾は実行中だけ GameObject として作られ(Hierarchy の「WaterDrops (名前)」の下)、選べば Inspector・CUI で位置や速度を見られる
+- **出し方**(Fire Mode): Action(アクションを押している間。既定は `Attack`)/ Always(ずっと)/ Code(`SetFiring(true)`)
+- **狙い方**(Aim Mode): Forward(このオブジェクトの前)/ Target(Aim Target に入れたオブジェクト)/ Mouse(Game ビューのマウス。**リプレイには残らない**)/ Code(`SetAimDirection` / `SetAimPoint`)。Aim Spread で狙いをばらけさせられる
+- **当たり判定**: 水弾1つ1つを半径 Hit Radius の球として、前の位置から今の位置まで動かして調べる(速くてもすり抜けない)。相手はトリガーでない Collider を付けた物なら何でもよい。当たった水弾はそこで消え、Hit Flash を入れると当たった物が点滅する。当たった点は `TryGetLastHitPoint` で取れる
+- **水面**: 海(OceanComponent)があれば、その場所の海面で水弾が消えてしぶきを上げる(無ければ Kill Height)
+- **しぶき**: 同じオブジェクトに ParticleSystemComponent があれば、当たった所・水面・流れに沿った飛沫を出す(Splash Count / Droplet Rate)
+- **見た目**: Water Color / Foam Color / Rim Color・Toon Steps・Flat Shading・Wobble(太さのうねり)・Stripe(流れる泡の筋)・Tip Dissolve(先端が面ごとに欠けて消える)。物に当たっている間は先端が欠けない
+- 見た目を作り込みたいときは、子に SplineRenderer を置いてマテリアルを設定すればそちらが使われる(子があれば自動では作らない)
+
 ### 丸影(BlobShadowComponent)
 
 キャラクターや敵に **BlobShadowComponent** を付けるだけで、真下の地面・海面に丸い影が落ちる(風のタクト / A Short Hike の影)。ジャンプ中や空中の敵が「どこの真上にいるか」を分かりやすくするためのもの。
@@ -161,14 +187,19 @@ Project でマテリアルを選ぶと Inspector に出る。CUI では `materia
 
 キーやボタンを直接読まず、**名前を付けた操作(アクション)**を通す(Unity の Input System と同じ考え方)。ゲームのコードにキーコードが出てこないので、キーの割り当てを変えても、AI に同じ操作をさせても、コードは変わらない。
 
-**割り当て**: `Data/ProjectSettings/InputActions.json`(無ければ既定の Move / Look / Jump / Attack / Dash を使う)
+**作る・割り当てる**: Edit → Project Settings → **Input Actions**。変えるとその場で `Data/ProjectSettings/InputActions.json` に保存される(ファイルが無いうちは既定の Move / Look / Jump / Attack / Dash を使う)
+- 下の欄に名前を入れて **Add Action**。見出しの右クリックで Move Up / Move Down / Delete
+- Type で種類を選び、**+ Binding** で割り当てを足して、一覧から選ぶ(種類に合う名前だけが出る)。軸1D は **+ Keys (- / +)** でキーを2つ選べる
+- CUI では `action.add` / `action.bind` などで同じことができる(下の「確かめる」)
+
+ファイルの形:
 ```json
 { "actions": [
   { "name": "Move", "type": "axis2d", "bindings": ["WASD", "LeftStick"] },
   { "name": "Jump", "type": "button", "bindings": ["Space", "PadA"] }
 ] }
 ```
-種類は `button` / `axis1d` / `axis2d`。割り当てに書けるもの: キー名(`W` `Space` `Shift` …)・`MouseLeft`・`PadA` などのボタン、`WASD` `Arrows` `LeftStick` `RightStick`(軸2D)、`LeftTrigger` `RightTrigger`、`A:D` のように「マイナス側:プラス側」でキーを2つ(軸1D)。
+種類は `button` / `axis1d` / `axis2d`。割り当てに書けるもの: キー名(`W` `Space` `Shift` …)・`MouseLeft`・`PadA` などのボタン(パッドの肩・トリガー・スティック押し込みは `PadL1`(LB)`PadL2`(LT)`PadL3` / `PadR1` `PadR2` `PadR3`。L2 / R2 は少し引けば押した扱い)、`WASD` `Arrows` `LeftStick` `RightStick`(軸2D)、`LeftTrigger` `RightTrigger`、`A:D` のように「マイナス側:プラス側」でキーを2つ(軸1D)。
 
 **ゲームのコードから**
 ```cpp
@@ -181,8 +212,8 @@ if (actions.Pressed("Jump")) { ... }     // この更新で 0 → 1 になった
 **仕組み(コマンドパターン)**: 生の入力は、値が**変わったアクションだけ** `ActionCommand` になって `CommandQueue` に積まれ、更新の頭で「出どころ → 積まれた順」に実行されて `ActionState` を更新する。キーボードでも、AI エージェント(`PushAction`)でも、CUI でも、入口の形が同じになる。後でリプレイ(`.krp`)を作るときは、この列をそのまま記録すればよい(設計は [tick-replay.md](tick-replay.md))。
 
 **確かめる**
-- Window → **Input Actions**: 割り当てと今の値が並ぶ。行のボタンで値を流せる。Device Input を OFF にすると、キーボード・パッドを読まなくなる(コマンドだけで動かせる)
-- CUI: `action.list` で一覧、`action.set Move 1 0` で値を流す(キーを押すのと同じ扱い)
+- CUI: `action.list` で一覧と今の値、`action.set Move 1 0` で値を流す(キーを押すのと同じ扱い)、`action.device off` でキーボード・パッドを読まなくする
+- CUI での編集: `action.add <名前> [button|axis1d|axis2d]`・`action.remove`・`action.rename`・`action.type`・`action.bind <名前> <割り当て>`・`action.unbind`。使える割り当ての名前は `action.bindings`
 
 ### 速い物の当たり判定(SphereCast)
 
@@ -208,7 +239,7 @@ git clone https://github.com/KujataD/KujataEngine MyGame
 2. GitHub で空のリポジトリを作り、`origin` として登録して push する
 3. `DirectXGame/Game.props` の `KujataExeName`(exe 名)と `DirectXGame/Data/ProjectSettings/Project.json`(ウィンドウタイトル)を書き換える
 4. `DirectXGame/README.md` をそのゲームの説明に書き換える
-5. ゲームのコードは `DirectXGame/GameComponents/` に書き、`DirectXGame/GameModule/GameModule.cpp` で登録する
+5. ゲームのコードは `DirectXGame/GameComponents/` に書く(Project の Create → Script で作れる)。登録は `.cpp` の末尾の `KUJATA_REGISTER_GAME_COMPONENT(型名);`
 
 **プロジェクトのパスに日本語を含めないこと**(テクスチャの読み込みが失敗する)。
 
