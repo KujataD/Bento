@@ -1,0 +1,82 @@
+{
+  "assetType": "Material",
+  "baseColor": [
+    0.4644351601600647,
+    0.4644351601600647,
+    0.4644351601600647,
+    1.0
+  ],
+  "blendMode": 1,
+  "bloomIntensity": 1.0,
+  "bloomSoftKnee": 0.5,
+  "bloomThreshold": 0.0,
+  "depthWrite": true,
+  "emissiveColor": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "emissiveEnabled": false,
+  "emissiveIntensity": 1.0,
+  "flatShading": false,
+  "name": "Ghost",
+  "pointSampling": false,
+  "shaderModel": 8,
+  "shaderParams": [
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "shaderPath": "",
+  "textures": {
+    "BaseColor": {
+      "assetId": "asset_ea2560699256419c751291213b25d0f0",
+      "path": "Resources/Models/ghost/ghost.png"
+    },
+    "Emissive": {
+      "assetId": "",
+      "path": ""
+    },
+    "Environment": {
+      "assetId": "",
+      "path": ""
+    },
+    "Normal": {
+      "assetId": "",
+      "path": ""
+    }
+  },
+  "toonSmoothness": 0.0,
+  "toonSteps": 5,
+  "uvOffset": [
+    0.0,
+    0.0
+  ],
+  "uvRotation": 0.0,
+  "uvScale": [
+    1.0,
+    1.0
+  ],
+  "version": 1
+}
