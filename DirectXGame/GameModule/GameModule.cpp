@@ -99,6 +99,8 @@ extern "C" __declspec(dllexport) void RegisterGameComponents(KujataEngine::Compo
 	// DirectXGame/GameComponents/ に書いたComponentもここで登録する。
 	factory.RegisterComponent<MoveForwardComponent>(kGameModuleName);
 	factory.RegisterComponent<BlinkComponent>(kGameModuleName);
+	
+	KujataEngine::GameComponentRegistry::RegisterAll(factory, kGameModuleName);
 }
 
 extern "C" __declspec(dllexport) void UnregisterGameComponents(KujataEngine::ComponentFactory& factory) {
